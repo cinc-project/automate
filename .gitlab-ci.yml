@@ -1,6 +1,3 @@
-blank:
-  script:
-    - echo 'no rules, just to check scheduler'
 git-rebase:
   stage: build
   before_script:
