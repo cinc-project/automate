@@ -1,0 +1,18 @@
+git-rebase:
+  stage: build
+  before_script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$GIT_SSH_PRIV_KEY")
+    - git config --global user.email "maintainers@cinc.sh"
+    - git config --global user.name "Cinc-bot"
+    - mkdir -p ~/.ssh
+    - cat gitlab-known-hosts >> ~/.ssh/known_hosts
+  script:
+    - git clone git@gitlab.com:${CI_PROJECT_PATH}.git
+    - cd ${CI_PROJECT_NAME}
+    - git checkout stable/cinc
+    - git rebase master
+    - git push --force origin stable/cinc
+  rules:
+    - if: ($CI_COMMIT_BRANCH == "stable/master") && $NIGHTLY_REBASE
