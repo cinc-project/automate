@@ -9,10 +9,7 @@ git-rebase:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - git clone git@gitlab.com:${CI_PROJECT_PATH}.git
-    - cd ${CI_PROJECT_NAME}
-    - git checkout stable/cinc
-    - git rebase master
+    - git rebase origin/master
     - git push --force origin stable/cinc
   rules:
     - if: ($CI_COMMIT_BRANCH == "stable/cinc") && $NIGHTLY_REBASE
