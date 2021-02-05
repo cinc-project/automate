@@ -633,15 +633,6 @@ steps:
           single-use: true
           privileged: true
 
-  - label: "workflow"
-    command:
-      - integration/run_test integration/tests/workflow.sh
-    timeout_in_minutes: 30 # longer timeout for workflow
-    expeditor:
-      executor:
-        linux:
-          privileged: true
-
   - label: "backup to s3"
     command:
       - integration/run_test integration/tests/backup_s3.sh
