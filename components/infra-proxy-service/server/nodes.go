@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	chef "github.com/go-chef/chef"
 	"google.golang.org/grpc/codes"
@@ -21,37 +20,27 @@ func (s *Server) GetNodes(ctx context.Context, req *request.Nodes) (*response.No
 		return nil, err
 	}
 
-	res, err := c.fetchAffectedNodes(ctx, "*:*")
+	params := map[string]interface{}{
+		"name":             []string{"name"},
+		"fqdn":             []string{"fqdn"},
+		"ipaddress":        []string{"ipaddress"},
+		"platform":         []string{"platform"},
+		"chef_environment": []string{"chef_environment"},
+		"policy_group":     []string{"policy_group"},
+		"chef_guid":        []string{"chef_guid"},
+		"uptime":           []string{"uptime"},
+		"ohai_time":        []string{"ohai_time"},
+	}
+
+	res, err := c.SearchObjectsWithDefaults("node", req.SearchQuery, params)
 	if err != nil {
 		return nil, err
 	}
 
 	return &response.Nodes{
-		Nodes: fromSearchAPIToAffectedNodes(*res),
-	}, nil
-}
-
-// GetAffectedNodes get the nodes using chef object
-func (s *Server) GetAffectedNodes(ctx context.Context, req *request.AffectedNodes) (*response.AffectedNodes, error) {
-	c, err := s.createClient(ctx, req.OrgId, req.ServerId)
-	if err != nil {
-		return nil, err
-	}
-
-	var statement string
-	if req.Version != "" {
-		statement = fmt.Sprintf("%s_%s_version:%s", req.ChefType, req.Name, req.Version)
-	} else {
-		statement = fmt.Sprintf("%s:%s", req.ChefType, req.Name)
-	}
-
-	res, err := c.fetchAffectedNodes(ctx, statement)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response.AffectedNodes{
-		Nodes: fromSearchAPIToAffectedNodes(*res),
+		Nodes: fromSearchAPIToNodes(res),
+		Page:  res.Page,
+		Total: res.Total,
 	}, nil
 }
 
@@ -191,38 +180,9 @@ func (s *Server) UpdateNode(ctx context.Context, req *request.UpdateNode) (*resp
 	}, nil
 }
 
-// fetchAffectedNodes get the nodes used by chef object
-// URL is being constructed based on the chefType, name, and version
-// chefType: should be one of the cookbooks, roles and chef_environment value
-// For cookbooks: it would be 'cookbooks_COOKBOOK_NAME_version:COOKBOOK_VERSION'
-// For other chef objects
-// roles: it would be 'roles:ROLE_NAME'
-// environments: it would be 'chef_environment:ENVIRONMENT_NAME'
-// policyfiles: it would be 'chef_environment:POLICY_FILES_GROUP_NAME'
-func (c *ChefClient) fetchAffectedNodes(ctx context.Context, statement string) (*chef.SearchResult, error) {
-	params := map[string]interface{}{
-		"name":             []string{"name"},
-		"fqdn":             []string{"fqdn"},
-		"ipaddress":        []string{"ipaddress"},
-		"platform":         []string{"platform"},
-		"chef_environment": []string{"chef_environment"},
-		"policy_group":     []string{"policy_group"},
-		"chef_guid":        []string{"chef_guid"},
-		"uptime":           []string{"uptime"},
-		"ohai_time":        []string{"ohai_time"},
-	}
-
-	res, err := c.client.Search.PartialExec("node", statement, params)
-	if err != nil {
-		return nil, ParseAPIError(err)
-	}
-
-	return &res, nil
-}
-
 // This return the response node attributes array
 // parse by the getting the attributes from partial search query.
-func fromSearchAPIToAffectedNodes(sr chef.SearchResult) []*response.NodeAttribute {
+func fromSearchAPIToNodes(sr chef.SearchResult) []*response.NodeAttribute {
 	results := make([]*response.NodeAttribute, len(sr.Rows))
 	index := 0
 	for _, element := range sr.Rows {
