@@ -46,5 +46,4 @@ func runServeCommand(cmd *cobra.Command, args []string) error {
 		fmt.Println(string(s))
 		time.Sleep(5 * time.Second)
 	}
-	return nil
 }
