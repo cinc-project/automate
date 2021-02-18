@@ -28,6 +28,7 @@ export class ChefServersListComponent implements OnInit, OnDestroy {
   public createModalVisible = false;
   public createChefServerForm: FormGroup;
   public creatingChefServer = false;
+  public chefServersLoading = true; 
   public conflictErrorEvent = new EventEmitter<boolean>();
   private isDestroyed = new Subject<boolean>();
   public serverToDelete: Server;
@@ -39,12 +40,23 @@ export class ChefServersListComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private layoutFacade: LayoutFacadeService
   ) {
+    this.chefServersLoading = true;
     this.loading$ = store.select(getStatus).pipe(map(loading));
 
     this.sortedChefServers$ = store.select(allServers)
     .pipe(
       map(servers => ChefSorters.naturalSort(servers, 'name')
       ));
+
+    this.sortedChefServers$
+      .pipe(
+        map(value => value),
+        takeUntil(this.isDestroyed))
+      .subscribe(servers => {
+        if (servers.length) {
+          this.chefServersLoading = false;
+        }
+      });
 
     this.createChefServerForm = this.fb.group({
       // Must stay in sync with error checks in create-chef-server-modal.component.html
