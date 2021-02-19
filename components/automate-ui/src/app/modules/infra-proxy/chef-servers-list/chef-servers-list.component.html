@@ -34,7 +34,7 @@
             <chef-button primary (click)="openCreateModal()">Add Chef Server</chef-button>
           </app-authorized>
         </chef-toolbar>
-        <div *ngIf="(sortedChefServers$ | async).length != 0">
+        <div *ngIf="servers.length != 0">
           <chef-table>
             <chef-thead>
               <chef-tr>
@@ -46,7 +46,7 @@
               </chef-tr>
             </chef-thead>
             <chef-tbody>
-              <chef-tr *ngFor="let server of sortedChefServers$ | async">
+              <chef-tr *ngFor="let server of servers">
                 <chef-td>
                   <a [routerLink]="['/infrastructure/chef-servers', server.id]">{{ server.name }}</a>
                 </chef-td>
@@ -65,7 +65,7 @@
             </chef-tbody>
           </chef-table>
         </div>
-        <div class="empty-section" *ngIf="((sortedChefServers$ | async).length === 0) && !chefServersLoading">
+        <div class="empty-section" *ngIf="(servers.length === 0) && !chefServersLoading">
           <img alt="No preview" src="/assets/img/no_preview.gif" />
           <p>No Chef server available.</p>
         </div>

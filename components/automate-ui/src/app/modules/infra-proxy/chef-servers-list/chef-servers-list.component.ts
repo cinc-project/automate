@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatOptionSelectionChange } from '@angular/material/core/option';
 import { Store } from '@ngrx/store';
-import { filter, takeUntil, map } from 'rxjs/operators';
+import { filter, takeUntil } from 'rxjs/operators';
 import { Regex } from 'app/helpers/auth/regex';
 import { Observable, Subject, combineLatest } from 'rxjs';
 import { isNil } from 'lodash/fp';
@@ -10,12 +10,15 @@ import { isNil } from 'lodash/fp';
 import { HttpStatus } from 'app/types/types';
 import { NgrxStateAtom } from 'app/ngrx.reducers';
 import { LayoutFacadeService, Sidebar } from 'app/entities/layout/layout.facade';
-import { loading, EntityStatus, pending } from 'app/entities/entities';
+import { EntityStatus, pending } from 'app/entities/entities';
 import { Server } from 'app/entities/servers/server.model';
 import {
-  allServers, getStatus, saveStatus, saveError } from 'app/entities/servers/server.selectors';
+  getAllStatus as getAllServersStatus,
+  allServers,
+  saveStatus,
+  saveError
+} from 'app/entities/servers/server.selectors';
 import { CreateServer, GetServers, DeleteServer } from 'app/entities/servers/server.actions';
-import { ChefSorters } from 'app/helpers/auth/sorter';
 
 @Component({
   selector: 'app-chef-servers-list',
@@ -23,8 +26,9 @@ import { ChefSorters } from 'app/helpers/auth/sorter';
   styleUrls: ['./chef-servers-list.component.scss']
 })
 export class ChefServersListComponent implements OnInit, OnDestroy {
-  public loading$: Observable<boolean>;
+  public isLoading = true;
   public sortedChefServers$: Observable<Server[]>;
+  public servers: Server[] = [];
   public createModalVisible = false;
   public createChefServerForm: FormGroup;
   public creatingChefServer = false;
@@ -41,22 +45,6 @@ export class ChefServersListComponent implements OnInit, OnDestroy {
     private layoutFacade: LayoutFacadeService
   ) {
     this.chefServersLoading = true;
-    this.loading$ = store.select(getStatus).pipe(map(loading));
-
-    this.sortedChefServers$ = store.select(allServers)
-    .pipe(
-      map(servers => ChefSorters.naturalSort(servers, 'name')
-      ));
-
-    this.sortedChefServers$
-      .pipe(
-        map(value => value),
-        takeUntil(this.isDestroyed))
-      .subscribe(servers => {
-        if (servers.length) {
-          this.chefServersLoading = false;
-        }
-      });
 
     this.createChefServerForm = this.fb.group({
       // Must stay in sync with error checks in create-chef-server-modal.component.html
@@ -77,6 +65,21 @@ export class ChefServersListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.layoutFacade.showSidebar(Sidebar.Infrastructure);
     this.store.dispatch(new GetServers());
+
+    combineLatest([
+      this.store.select(getAllServersStatus),
+      this.store.select(allServers)
+    ]).pipe(
+      filter(([getServersStatus, allServersState]) =>
+        getServersStatus === EntityStatus.loadingSuccess &&
+        !isNil(allServersState)),
+      takeUntil(this.isDestroyed)
+    ).subscribe(([_getServerSt, allServersState]) => {
+      this.servers = allServersState;
+      this.chefServersLoading = false;
+    });
+
+
     this.store.select(saveStatus)
     .pipe(
       takeUntil(this.isDestroyed),
