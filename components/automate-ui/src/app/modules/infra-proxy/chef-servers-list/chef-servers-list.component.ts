@@ -28,7 +28,7 @@ export class ChefServersListComponent implements OnInit, OnDestroy {
   public createModalVisible = false;
   public createChefServerForm: FormGroup;
   public creatingChefServer = false;
-  public chefServersLoading = true; 
+  public chefServersLoading = true;
   public conflictErrorEvent = new EventEmitter<boolean>();
   private isDestroyed = new Subject<boolean>();
   public serverToDelete: Server;
