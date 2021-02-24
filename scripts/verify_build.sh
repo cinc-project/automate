@@ -61,6 +61,7 @@ fi
 # Build all habitat packages that have changed
 build_commands=""
 for component in "${changed_components[@]}"; do
+    echo "shaik ${component}"
     component_build="echo \"--- [\$(date -u)] build $component\"; build $component"
     build_commands="${build_commands} $component_build;"
 done
