@@ -6,3 +6,8 @@ chef-loading-spinner {
   width: 100px;
   z-index: 199;
 }
+
+chef-toolbar chef-button:first-child {
+  float: right;
+  margin: 0;
+}

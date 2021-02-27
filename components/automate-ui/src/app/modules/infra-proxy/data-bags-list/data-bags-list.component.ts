@@ -8,7 +8,7 @@ import { NgrxStateAtom } from 'app/ngrx.reducers';
 import { EntityStatus } from 'app/entities/entities';
 import { LayoutFacadeService, Sidebar } from 'app/entities/layout/layout.facade';
 import { GetDataBags } from 'app/entities/data-bags/data-bags.actions';
-import { DataBags } from 'app/entities/data-bags/data-bags.model';
+import { DataBag } from 'app/entities/data-bags/data-bags.model';
 import {
   allDataBags,
   getAllStatus as getAllDatabagsForOrgStatus
@@ -26,9 +26,10 @@ export class DataBagsListComponent implements OnInit, OnDestroy {
   @Output() resetKeyRedirection = new EventEmitter<boolean>();
 
   private isDestroyed = new Subject<boolean>();
-  public dataBags: DataBags[];
+  public dataBags: DataBag[];
   public dataBagsListLoading = true;
   public authFailure = false;
+  public openDataBagModal = new EventEmitter<void>();
 
   constructor(
     private store: Store<NgrxStateAtom>,
@@ -64,5 +65,9 @@ export class DataBagsListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.isDestroyed.next(true);
     this.isDestroyed.complete();
+  }
+
+  public openCreateModal(): void {
+    this.openDataBagModal.emit();
   }
 }

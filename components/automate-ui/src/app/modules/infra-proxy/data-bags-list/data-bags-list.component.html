@@ -1,7 +1,17 @@
 <section class="databags">
   <chef-loading-spinner *ngIf="dataBagsListLoading" size="50"></chef-loading-spinner>
+  <app-create-data-bag-modal 
+    [openEvent]="openDataBagModal"
+    [server_Id]="serverId"
+    [org_Id]="orgId">
+  </app-create-data-bag-modal>
   <app-empty-state *ngIf="authFailure" moduleTitle="data bags" (resetKeyRedirection)="resetKeyTabRedirection($event)"></app-empty-state>
   <ng-container  *ngIf="!dataBagsListLoading && !authFailure">
+    <chef-toolbar>
+      <app-authorized [allOf]="['/api/v0/infra/servers', 'post']">
+        <chef-button primary (click)="openCreateModal()">Create Databag</chef-button>
+      </app-authorized>
+    </chef-toolbar>
     <div class="head-container">
       <chef-tr class="no_border_tr">
         <chef-th class="no_border_th">Name</chef-th>
