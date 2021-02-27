@@ -11,7 +11,10 @@ import {
   GetDataBagsSuccess,
   GetDataBagsFailure,
   DataBagsSuccessPayload,
-  DataBagsActionTypes
+  DataBagActionTypes,
+  CreateDataBag,
+  CreateDataBagSuccess,
+  CreateDataBagFailure
 } from './data-bags.actions';
 
 import { DataBagsRequests } from './data-bags.requests';
@@ -25,21 +28,50 @@ export class DataBagsEffects {
 
   @Effect()
   getDataBags$ = this.actions$.pipe(
-      ofType(DataBagsActionTypes.GET_ALL),
-      mergeMap(({ payload: { server_id, org_id } }: GetDataBags) =>
-        this.requests.getDataBags(server_id, org_id).pipe(
-          map((resp: DataBagsSuccessPayload) => new GetDataBagsSuccess(resp)),
-          catchError((error: HttpErrorResponse) => observableOf(new GetDataBagsFailure(error))))));
+    ofType(DataBagActionTypes.GET_ALL),
+    mergeMap(({ payload: { server_id, org_id } }: GetDataBags) =>
+      this.requests.getDataBags(server_id, org_id).pipe(
+        map((resp: DataBagsSuccessPayload) => new GetDataBagsSuccess(resp)),
+        catchError((error: HttpErrorResponse) => observableOf(new GetDataBagsFailure(error))))));
 
   @Effect()
   getDataBagsFailure$ = this.actions$.pipe(
-      ofType(DataBagsActionTypes.GET_ALL_FAILURE),
-      map(({ payload }: GetDataBagsFailure) => {
-        const msg = payload.error.error;
-        return new CreateNotification({
-          type: Type.error,
-          message: `Could not get infra data bags: ${msg || payload.error}`
-        });
-      }));
+    ofType(DataBagActionTypes.GET_ALL_FAILURE),
+    map(({ payload }: GetDataBagsFailure) => {
+      const msg = payload.error.error;
+      return new CreateNotification({
+        type: Type.error,
+        message: `Could not get infra data bags: ${msg || payload.error}`
+      });
+    }));
+  
+  @Effect()
+  createDataBag$ = this.actions$.pipe(
+    ofType(DataBagActionTypes.CREATE),
+    mergeMap(({ payload: { dataBag } }: CreateDataBag) =>
+      this.requests.createDataBag(dataBag).pipe(
+        map(() => new CreateDataBagSuccess({ databag: dataBag })),
+        catchError((error: HttpErrorResponse) =>
+          observableOf(new CreateDataBagFailure(error))))));
 
+  @Effect()
+  createDataBagSuccess$ = this.actions$.pipe(
+    ofType(DataBagActionTypes.CREATE_SUCCESS),
+    map(({ payload: { databag: dataBag } }: CreateDataBagSuccess) => {
+      return new CreateNotification({
+        type: Type.info,
+        message: `Created data bag ${dataBag.name}.`
+      });
+    }));
+
+  @Effect()
+  createDataBagFailure$ = this.actions$.pipe(
+    ofType(DataBagActionTypes.CREATE_FAILURE),
+    map(({ payload: { error } }: CreateDataBagFailure) => {
+      const msg = error.error;
+      return new CreateNotification({
+        type: Type.error,
+        message: `Could not create data bag: ${msg || error}`
+      });
+    }));
 }

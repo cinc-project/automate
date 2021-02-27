@@ -4,13 +4,13 @@ import { Observable } from 'rxjs';
 import { environment as env } from 'environments/environment';
 import { DataBagsSuccessPayload } from './data-bags.actions';
 import { DataBagItemPayload } from './data-bag-details.actions';
-import { DataBags, DataBagsItemDetails } from './data-bags.model';
+import { DataBag, DataBagsItemDetails } from './data-bags.model';
 import { InterceptorSkipHeader } from 'app/services/http/http-client-auth.interceptor';
 
 const headers = new HttpHeaders().set(InterceptorSkipHeader, '');
 
 export interface DataBagSearchResponse {
-  items: DataBags[];
+  items: DataBag[];
   total: number;
 }
 
@@ -44,5 +44,10 @@ export class DataBagsRequests {
       `${env.infra_proxy_url}/servers/${server_id}/orgs/${org_id}/data_bags/${name}/${item_name}`,
       {headers}
     );
+  }
+
+  public createDataBag(dataBag: DataBag): Observable<{}> {
+    return this.http.post(`${env.infra_proxy_url}/servers/${dataBag.server_id}/orgs/${dataBag.org_id}/data_bags/${dataBag.name}`,
+    {headers});
   }
 }
