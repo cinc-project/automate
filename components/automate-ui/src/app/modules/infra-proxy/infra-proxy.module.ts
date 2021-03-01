@@ -27,6 +27,7 @@ import { OrgEditComponent } from './org-edit/org-edit.component';
 import { PolicyFilesComponent } from './policy-files/policy-files.component';
 import { ResetAdminKeyComponent } from './reset-admin-key/reset-admin-key.component';
 import { TreeTableModule } from './tree-table/tree-table.module';
+import { CreateClientModalComponent } from './create-client-modal/create-client-modal.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { TreeTableModule } from './tree-table/tree-table.module';
     OrgDetailsComponent,
     OrgEditComponent,
     PolicyFilesComponent,
-    ResetAdminKeyComponent
+    ResetAdminKeyComponent,
+    CreateClientModalComponent
   ],
   imports: [
     CommonModule,

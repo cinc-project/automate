@@ -8,7 +8,20 @@ export enum ClientActionTypes {
   GET_ALL_FAILURE = 'CLIENTS::GET_ALL::FAILURE',
   GET = 'CLIENTS::GET',
   GET_SUCCESS = 'CLIENTS::GET::SUCCESS',
-  GET_FAILURE = 'CLIENTS::GET::FAILURE'
+  GET_FAILURE = 'CLIENTS::GET::FAILURE',
+  CREATE = 'CLIENTS::CREATE',
+  CREATE_SUCCESS = 'CLIENTS::CREATE::SUCCESS',
+  CREATE_FAILURE = 'CLIENTS::CREATE::FAILURE'
+}
+
+export interface CreateClientSuccessPayload {
+  name: string,
+  client_key: {
+    name: string,
+    public_key: string,
+    expiration_date: string,
+    private_key: string
+  }
 }
 
 export interface ClientsSuccessPayload {
@@ -55,10 +68,36 @@ export class GetClientFailure implements Action {
   constructor(public payload: HttpErrorResponse) { }
 }
 
+export interface CreateClientPayload {
+  name: string;
+  validator: boolean;
+  org_id: string;
+  server_id: string;
+  create_key: boolean
+}
+
+export class CreateClient implements Action {
+  readonly type = ClientActionTypes.CREATE;
+  constructor(public payload: CreateClientPayload) { }
+}
+true
+export class CreateClientSuccess implements Action {
+  readonly type = ClientActionTypes.CREATE_SUCCESS;
+  constructor(public payload: CreateClientSuccessPayload) { }
+}
+
+export class CreateClientFailure implements Action {
+  readonly type = ClientActionTypes.CREATE_FAILURE;
+  constructor(public payload: HttpErrorResponse) { }
+}
+
 export type ClientActions =
   | GetClients
   | GetClientsSuccess
   | GetClientsFailure
   | GetClient
   | GetClientSuccess
-  | GetClientFailure;
+  | GetClientFailure
+  | CreateClient
+  | CreateClientSuccess
+  | CreateClientFailure;
