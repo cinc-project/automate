@@ -12,21 +12,27 @@ import { ClientDetailsComponent } from './client-details/client-details.componen
 import { CookbooksComponent } from './cookbooks/cookbooks.component';
 import { CookbookDetailsComponent } from './cookbook-details/cookbook-details.component';
 import { CreateChefServerModalComponent } from './create-chef-server-modal/create-chef-server-modal.component';
+import { CreateEnvironmentModalComponent } from './create-environment-modal/create-environment-modal.component';
 import { CreateOrgModalComponent } from './create-org-modal/create-org-modal.component';
 import { DataBagsDetailsComponent } from './data-bags-details/data-bags-details.component';
 import { DataBagsListComponent } from './data-bags-list/data-bags-list.component';
 import { EmptyStateComponent } from './empty-state/empty-state.component';
 import { EnvironmentsComponent } from './environments/environments.component';
 import { EnvironmentDetailsComponent } from './environment-details/environment-details.component';
+import { InfraEnvironmentConstraintComponent } from './infra-environment-constraint/infra-environment-constraint.component';
 import { InfraRolesComponent } from './infra-roles/infra-roles.component';
 import { InfraRoleDetailsComponent } from './infra-role-details/infra-role-details.component';
 import { InfraSearchBarComponent } from './infra-search-bar/infra-search-bar.component';
+import { InfraTabComponent } from './infra-tab-change/infra-tab/infra-tab.component';
+import { InfraTabChangeComponent } from './infra-tab-change/infra-tab-change.component';
 import { JsonTreeTableComponent } from './json-tree-table/json-tree-table.component';
 import { OrgDetailsComponent } from './org-details/org-details.component';
 import { OrgEditComponent } from './org-edit/org-edit.component';
 import { PolicyFilesComponent } from './policy-files/policy-files.component';
 import { ResetAdminKeyComponent } from './reset-admin-key/reset-admin-key.component';
 import { TreeTableModule } from './tree-table/tree-table.module';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatInputModule } from '@angular/material/input';
 
 @NgModule({
   declarations: [
@@ -37,6 +43,7 @@ import { TreeTableModule } from './tree-table/tree-table.module';
     CookbooksComponent,
     CookbookDetailsComponent,
     CreateChefServerModalComponent,
+    CreateEnvironmentModalComponent,
     CreateOrgModalComponent,
     DataBagsDetailsComponent,
     DataBagsListComponent,
@@ -44,9 +51,12 @@ import { TreeTableModule } from './tree-table/tree-table.module';
     EnvironmentsComponent,
     EnvironmentDetailsComponent,
     JsonTreeTableComponent,
+    InfraEnvironmentConstraintComponent,
     InfraRolesComponent,
     InfraRoleDetailsComponent,
     InfraSearchBarComponent,
+    InfraTabComponent,
+    InfraTabChangeComponent,
     OrgDetailsComponent,
     OrgEditComponent,
     PolicyFilesComponent,
@@ -59,6 +69,8 @@ import { TreeTableModule } from './tree-table/tree-table.module';
     ChefPipesModule,
     TreeTableModule,
     FormsModule,
+    MatTabsModule,
+    MatInputModule,
     ReactiveFormsModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ]

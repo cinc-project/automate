@@ -31,6 +31,7 @@ export class EnvironmentsComponent implements OnInit, OnDestroy {
   public searching = false;
   public searchValue = '';
   public total: number;
+  public openEnvironmentModal = new EventEmitter<boolean>();
 
   constructor(
     private store: Store<NgrxStateAtom>,
@@ -93,6 +94,10 @@ export class EnvironmentsComponent implements OnInit, OnDestroy {
     };
 
     this.store.dispatch(new GetEnvironments(payload));
+  }
+
+  public openCreateModal(): void {
+    this.openEnvironmentModal.emit();
   }
 
   ngOnDestroy(): void {

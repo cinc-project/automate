@@ -2,13 +2,13 @@ import { RespAttributes, AllAttributes } from '../infra-roles/infra-role.model';
 
 export interface Environment {
   name: string;
-  chef_type: string;
+  chef_type?: string;
   description: string;
-  json_class: string;
-  default_attributes: string;
-  override_attributes: string;
-  run_list: string[];
-  cookbook_versions: CookbookVersion[];
+  json_class?: string;
+  default_attributes: Object;
+  override_attributes: Object;
+  run_list?: string[];
+  cookbook_versions: any;
 }
 
 export interface CookbookVersion {

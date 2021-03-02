@@ -21,3 +21,13 @@ export const environmentList = createSelector(
   environmentState,
   (state) => state.environmentList
 );
+
+export const saveStatus = createSelector(
+  environmentState,
+  (state) => state.saveStatus
+);
+
+export const saveError = createSelector(
+  environmentState,
+  (state) => state.saveError
+);
