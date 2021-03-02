@@ -54,6 +54,10 @@ chef-loading-spinner {
 //   }
 // }
 
+.search-items {
+  display: flex;
+}
+
 .full-screen-spinner {
   display: flex;
   margin: auto;
@@ -73,6 +77,7 @@ img {
 }
 #env-create {
   float: right;
+  margin-left: 16px;
 }
 
 ::ng-deep {
