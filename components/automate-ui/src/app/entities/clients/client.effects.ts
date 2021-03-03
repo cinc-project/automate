@@ -74,7 +74,7 @@ export class ClientEffects {
     @Effect()
   createClient$ = this.actions$.pipe(
       ofType(ClientActionTypes.CREATE),
-      mergeMap((action : CreateClient) =>
+      mergeMap((action: CreateClient) =>
       this.requests.createClient(action.payload).pipe(
         map((resp: CreateClientSuccessPayload) => new CreateClientSuccess(resp)),
         catchError((error: HttpErrorResponse) => observableOf(new CreateClientFailure(error))))));
