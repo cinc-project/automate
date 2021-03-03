@@ -34,6 +34,7 @@ describe('EnvironmentsComponent', () => {
         MockComponent({ selector: 'input', inputs: ['resetOrigin'] }),
         MockComponent({ selector: 'mat-select' }),
         MockComponent({ selector: 'mat-option' }),
+        MockComponent({ selector: 'app-create-client-modal', inputs: ['openEvent'] }),
         ClientsComponent
       ],
       providers: [
