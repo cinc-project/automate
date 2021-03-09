@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Action } from '@ngrx/store';
-import { Client } from './client.model';
+import { Client, ClientKey } from './client.model';
 
 export enum ClientActionTypes {
   GET_ALL = 'CLIENTS::GET_ALL',
@@ -11,7 +11,10 @@ export enum ClientActionTypes {
   GET_FAILURE = 'CLIENTS::GET::FAILURE',
   DELETE          = 'CLIENTS::DELETE',
   DELETE_SUCCESS  = 'CLIENTS::DELETE::SUCCESS',
-  DELETE_FAILURE  = 'CLIENTS::DELETE::FAILURE'
+  DELETE_FAILURE  = 'CLIENTS::DELETE::FAILURE',
+  RESETKEY = 'CLIENTS::RESETKEY',
+  RESETKEY_SUCCESS = 'CLIENTS::RESETKEY::SUCCESS',
+  RESETKEY_FAILURE = 'CLIENTS::RESETKEY::FAILURE'
 }
 
 export interface ClientsSuccessPayload {
@@ -25,6 +28,13 @@ export interface ClientsPayload {
   page: number;
   per_page: number;
   server_id: string;
+}
+
+export interface ResetKeyPayload {
+  server_id: string;
+  org_id: string;
+  name: string;
+  key: string;
 }
 
 export class GetClients implements Action {
@@ -41,7 +51,6 @@ export class GetClientsFailure implements Action {
   readonly type = ClientActionTypes.GET_ALL_FAILURE;
   constructor(public payload: HttpErrorResponse) { }
 }
-
 
 export class GetClient implements Action {
   readonly type = ClientActionTypes.GET;
@@ -73,6 +82,26 @@ export class DeleteClientFailure implements Action {
   constructor(public payload: HttpErrorResponse) { }
 }
 
+export class ResetKeyClient implements Action {
+  readonly type = ClientActionTypes.RESETKEY;
+  constructor(public payload: { server_id: string, org_id: string, name: string }) { }
+}
+
+export interface ResetKeySuccessPayload {
+  clientKey: ClientKey;
+  client_name: string;
+}
+
+export class ResetKeyClientSuccess implements Action {
+  readonly type = ClientActionTypes.RESETKEY_SUCCESS;
+  constructor(public payload: ResetKeySuccessPayload) { }
+}
+
+export class ResetKeyClientFailure implements Action {
+  readonly type = ClientActionTypes.RESETKEY_FAILURE;
+  constructor(public payload: HttpErrorResponse) { }
+}
+
 export type ClientActions =
   | GetClients
   | GetClientsSuccess
@@ -82,4 +111,7 @@ export type ClientActions =
   | GetClientFailure
   | DeleteClient
   | DeleteClientSuccess
-  | DeleteClientFailure;
+  | DeleteClientFailure
+  | ResetKeyClient
+  | ResetKeyClientSuccess
+  | ResetKeyClientFailure;

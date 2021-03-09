@@ -41,4 +41,8 @@ export class ClientRequests {
     {headers});
   }
 
+  public resetKeyClient(server_id: string, org_id: string, name: string): Observable<{}> {
+    return this.http.put(`${env.infra_proxy_url}/servers/${server_id}/orgs/${org_id}/clients/${name}/reset`,
+    {headers});
+  }
 }
