@@ -15,8 +15,10 @@ import { CookbookDetailsComponent } from './cookbook-details/cookbook-details.co
 import { CreateChefServerModalComponent } from './create-chef-server-modal/create-chef-server-modal.component';
 import { CreateOrgModalComponent } from './create-org-modal/create-org-modal.component';
 import { CreateDataBagModalComponent } from './create-data-bag-modal/create-data-bag-modal.component';
+import { CreateInfraRoleModalComponent } from './create-infra-role-modal/create-infra-role-modal.component';
 import { DataBagsDetailsComponent } from './data-bags-details/data-bags-details.component';
 import { DataBagsListComponent } from './data-bags-list/data-bags-list.component';
+import { DragDropComponent } from './drag-drop/drag-drop.component';
 import { DeleteInfraObjectModalComponent } from './delete-infra-object-modal/delete-infra-object-modal.component';
 import { EmptyStateComponent } from './empty-state/empty-state.component';
 import { EnvironmentsComponent } from './environments/environments.component';
@@ -24,12 +26,19 @@ import { EnvironmentDetailsComponent } from './environment-details/environment-d
 import { InfraRolesComponent } from './infra-roles/infra-roles.component';
 import { InfraRoleDetailsComponent } from './infra-role-details/infra-role-details.component';
 import { InfraSearchBarComponent } from './infra-search-bar/infra-search-bar.component';
+import { InfraTabComponent } from './infra-tab-change/infra-tab/infra-tab.component';
+import { InfraTabChangeComponent } from './infra-tab-change/infra-tab-change.component';
 import { JsonTreeTableComponent } from './json-tree-table/json-tree-table.component';
 import { OrgDetailsComponent } from './org-details/org-details.component';
 import { OrgEditComponent } from './org-edit/org-edit.component';
 import { PolicyFilesComponent } from './policy-files/policy-files.component';
 import { ResetAdminKeyComponent } from './reset-admin-key/reset-admin-key.component';
 import { TreeTableModule } from './tree-table/tree-table.module';
+import { DragDropModule } from '@angular/cdk/drag-drop';
+import { SelectBoxModule } from './select-box/src/public_api';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatStepperModule } from '@angular/material/stepper';
 
 @NgModule({
   declarations: [
@@ -43,8 +52,10 @@ import { TreeTableModule } from './tree-table/tree-table.module';
     CreateOrgModalComponent,
     CreateDataBagModalComponent,
     CreateClientModalComponent,
+    CreateInfraRoleModalComponent,
     DataBagsDetailsComponent,
     DataBagsListComponent,
+    DragDropComponent,
     DeleteInfraObjectModalComponent,
     EmptyStateComponent,
     EnvironmentsComponent,
@@ -53,6 +64,8 @@ import { TreeTableModule } from './tree-table/tree-table.module';
     InfraRolesComponent,
     InfraRoleDetailsComponent,
     InfraSearchBarComponent,
+    InfraTabComponent,
+    InfraTabChangeComponent,
     OrgDetailsComponent,
     OrgEditComponent,
     PolicyFilesComponent,
@@ -63,9 +76,14 @@ import { TreeTableModule } from './tree-table/tree-table.module';
     AppRoutingModule,
     ChefComponentsModule,
     ChefPipesModule,
+    DragDropModule,
+    SelectBoxModule,
     TreeTableModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatStepperModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
 })
