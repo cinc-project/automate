@@ -54,4 +54,9 @@ export class DataBagsRequests {
       {headers}
     );
   }
+
+  public updateDataBagItem(dataBagItem: DataBagsItemDetails): Observable<DataBagsItemDetails> {
+    return this.http.put<DataBagsItemDetails>(
+      `${env.infra_proxy_url}/servers/${dataBagItem.server_id}/orgs/${dataBagItem.org_id}/data_bags/${dataBagItem.data_bag_name}/${dataBagItem.name}`, dataBagItem);
+  }
 }

@@ -10,9 +10,11 @@ export interface DataBagItemsEntityState extends EntityState<DataBagItems> {
     items: DataBagItems[],
     total: number;
   };
+  updateStatus: EntityStatus;
 }
 
 const GET_ALL_STATUS = 'getAllStatus';
+const UPDATE_STATUS  = 'updateStatus';
 
 export const dataBagItemsEntityAdapter: EntityAdapter<DataBagItems> =
   createEntityAdapter<DataBagItems>({
@@ -21,7 +23,8 @@ export const dataBagItemsEntityAdapter: EntityAdapter<DataBagItems> =
 
 export const DataBagItemsEntityInitialState: DataBagItemsEntityState =
   dataBagItemsEntityAdapter.getInitialState(<DataBagItemsEntityState>{
-    getAllStatus: EntityStatus.notLoaded
+    getAllStatus: EntityStatus.notLoaded,
+    updateStatus: EntityStatus.notLoaded
   });
 
 export function dataBagItemsEntityReducer(
@@ -42,6 +45,19 @@ export function dataBagItemsEntityReducer(
 
     case DataBagItemsActionTypes.GET_ALL_FAILURE:
       return set(GET_ALL_STATUS, EntityStatus.loadingFailure, state);
+
+    case DataBagItemsActionTypes.UPDATE:
+      return set(UPDATE_STATUS, EntityStatus.loading, state);
+
+    case DataBagItemsActionTypes.UPDATE_SUCCESS:
+      return set(UPDATE_STATUS, EntityStatus.loadingSuccess,
+        dataBagItemsEntityAdapter.updateOne({
+          id: action.payload.name,
+          changes: action.payload
+        }, state));
+
+    case DataBagItemsActionTypes.UPDATE_FAILURE:
+      return set(UPDATE_STATUS, EntityStatus.loadingFailure, state);
 
     default:
       return state;
