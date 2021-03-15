@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subject, combineLatest } from 'rxjs';
 import { filter, takeUntil, pluck } from 'rxjs/operators';
@@ -40,6 +40,7 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
   public page = 1;
   public per_page = 9;
   public total: number;
+  public openDataBagItemModal = new EventEmitter<void>();
 
   constructor(
     private store: Store<NgrxStateAtom>,
@@ -157,5 +158,9 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
       per_page: this.per_page
     };
     this.store.dispatch(new GetDataBagItems(payload));
+  }
+
+  openDatabagItemModal() {
+    this.openDataBagItemModal.emit();
   }
 }
