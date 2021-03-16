@@ -27,3 +27,13 @@ export const dataBagItemList = createSelector(
   dataBagItemsState,
   (state) => state.dataBagItems
 );
+
+export const saveStatus = createSelector(
+  dataBagItemsState,
+  (state) => state.saveStatus
+);
+
+export const saveError = createSelector(
+  dataBagItemsState,
+  (state) => state.saveError
+);

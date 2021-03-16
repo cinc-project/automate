@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment as env } from 'environments/environment';
 import { DataBagsSuccessPayload } from './data-bags.actions';
 import { DataBagItemPayload } from './data-bag-details.actions';
-import { DataBag, DataBagsItemDetails } from './data-bags.model';
+import { DataBag, DataBagsItemDetails, DataBagItem } from './data-bags.model';
 import { InterceptorSkipHeader } from 'app/services/http/http-client-auth.interceptor';
 
 const headers = new HttpHeaders().set(InterceptorSkipHeader, '');
@@ -53,5 +53,9 @@ export class DataBagsRequests {
       `${env.infra_proxy_url}/servers/${server_id}/orgs/${org_id}/data_bags/${name}/${item_name}`,
       {headers}
     );
+  }
+
+  public createDataBagItem(databagItem: DataBagItem): Observable<{}> {
+    return this.http.post(`${env.infra_proxy_url}/servers/${databagItem.server_id}/orgs/${databagItem.org_id}/data_bags/${databagItem.name}`, databagItem);
   }
 }

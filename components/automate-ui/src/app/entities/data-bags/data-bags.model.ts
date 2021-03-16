@@ -14,3 +14,11 @@ export interface DataBagsItemDetails {
   id: string;
   data: string;
 }
+
+export interface DataBagItem {
+  server_id: string;
+  org_id: string;
+  // id: string;
+  name: string;
+  data: {}
+}
