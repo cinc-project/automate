@@ -31,7 +31,8 @@
       [openEvent]="openDataBagItemModal"
       [server_Id]="serverId"
       [org_Id]="orgId"
-      [name]="dataBagsName"></app-create-databag-item-modal>
+      [name]="dataBagsName"
+      [currentPage]="current_page"></app-create-databag-item-modal>
 
       <section class="page-body" *ngIf="tabValue === 'details'">
         <div class="search-items">
@@ -85,7 +86,7 @@
             class="item-list-paging"
             [total]="total"
             [perPage]="per_page"
-            [page]="page"
+            [page]="current_page"
             (pageChanged)="onPageChange($event)">
           </app-page-picker>
         </div>

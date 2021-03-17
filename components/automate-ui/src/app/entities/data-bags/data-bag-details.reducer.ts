@@ -54,15 +54,15 @@ export function dataBagItemsEntityReducer(
           EntityStatus.loading,
           state);
       }
-  
+
       case DataBagItemsActionTypes.CREATE_SUCCESS: {
         return pipe(
             unset(SAVE_ERROR),
             set(SAVE_STATUS, EntityStatus.loadingSuccess)
           )(dataBagItemsEntityAdapter.addOne(action.payload, state)
         ) as DataBagItemsEntityState;
-      }  
-     
+      }
+
       case DataBagItemsActionTypes.CREATE_FAILURE: {
         return pipe(
           set(SAVE_ERROR, action.payload),

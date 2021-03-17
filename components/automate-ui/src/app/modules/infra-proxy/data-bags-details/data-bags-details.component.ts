@@ -37,7 +37,7 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
   public activeClassName: string;
   public searching = false;
   public searchValue = '';
-  public page = 1;
+  public current_page = 1;
   public per_page = 9;
   public total: number;
   public openDataBagItemModal = new EventEmitter<void>();
@@ -65,7 +65,7 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
         server_id: this.serverId,
         org_id: this.orgId,
         name: this.dataBagsName,
-        page: this.page,
+        page: this.current_page,
         per_page: this.per_page
       };
       this.store.dispatch(new GetDataBagItems(payload));
@@ -137,14 +137,14 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
 
   searchDataBagItems(currentText: string) {
     this.searching = true;
-    this.page = 1;
+    this.current_page = 1;
     this.searchValue = currentText;
     this.getDataBagItemsData();
   }
 
   onPageChange(event: number): void {
     this.searching = true;
-    this.page = event;
+    this.current_page = event;
     this.getDataBagItemsData();
   }
 
@@ -154,7 +154,7 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
       server_id: this.serverId,
       org_id: this.orgId,
       name: this.dataBagsName,
-      page: this.page,
+      page: this.current_page,
       per_page: this.per_page
     };
     this.store.dispatch(new GetDataBagItems(payload));
