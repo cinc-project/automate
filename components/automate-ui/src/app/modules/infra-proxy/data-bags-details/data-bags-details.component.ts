@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Subject, combineLatest } from 'rxjs';
 import { filter, takeUntil, pluck } from 'rxjs/operators';
@@ -28,7 +28,9 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
   public dataBagItemDetails: DataBagsItemDetails;
   public serverId: string;
   public orgId: string;
-  public dataBagsName: string;
+  public dataBagName: string;
+  public dataBagItemName: string;
+  public itemDataJson: string;
   public tabValue: DataBagsDetailsTab = 'details';
   public dataBagsDetailsLoading = true;
   public selectedItem: string;
@@ -40,6 +42,7 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
   public page = 1;
   public per_page = 9;
   public total: number;
+  public openEditDataBagItemModal = new EventEmitter<void>();
 
   constructor(
     private store: Store<NgrxStateAtom>,
@@ -55,15 +58,15 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
       this.store.select(routeParams).pipe(pluck('name'), filter(identity))
     ]).pipe(
       takeUntil(this.isDestroyed)
-    ).subscribe(([server_id, org_id, dataBags_name]) => {
+    ).subscribe(([server_id, org_id, dataBag_name]) => {
       this.serverId = server_id;
       this.orgId = org_id;
-      this.dataBagsName = dataBags_name;
+      this.dataBagName = dataBag_name;
       const payload = {
         databagName: '',
         server_id: this.serverId,
         org_id: this.orgId,
-        name: this.dataBagsName,
+        name: this.dataBagName,
         page: this.page,
         per_page: this.per_page
       };
@@ -108,7 +111,7 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
     this.store.dispatch(new GetDataBagItemDetails({
       server_id: this.serverId,
       org_id: this.orgId,
-      name: this.dataBagsName,
+      name: this.dataBagName,
       item_name: item
     }));
 
@@ -118,6 +121,10 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
 
     this.dataBagItems[index].active = !this.dataBagItems[index].active;
     this.activeClassName = 'autoHeight';
+  }
+
+  refreshData(data: string) {
+    this.selectedItemDetails = JSON.parse(data);
   }
 
   ngOnDestroy(): void {
@@ -152,10 +159,16 @@ export class DataBagsDetailsComponent implements OnInit, OnDestroy {
       databagName: this.searchValue,
       server_id: this.serverId,
       org_id: this.orgId,
-      name: this.dataBagsName,
+      name: this.dataBagName,
       page: this.page,
       per_page: this.per_page
     };
     this.store.dispatch(new GetDataBagItems(payload));
+  }
+
+  public startUpdateDataBagItem(item: DataBagItems, jsonData: Object): void {
+    this.dataBagItemName = item.name;
+    this.itemDataJson = JSON.stringify(jsonData, undefined, 4);
+    this.openEditDataBagItemModal.emit();
   }
 }
