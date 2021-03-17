@@ -7,8 +7,8 @@ import (
 
 // Global variables
 var (
-	autoDeployedChefServerID       = "local-dev"
-	autoDeployedChefOrganizationID = "test-org"
+	autoDeployedChefServerID       = "chef-server-dev-test"
+	autoDeployedChefOrganizationID = "chef-org-dev"
 	cFile                          = "/src/components/infra-proxy-service/dev/config"
 	// This suite variable will be available for every single test as long as they
 	// belong to the 'integration_test' package.
