@@ -103,6 +103,29 @@ func TestGetRoles(t *testing.T) {
 	})
 }
 
+func TestGetRole(t *testing.T) {
+	ctx := context.Background()
+	name := fmt.Sprintf("chef-load-role-%d", time.Now().Nanosecond())
+	req := &request.CreateRole{
+		ServerId:    autoDeployedChefServerID,
+		OrgId:       autoDeployedChefOrganizationID,
+		Name:        name,
+		Description: "auto generated role",
+		RunList:     []string{"recipe[audit::default]", "recipe[chef-client::default]"},
+	}
+	role, err := infraProxy.CreateRole(ctx, req)
+	assert.NoError(t, err)
+	assert.NotNil(t, role)
+
+	res, err := infraProxy.GetRole(ctx, &request.Role{
+		ServerId: autoDeployedChefServerID,
+		OrgId:    autoDeployedChefOrganizationID,
+		Name:     name,
+	})
+	assert.NoError(t, err)
+	assert.NotNil(t, res)
+}
+
 // Adds roles records
 func addRoles(ctx context.Context, n int) int {
 	total := 0
@@ -112,6 +135,7 @@ func addRoles(ctx context.Context, n int) int {
 			OrgId:       autoDeployedChefOrganizationID,
 			Name:        fmt.Sprintf("chef-load-role-%d", time.Now().Nanosecond()),
 			Description: "auto generated role",
+			RunList:     []string{"recipe[audit::default]", "recipe[chef-client::default]"},
 		}
 		_, err := infraProxy.CreateRole(ctx, req)
 
