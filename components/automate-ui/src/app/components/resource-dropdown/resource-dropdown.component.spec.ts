@@ -1,3 +1,6 @@
+// Imports needed HTMLChefCheckboxElement type
+/// <reference path="../../../assets/chef-ui-library/types/components.d.ts" />
+
 import { CUSTOM_ELEMENTS_SCHEMA, EventEmitter, SimpleChange, Component } from '@angular/core';
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
@@ -31,9 +34,9 @@ class TestHostComponent {
   resources = testResources;
   resourceIDs: string[];
 
-  // onClosing(resourceIDs: string[]): void {
-  //   this.resourceIDs = resourceIDs;
-  // }
+  onClosing(resourceIDs: string[]): void {
+    this.resourceIDs = resourceIDs;
+  }
 }
 
 describe('HostedMessageModalComponent', () => {
@@ -41,6 +44,7 @@ describe('HostedMessageModalComponent', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let dropdownComponent: ResourceDropdownComponent;
   let dropdownElement: HTMLElement;
+  let dropdownButton: HTMLButtonElement;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -60,6 +64,7 @@ describe('HostedMessageModalComponent', () => {
     hostComponent = fixture.componentInstance;
     dropdownComponent = fixture.debugElement.children[0].componentInstance;
     dropdownElement = fixture.nativeElement;
+    dropdownButton = dropdownElement.querySelector('.dropdown-button');
     fixture.detectChanges();
   });
 
@@ -71,31 +76,65 @@ describe('HostedMessageModalComponent', () => {
   // This is an example of how to get closer to the UI in a unit test.
   // Here we are actually clicking an HTML button rather than firing the internal ngOnChanges
   // as is done in later tests in this file.
-  it('retains checked items after closing then re-opening dropdown', () => {
+  it('passes in resource list through "resource" parameter', () => {
     expect(dropdownComponent.dropdownState).toEqual('closed');
     expect(dropdownComponent.filteredResources).toEqual(testResources);
-    expect(dropdownComponent.label).toEqual('3 hummingbirds');
 
-    (dropdownElement.querySelector('.dropdown-button') as HTMLButtonElement).click();
-    dropdownComponent.handleClickOutside(); // in the browser, this fires automatically after click
-
+    toggleDropdown(); // open
     expect(dropdownComponent.dropdownState).toEqual('open');
 
-    // options is actually an array of HTMLChefCheckboxElement, which must come from chef-ui-library
-    // but that is apparently unavailable to import here!
-    const options = Array.from(
-        dropdownElement.querySelectorAll('chef-checkbox')) as unknown as HTMLInputElement[];
+    const options: HTMLChefCheckboxElement[] = Array.from(
+      dropdownElement.querySelectorAll('chef-checkbox'));
     expect(options.length).toEqual(testResources[0].itemList.length);
     for (let i = 0; i < options.length; i++) {
       const { name, checked } = testResources[0].itemList[i];
       expect(options[i].textContent).toEqual(name);
       expect(options[i].checked).toEqual(checked);
     }
-    // could do further manipulations...
-    // dropdownComponent.resourceChecked(true, dropdownComponent.filteredResources[0].itemList[1]);
   });
-});
 
+  it('emits list of checked resources upon close', () => {
+    expect(dropdownComponent.dropdownState).toEqual('closed');
+    expect(hostComponent.resourceIDs).toBeUndefined();
+
+    toggleDropdown(); // open
+    expect(dropdownComponent.dropdownState).toEqual('open');
+    expect(hostComponent.resourceIDs).toBeUndefined(); // only gets set on close, so not yet...
+
+    toggleDropdown(); // close
+    expect(dropdownComponent.dropdownState).toEqual('closed');
+
+    // check what is emitted on close
+    expect(hostComponent.resourceIDs)
+      .toEqual(testResources[0].itemList.filter(r => r.checked).map(r => r.name));
+  });
+
+  it('retains checked items after closing then re-opening dropdown', () => {
+    expect(dropdownComponent.dropdownState).toEqual('closed');
+    expect(dropdownComponent.filteredResources).toEqual(testResources);
+    expect(dropdownComponent.label).toEqual('3 hummingbirds');
+
+    toggleDropdown(); // open
+    expect(dropdownComponent.dropdownState).toEqual('open');
+
+    // now add one more checked item
+    dropdownComponent.resourceChecked(true, dropdownComponent.filteredResources[0].itemList[1]);
+    expect(dropdownComponent.label).toEqual('4 hummingbirds');
+
+    toggleDropdown(); // close
+    expect(dropdownComponent.dropdownState).toEqual('closed');
+
+    toggleDropdown(); // re-open
+    expect(dropdownComponent.dropdownState).toEqual('open');
+
+    expect(dropdownComponent.label).toEqual('4 hummingbirds');
+  });
+
+  function toggleDropdown(): void {
+    dropdownButton.click();
+    dropdownComponent.handleClickOutside(); // in the browser, this fires automatically after click
+  }
+});
 
 describe('ResourceDropdownComponent', () => {
   let component: ResourceDropdownComponent;
