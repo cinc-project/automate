@@ -9,8 +9,8 @@ export interface Environment {
   json_class: string;
   default_attributes: string;
   override_attributes: string;
-  run_list: string[];
-  cookbook_versions: CookbookVersion[];
+  run_list?: string[];
+  cookbook_versions: Object;
 }
 
 export interface CookbookVersion {
