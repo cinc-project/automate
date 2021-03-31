@@ -1,10 +1,11 @@
 package relaxting
 
 import (
-	"github.com/chef/automate/components/compliance-service/ingest/ingestic/mappings"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/chef/automate/components/compliance-service/ingest/ingestic/mappings"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetEsIndexNoTimeLast24h(t *testing.T) {
@@ -18,6 +19,50 @@ func TestGetEsIndexNoTimeLast24h(t *testing.T) {
 
 	assert.Equal(t, sum+"-"+yesterday+"*,"+sum+"-"+today+"*", index)
 	assert.NoError(t, err)
+}
+
+func TestThirties(t *testing.T) {
+	indexFormat := "%s%d.0%d"
+	prefix := mappings.IndexNameSum
+
+	endTime := time.Date(2021, time.March, 31, 0, 0, 0, 0, time.UTC)
+	startTime := endTime.Add(-24 * time.Hour)
+
+	indices := thirties(prefix, startTime, endTime, indexFormat)
+	assert.Equal(t, "comp-7-s2021.03.30*,comp-7-s2021.03.31*", indices)
+}
+
+func TestThirties_day30(t *testing.T) {
+	indexFormat := "%s%d.0%d"
+	prefix := mappings.IndexNameSum
+
+	endTime := time.Date(2021, time.March, 30, 0, 0, 0, 0, time.UTC)
+	startTime := endTime.Add(-24 * time.Hour)
+
+	indices := thirties(prefix, startTime, endTime, indexFormat)
+	assert.Equal(t, "comp-7-s2021.03.30*", indices)
+}
+
+func TestThirties_day32(t *testing.T) {
+	indexFormat := "%s%d.0%d"
+	prefix := mappings.IndexNameSum
+
+	endTime := time.Date(2021, time.March, 32, 0, 0, 0, 0, time.UTC)
+	startTime := endTime.Add(-24 * time.Hour)
+
+	indices := thirties(prefix, startTime, endTime, indexFormat)
+	assert.Equal(t, "", indices)
+}
+
+func TestThirties_day29(t *testing.T) {
+	indexFormat := "%s%d.0%d"
+	prefix := mappings.IndexNameSum
+
+	endTime := time.Date(2021, time.March, 32, 0, 0, 0, 0, time.UTC)
+	startTime := endTime.Add(-24 * time.Hour)
+
+	indices := thirties(prefix, startTime, endTime, indexFormat)
+	assert.Equal(t, "", indices)
 }
 
 func TestGetEsIndexWithOnlyEndTimeFilter(t *testing.T) {

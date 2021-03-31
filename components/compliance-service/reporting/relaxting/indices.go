@@ -281,13 +281,6 @@ func thirties(prefix string, startTime time.Time, endTime time.Time, indexFormat
 	startRange := 30
 	endRange := 31
 
-	//logrus.Debugf("starttime: %s, endtime: %s", startTime, endTime)
-	if startTime.Day() <= startRange && endTime.Day() >= endRange {
-		indices = appendIndices(indices, fmt.Sprintf(indexFormat+".3*", prefix, startTime.Year(), int(startTime.Month())))
-		//logrus.Debugf("thirties (all): %s", indices)
-		return indices
-	}
-
 	if startTime.Day() <= endRange && endTime.Day() >= startRange {
 		if startTime.Day() > startRange {
 			startRange = startTime.Day()
