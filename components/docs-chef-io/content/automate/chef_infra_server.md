@@ -93,11 +93,15 @@ The Chef Infra Server UI let's you access the _Environment_ object in following 
 
 - All the _Environments_ of an Organization can be listed at one place.
 
-- You can create a new Environment using the button as shown below:
-
 {{< figure src="/images/automate/create-environment-button.png" alt="Create Environment Button">}}
 
 - In the above image, the search bar stating __Search environments__ can be used to search a specific environment from the list.
+
+- To create a new Environment, select __Create Environment__ which will open a popup menu as shown below:
+
+{{< figure src="/images/automate/create-environment-popup.png" alt="Create Environment Popup Menu">}}
+
+The popup menu contains four different sections named _Details_, _Constraints_, _Default Attributes_ and _Override Attributes_. Enter the details in the possible sections and select __Create__ to create a new environment.
 
 - The Chef Infra Server also allows you to delete the created environments one at a time.
 
@@ -123,11 +127,15 @@ The Chef Infra Server UI let's you access the _Clients_ object in the following 
 
 - All the _Clients_ of an organization can be listed at one place.
 
-- You can create a client using the button as shown below:
-
 {{< figure src="/images/automate/create-client-button.png" alt="Create Client Button">}}
 
 - In the above image, the search bar stating __Search Clients__ can be used to search a specific client from the list.
+
+- To create a new Client, select __Create Client__ which will open a popup menu as shown below:
+
+{{< figure src="/images/automate/create-client-popup.png" alt="Create Client Popup Menu">}}
+
+Enter the _Client Name_, select whether you want it to be a _Validation Client_ or not. Select __Create__ to create a New Client.
 
 - The Chef Infra Server also allows you to delete the created clients one at a time.
 
