@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 #shellcheck disable=SC2034
 
 export HAB_ORIGIN=${HAB_ORIGIN:-chef}
