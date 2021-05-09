@@ -18,14 +18,3 @@ export interface InfraNode {
   run_list: string[];
   tags: string[];
 }
-
-
-automatic_attributes: "{}"
-default_attributes: "{}"
-environment: "_default"
-name: "node-969656100"
-node_id: "node-969656100"
-normal_attributes: "{\"tags\":[\"tag2\"]}"
-override_attributes: "{}"
-run_list: []
-tags: ["tag2"]
