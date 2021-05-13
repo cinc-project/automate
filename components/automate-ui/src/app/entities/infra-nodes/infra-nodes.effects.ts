@@ -73,7 +73,7 @@ export class InfraNodeEffects {
           message: `Could not get node: ${msg || payload.error}`
         });
     })));
-  
+
   updateNodeEnvironment$ = createEffect(() =>
     this.actions$.pipe(
       ofType(NodeActionTypes.UPDATE_ENVIRONMENT),
@@ -88,7 +88,7 @@ export class InfraNodeEffects {
       ofType(NodeActionTypes.UPDATE_ENVIRONMENT_SUCCESS),
       map(({ }: UpdateNodeEnvironmentSuccess) => new CreateNotification({
         type: Type.info,
-        message: `Successfully updated node environment.`
+        message: 'Successfully updated node environment.'
       }))));
 
   updateNodeEnvironmentFailure$ = createEffect(() =>
@@ -99,7 +99,7 @@ export class InfraNodeEffects {
         type: Type.error,
         message: `Could not update node environment: ${payload.error.error || payload}.`
       }))));
-  
+
   updateNodeTags$ = createEffect(() =>
     this.actions$.pipe(
       ofType(NodeActionTypes.UPDATE_TAGS),
@@ -114,7 +114,7 @@ export class InfraNodeEffects {
       ofType(NodeActionTypes.UPDATE_TAGS_SUCCESS),
       map(({ }: UpdateNodeTagsSuccess) => new CreateNotification({
         type: Type.info,
-        message: `Successfully updated node tags.`
+        message: 'Successfully updated node tags.'
       }))));
 
   updateNodeTagsFailure$ = createEffect(() =>

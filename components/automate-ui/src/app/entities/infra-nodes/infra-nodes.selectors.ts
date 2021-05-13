@@ -45,6 +45,11 @@ export const nodeTags = createSelector(
   (state) => state.nodeTags
 );
 
+export const nodeEnvironment = createSelector(
+  infraNodeState,
+  (state) => state.nodeEnvironment
+);
+
 export const infraNodeFromRoute = createSelector(
   nodeEntities,
   routeParams,
