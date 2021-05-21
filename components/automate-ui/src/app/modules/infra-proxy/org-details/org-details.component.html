@@ -2,7 +2,7 @@
   <div class="container">
     <main>
       <chef-breadcrumbs>
-        <chef-breadcrumb [link]="['/infrastructure/chef-servers']">Chef Servers</chef-breadcrumb>
+        <chef-breadcrumb [link]="['/infrastructure/chef-servers']">Chef Infra Servers</chef-breadcrumb>
         <chef-breadcrumb [routerLink]="['/infrastructure/chef-servers', org?.server_id]">Organizations</chef-breadcrumb>
         {{ org?.name }}
       </chef-breadcrumbs>
@@ -41,6 +41,9 @@
           </app-tab>
           <app-tab tabTitle="Clients" #clients_tab  [active]="clientsTab">
             <app-clients *ngIf="clients_tab.active" [serverId]="serverId" [orgId]="orgId" (resetKeyRedirection)="resetAdminKeyRedirection($event)"></app-clients>
+          </app-tab>
+          <app-tab tabTitle="Nodes" #nodes_tab  [active]="nodesTab">
+            <app-infra-nodes *ngIf="nodes_tab.active" [serverId]="serverId" [orgId]="orgId" (resetKeyRedirection)="resetAdminKeyRedirection($event)"></app-infra-nodes>
           </app-tab>
           <app-tab *ngIf="chefInfraViewsFeatureFlagOn" tabTitle="Policyfiles" #policyFiles_tab  [active]="policyFilesTab">
             <app-policy-files *ngIf="policyFiles_tab.active" [serverId]="serverId" [orgId]="orgId" (resetKeyRedirection)="resetAdminKeyRedirection($event)"></app-policy-files>

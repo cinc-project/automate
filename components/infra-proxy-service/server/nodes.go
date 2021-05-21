@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	chef "github.com/go-chef/chef"
 	"google.golang.org/grpc/codes"
@@ -21,37 +20,27 @@ func (s *Server) GetNodes(ctx context.Context, req *request.Nodes) (*response.No
 		return nil, err
 	}
 
-	res, err := c.fetchAffectedNodes(ctx, "*:*")
+	params := map[string]interface{}{
+		"name":             []string{"name"},
+		"fqdn":             []string{"fqdn"},
+		"ipaddress":        []string{"ipaddress"},
+		"platform":         []string{"platform"},
+		"chef_environment": []string{"chef_environment"},
+		"policy_group":     []string{"policy_group"},
+		"chef_guid":        []string{"chef_guid"},
+		"uptime":           []string{"uptime"},
+		"ohai_time":        []string{"ohai_time"},
+	}
+
+	res, err := c.SearchObjectsWithDefaults("node", req.SearchQuery, params)
 	if err != nil {
 		return nil, err
 	}
 
 	return &response.Nodes{
-		Nodes: fromSearchAPIToAffectedNodes(*res),
-	}, nil
-}
-
-// GetAffectedNodes gets the nodes using chef object
-func (s *Server) GetAffectedNodes(ctx context.Context, req *request.AffectedNodes) (*response.AffectedNodes, error) {
-	c, err := s.createClient(ctx, req.OrgId, req.ServerId)
-	if err != nil {
-		return nil, err
-	}
-
-	var statement string
-	if req.Version != "" {
-		statement = fmt.Sprintf("%s_%s_version:%s", req.ChefType, req.Name, req.Version)
-	} else {
-		statement = fmt.Sprintf("%s:%s", req.ChefType, req.Name)
-	}
-
-	res, err := c.fetchAffectedNodes(ctx, statement)
-	if err != nil {
-		return nil, err
-	}
-
-	return &response.AffectedNodes{
-		Nodes: fromSearchAPIToAffectedNodes(*res),
+		Nodes: fromSearchAPIToNodes(res),
+		Page:  int32(res.Start),
+		Total: int32(res.Total),
 	}, nil
 }
 
@@ -303,6 +292,55 @@ func (s *Server) UpdateNodeAttributes(ctx context.Context, req *request.UpdateNo
 	}, nil
 }
 
+// GetNodeExpandedRunList fetches the expanded runlist of a node
+func (s *Server) GetNodeExpandedRunList(ctx context.Context, req *request.NodeExpandedRunList) (*response.NodeExpandedRunList, error) {
+	err := validation.New(validation.Options{
+		Target:  "role",
+		Request: *req,
+		Rules: validation.Rules{
+			"OrgId":       []string{"required"},
+			"ServerId":    []string{"required"},
+			"Name":        []string{"required"},
+			"Environment": []string{"required"},
+		},
+	}).Validate()
+
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := s.createClient(ctx, req.OrgId, req.ServerId)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.client.Nodes.Get(req.Name)
+	if err != nil {
+		return nil, ParseAPIError(err)
+	}
+
+	runList := res.RunList
+
+	// Fetches cookbooks to evaluate recipes version.
+	cookbooks, err := c.client.Environments.ListCookbooks(req.Environment, "1")
+	if err != nil {
+		return nil, ParseAPIError(err)
+	}
+
+	var runlistCache = RunListCache{}
+
+	var expandedRunList []*response.RunList
+	expandedRunList, err = ToResponseExpandedRunList(c, runList, cookbooks, runlistCache)
+	if err != nil {
+		return nil, ParseAPIError(err)
+	}
+
+	return &response.NodeExpandedRunList{
+		Id:      req.Environment,
+		RunList: expandedRunList,
+	}, nil
+}
+
 // fetchAffectedNodes gets the nodes used by chef object
 // URL is being constructed based on the chefType, name, and version
 // chefType: should be one of the cookbooks, roles and chef_environment value
@@ -334,7 +372,7 @@ func (c *ChefClient) fetchAffectedNodes(ctx context.Context, statement string) (
 
 // This return the response node attributes array
 // parse by the getting the attributes from partial search query.
-func fromSearchAPIToAffectedNodes(sr chef.SearchResult) []*response.NodeAttribute {
+func fromSearchAPIToNodes(sr *chef.SearchResult) []*response.NodeAttribute {
 	results := make([]*response.NodeAttribute, len(sr.Rows))
 	index := 0
 	for _, element := range sr.Rows {

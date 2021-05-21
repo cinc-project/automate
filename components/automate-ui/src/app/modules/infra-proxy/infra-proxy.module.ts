@@ -20,14 +20,16 @@ import { CreateDatabagItemModalComponent } from './create-databag-item-modal/cre
 import { CreateInfraRoleModalComponent } from './create-infra-role-modal/create-infra-role-modal.component';
 import { DataBagsDetailsComponent } from './data-bags-details/data-bags-details.component';
 import { DataBagsListComponent } from './data-bags-list/data-bags-list.component';
-import { DragDropComponent } from './drag-drop/drag-drop.component';
 import { DeleteInfraObjectModalComponent } from './delete-infra-object-modal/delete-infra-object-modal.component';
 import { EditDataBagItemModalComponent } from './edit-data-bag-item-modal/edit-data-bag-item-modal.component';
 import { EditEnvironmentAttributeModalComponent } from './edit-environment-attribute-modal/edit-environment-attribute-modal.component';
+import { EditInfraRoleModalComponent } from './edit-infra-role-modal/edit-infra-role-modal.component';
 import { EmptyStateComponent } from './empty-state/empty-state.component';
 import { EnvironmentsComponent } from './environments/environments.component';
 import { EnvironmentDetailsComponent } from './environment-details/environment-details.component';
 import { InfraEnvironmentConstraintComponent } from './infra-environment-constraint/infra-environment-constraint.component';
+import { InfraNodesComponent } from './infra-nodes/infra-nodes.component';
+import { InfraNodeDetailsComponent } from './infra-node-details/infra-node-details.component';
 import { InfraRolesComponent } from './infra-roles/infra-roles.component';
 import { InfraRoleDetailsComponent } from './infra-role-details/infra-role-details.component';
 import { InfraSearchBarComponent } from './infra-search-bar/infra-search-bar.component';
@@ -45,6 +47,7 @@ import { MatInputModule } from '@angular/material/input';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { SelectBoxModule } from './select-box/src/public_api';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
   declarations: [
@@ -63,15 +66,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     CreateInfraRoleModalComponent,
     DataBagsDetailsComponent,
     DataBagsListComponent,
-    DragDropComponent,
     DeleteInfraObjectModalComponent,
     EditDataBagItemModalComponent,
     EditEnvironmentAttributeModalComponent,
+    EditInfraRoleModalComponent,
     EmptyStateComponent,
     EnvironmentsComponent,
     EnvironmentDetailsComponent,
     JsonTreeTableComponent,
     InfraEnvironmentConstraintComponent,
+    InfraNodesComponent,
+    InfraNodeDetailsComponent,
     InfraRolesComponent,
     InfraRoleDetailsComponent,
     InfraSearchBarComponent,
@@ -96,7 +101,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     MatInputModule,
     ReactiveFormsModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    NgSelectModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ]
 })

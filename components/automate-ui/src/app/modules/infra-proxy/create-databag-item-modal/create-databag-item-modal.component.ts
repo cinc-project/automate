@@ -15,6 +15,7 @@ import { NgrxStateAtom } from 'app/ngrx.reducers';
 import { Regex } from 'app/helpers/auth/regex';
 import { EntityStatus, pending } from 'app/entities/entities';
 import { HttpStatus } from 'app/types/types';
+import { Utilities } from 'app/helpers/utilities/utilities';
 import {
   saveStatus,
   saveError
@@ -57,7 +58,8 @@ export class CreateDatabagItemModalComponent implements OnInit, OnDestroy {
     private fb: FormBuilder
   ) {
     this.createForm = this.fb.group({
-      itemId: ['', [Validators.required, Validators.pattern(Regex.patterns.NON_BLANK)]],
+      itemId: ['', [Validators.required,
+        Validators.pattern(Regex.patterns.NO_WILDCARD_ALLOW_HYPHEN)]],
       itemAttr: ['{}']
     });
   }
@@ -103,7 +105,7 @@ export class CreateDatabagItemModalComponent implements OnInit, OnDestroy {
   }
 
   handleInput(event: KeyboardEvent): void {
-    if (this.isNavigationKey(event)) {
+    if (Utilities.isNavigationKey(event)) {
       return;
     }
     this.conflictError = false;
@@ -160,7 +162,4 @@ export class CreateDatabagItemModalComponent implements OnInit, OnDestroy {
     this.itemAttrParseError = false;
   }
 
-  private isNavigationKey(event: KeyboardEvent): boolean {
-    return event.key === 'Shift' || event.key === 'Tab';
-  }
 }

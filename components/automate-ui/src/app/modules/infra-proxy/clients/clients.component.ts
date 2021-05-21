@@ -10,6 +10,7 @@ import { LayoutFacadeService, Sidebar } from 'app/entities/layout/layout.facade'
 import { GetClients, DeleteClient } from 'app/entities/clients/client.action';
 import { Client } from 'app/entities/clients/client.model';
 import { getAllStatus, clientList, deleteStatus } from 'app/entities/clients/client.selectors';
+import { Regex } from 'app/helpers/auth/regex';
 
 @Component({
   selector: 'app-clients',
@@ -50,18 +51,17 @@ export class ClientsComponent implements OnInit, OnDestroy {
     combineLatest([
       this.store.select(getAllStatus),
       this.store.select(clientList)
-    ]).pipe(
-      filter(([getClientsStatus, allClientsState]) =>
-        getClientsStatus === EntityStatus.loadingSuccess &&
-        !isNil(allClientsState)),
-      takeUntil(this.isDestroyed))
-    .subscribe(([_getClientsSt, ClientsState]) => {
-      if (!isNil(ClientsState)) {
+    ]).pipe(takeUntil(this.isDestroyed))
+    .subscribe(([getClientsSt, ClientsState]) => {
+      if (getClientsSt === EntityStatus.loadingSuccess && !isNil(ClientsState)) {
         this.clientListState = ClientsState;
         this.clients = ClientsState?.items;
         this.total = ClientsState?.total;
         this.clientsListLoading = false;
         this.searching = false;
+      } else if (getClientsSt === EntityStatus.loadingFailure) {
+        this.clientsListLoading = false;
+        this.authFailure = true;
       }
     });
 
@@ -82,7 +82,13 @@ export class ClientsComponent implements OnInit, OnDestroy {
     this.current_page = 1;
     this.searching = true;
     this.searchValue = currentText;
-    this.getClientsData();
+    if ( currentText !== ''  && !Regex.patterns.NO_WILDCARD_ALLOW_HYPHEN.test(currentText)) {
+      this.searching = false;
+      this.clients.length = 0;
+      this.total = 0;
+    } else {
+      this.getClientsData();
+    }
   }
 
   onPageChange(event: number): void {

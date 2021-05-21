@@ -82,6 +82,7 @@ import { DataBagsRequests } from './entities/data-bags/data-bags.requests';
 import { DesktopRequests } from './entities/desktop/desktop.requests';
 import { DestinationRequests } from './entities/destinations/destination.requests';
 import { EnvironmentRequests } from './entities/environments/environment.requests';
+import { InfraNodeRequests } from './entities/infra-nodes/infra-nodes.requests';
 import { InfraRoleRequests } from './entities/infra-roles/infra-role.requests';
 import { JobRequests } from './entities/jobs/job.requests';
 import { LicenseStatusRequests } from './entities/license/license.requests';
@@ -92,8 +93,10 @@ import { PolicyRequests } from './entities/policies/policy.requests';
 import { ProfileRequests } from './entities/profiles/profile.requests';
 import { ProjectRequests } from './entities/projects/project.requests';
 import { RecipeRequests } from './entities/recipes/recipe.requests';
+import { RoleEnvironmentRequests } from './entities/role-environments/role-environments.requests';
 import { RoleRequests } from './entities/roles/role.requests';
 import { RuleRequests } from './entities/rules/rule.requests';
+import { RunlistRequests } from './entities/runlists/runlists.requests';
 import { ServerRequests } from './entities/servers/server.requests';
 import { NodeCredentialRequests } from './entities/node-credentials/node-credential.requests';
 import { OrgRequests } from './entities/orgs/org.requests';
@@ -315,6 +318,7 @@ import { WelcomeModalComponent } from './page-components/welcome-modal/welcome-m
       useClass: HttpClientAuthInterceptor,
       multi: true
     },
+    InfraNodeRequests,
     InfraRoleRequests,
     JobRequests,
     LayoutSidebarService,
@@ -337,8 +341,10 @@ import { WelcomeModalComponent } from './page-components/welcome-modal/welcome-m
     ProjectsFilterRequests,
     ProjectsFilterService,
     RecipeRequests,
+    RoleEnvironmentRequests,
     RoleRequests,
     RuleRequests,
+    RunlistRequests,
     RunHistoryStore,
     ServerRequests,
     NodeCredentialRequests,

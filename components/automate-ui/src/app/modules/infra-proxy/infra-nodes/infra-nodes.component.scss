@@ -1,0 +1,124 @@
+@import "~styles/variables";
+
+.search-create-container {
+  display: flex;
+  margin: 24px 0 18px;
+  flex-direction: row;
+
+  app-infra-search-bar {
+    flex-grow: 2;
+  }
+
+  chef-button {
+    margin: 0;
+    margin-left: 16px;
+  }
+}
+
+thead {
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  color: $chef-primary-dark;
+}
+
+th {
+  text-align: left;
+  padding: 0px;
+}
+
+tbody > .detail-row {
+  padding-top: 0px;
+  padding-bottom: 15px;
+}
+
+chef-table-new {
+  .controls {
+    text-align: right;
+  }
+
+  a {
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}
+
+chef-loading-spinner {
+  display: block;
+  margin: 100px auto;
+  width: 100px;
+  z-index: 199;
+}
+
+.empty-section {
+  text-align: center;
+}
+
+img {
+  width: 70px;
+  margin-top: 130px;
+}
+
+.full-screen-spinner {
+  display: flex;
+  margin: auto;
+  margin-top: 239px;
+  background-color: $chef-white;
+  opacity: 0.7;
+  width: initial;
+  height: 100%;
+}
+
+.nodes-list-paging {
+  margin: 0 0 35px;
+}
+
+.three-dot-column {
+  text-align: right;
+}
+
+.infra-nodes {
+  .search-items {
+    margin-bottom: 18px;
+    height: 55px;
+  }
+}
+
+.minus-icon {
+  &:before {
+    display: inline-block;
+    content: '|';
+    font-family: arial;
+    transform: scaleX(-1) rotate(-90deg);
+    vertical-align: top;
+    line-height: 1em;
+    width: 8px;
+    color: $chef-critical;
+    height: 10px;
+    margin-right: 1.3em;
+    text-align: center;
+    position: absolute;
+    right: 0;
+  }
+
+  &:hover {
+    &:before {
+      color: $chef-white;
+    }
+
+  }
+}
+
+::ng-deep
+.mat-select-panel .mat-option {
+  &.secondary {
+    width: 115px;
+    height: 2.3em;
+    background: $chef-white;
+    color: $chef-critical;
+  }
+
+  &:hover {
+    background: $chef-primary-bright;
+    color: $chef-white;
+  }
+}

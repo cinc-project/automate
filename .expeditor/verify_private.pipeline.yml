@@ -455,6 +455,9 @@ steps:
     command:
       - FLAKY=no integration/run_test integration/tests/cypress_e2e.sh
     timeout_in_minutes: 35
+    retry:
+      automatic:
+        limit: 2
     expeditor:
       secrets: &cypress_secrets
         A2_LICENSE:
@@ -468,6 +471,9 @@ steps:
           field: data
         CYPRESS_AUTOMATE_ACCEPTANCE_TARGET_KEY:
           path: secret/a2/testing/target_key
+          field: data
+        CYPRESS_AUTOMATE_INFRA_ADMIN_KEY:
+          path: secret/a2/testing/infra_admin_key
           field: data
       executor:
         linux:

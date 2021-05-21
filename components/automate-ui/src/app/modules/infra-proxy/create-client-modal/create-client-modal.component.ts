@@ -10,6 +10,7 @@ import { CreateClient, GetClients } from 'app/entities/clients/client.action';
 import { saveError, createClient } from 'app/entities/clients/client.selectors';
 import { isNil } from 'lodash/fp';
 import { saveAs } from 'file-saver';
+import { Utilities } from 'app/helpers/utilities/utilities';
 
 @Component({
   selector: 'app-create-client-modal',
@@ -45,7 +46,8 @@ export class CreateClientModalComponent implements OnInit, OnDestroy {
     private store: Store<NgrxStateAtom>
   ) {
     this.createForm = this.fb.group({
-      name: ['', [Validators.required, Validators.pattern(Regex.patterns.NON_BLANK)]],
+      name: ['', [Validators.required,
+        Validators.pattern(Regex.patterns.NO_WILDCARD_ALLOW_HYPHEN)]],
       validator: ['']
     });
   }
@@ -89,7 +91,7 @@ export class CreateClientModalComponent implements OnInit, OnDestroy {
   }
 
   handleNameInput(event: KeyboardEvent): void {
-    if (!this.isNavigationKey(event)) {
+    if (!Utilities.isNavigationKey(event)) {
       this.conflictError = false;
       this.error = '';
       this.createForm.controls.name.setValue(
@@ -98,7 +100,7 @@ export class CreateClientModalComponent implements OnInit, OnDestroy {
   }
 
   public handleInput(event: KeyboardEvent): void {
-    if (this.isNavigationKey(event)) {
+    if (Utilities.isNavigationKey(event)) {
       return;
     }
     this.conflictError = false;
@@ -155,7 +157,4 @@ export class CreateClientModalComponent implements OnInit, OnDestroy {
     saveAs(blob, this.createdClient + '.pem');
   }
 
-  private isNavigationKey(event: KeyboardEvent): boolean {
-    return event.key === 'Shift' || event.key === 'Tab';
-  }
 }

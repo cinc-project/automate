@@ -20,6 +20,7 @@ import { DesktopEffects } from './entities/desktop/desktop.effects';
 import { DestinationEffects } from './entities/destinations/destination.effects';
 import { EnvironmentEffects } from './entities/environments/environment.effects';
 import { EventFeedEffects } from './services/event-feed/event-feed.effects';
+import { InfraNodeEffects } from './entities/infra-nodes/infra-nodes.effects';
 import { InfraRoleEffects } from './entities/infra-roles/infra-role.effects';
 import { JobEffects } from './entities/jobs/job.effects';
 import { LicenseStatusEffects } from './entities/license/license.effects';
@@ -34,8 +35,10 @@ import { ProfileEffects } from './entities/profiles/profile.effects';
 import { ProjectEffects } from './entities/projects/project.effects';
 import { ProjectsFilterEffects } from './services/projects-filter/projects-filter.effects';
 import { RecipeEffects } from './entities/recipes/recipe.effects';
+import { RoleEnvironmentEffects } from './entities/role-environments/role-environments.effects';
 import { RoleEffects } from './entities/roles/role.effects';
 import { RuleEffects } from './entities/rules/rule.effects';
+import { RunlistEffects } from './entities/runlists/runlists.effects';
 import { ServerEffects } from './entities/servers/server.effects';
 import { ServiceGroupsEffects } from './entities/service-groups/service-groups.effects';
 import { UserPreferencesEffects } from './services/user-preferences/user-preferences.effects';
@@ -65,6 +68,7 @@ import { UserPermEffects } from './entities/userperms/userperms.effects';
       DestinationEffects,
       EnvironmentEffects,
       EventFeedEffects,
+      InfraNodeEffects,
       InfraRoleEffects,
       JobEffects,
       LicenseStatusEffects,
@@ -79,8 +83,10 @@ import { UserPermEffects } from './entities/userperms/userperms.effects';
       ProjectEffects,
       ProjectsFilterEffects,
       RecipeEffects,
+      RoleEnvironmentEffects,
       RoleEffects,
       RuleEffects,
+      RunlistEffects,
       ServerEffects,
       ServiceGroupsEffects,
       ScannerEffects,

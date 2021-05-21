@@ -9,6 +9,7 @@ import { GetEnvironments, DeleteEnvironment } from 'app/entities/environments/en
 import { Environment } from 'app/entities/environments/environment.model';
 import { getAllStatus, deleteStatus, environmentList } from 'app/entities/environments/environment.selectors';
 import { EntityStatus } from 'app/entities/entities';
+import { Regex } from 'app/helpers/auth/regex';
 
 @Component({
   selector: 'app-environments',
@@ -51,18 +52,17 @@ export class EnvironmentsComponent implements OnInit, OnDestroy {
     combineLatest([
         this.store.select(getAllStatus),
         this.store.select(environmentList)
-      ]).pipe(
-        filter(([getEnvironmentsStatus, allEnvironmentsState]) =>
-        getEnvironmentsStatus === EntityStatus.loadingSuccess &&
-        !isNil(allEnvironmentsState)),
-        takeUntil(this.isDestroyed))
-      .subscribe(([_getEnvironmentsSt, EnvironmentsState]) => {
-        if (!isNil(EnvironmentsState)) {
+      ]).pipe(takeUntil(this.isDestroyed))
+      .subscribe(([getEnvironmentsSt, EnvironmentsState]) => {
+        if (getEnvironmentsSt === EntityStatus.loadingSuccess && !isNil(EnvironmentsState)) {
           this.environmentListState = EnvironmentsState;
           this.environments = EnvironmentsState?.items;
           this.total = EnvironmentsState?.total;
           this.environmentsListLoading = false;
           this.searching = false;
+        } else if (getEnvironmentsSt === EntityStatus.loadingFailure) {
+          this.environmentsListLoading = false;
+          this.authFailure = true;
         }
       });
 
@@ -87,7 +87,13 @@ export class EnvironmentsComponent implements OnInit, OnDestroy {
     this.current_page = 1;
     this.searching = true;
     this.searchValue = currentText;
-    this.getEnvironmentData();
+    if ( currentText !== ''  && !Regex.patterns.NO_WILDCARD_ALLOW_HYPHEN.test(currentText)) {
+      this.searching = false;
+      this.environments.length = 0;
+      this.total = 0;
+    } else {
+      this.getEnvironmentData();
+    }
   }
 
   onPageChange(event: number): void {
