@@ -43,13 +43,6 @@ export class ApiTokenListComponent implements OnInit, OnDestroy {
   public conflictErrorEvent = new EventEmitter<boolean>();
   private isDestroyed = new Subject<boolean>();
   public unassigned = ProjectConstants.UNASSIGNED_PROJECT_ID;
-<<<<<<< HEAD
-=======
-
-  // user preferences timezone
-  public timezone: string;
-  // public timezone2: any;
->>>>>>> jamie/time-format-rebase
 
   constructor(
     private store: Store<NgrxStateAtom>,
