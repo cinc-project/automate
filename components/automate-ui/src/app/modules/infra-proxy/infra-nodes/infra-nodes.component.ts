@@ -40,6 +40,10 @@ export class InfraNodesComponent implements OnInit, OnDestroy {
   public nodeToDelete: InfraNode;
   public deleteModalVisible = false;
 
+  // update node tag
+  public nodeName: string;
+  public openTagModal = new EventEmitter<void>();
+
   constructor(
     private store: Store<NgrxStateAtom>,
     private layoutFacade: LayoutFacadeService
@@ -119,6 +123,11 @@ export class InfraNodesComponent implements OnInit, OnDestroy {
     const epchoTime = Number(epochFormat);
     const fromNowValue = this.timeFromNowPipe.transform(epchoTime);
     return fromNowValue === '-' ? '--' : fromNowValue;
+  }
+
+  openManageTagModal(name: string) {
+    this.nodeName = name;
+    this.openTagModal.emit();
   }
 
   public startNodeDelete(node: InfraNode): void {

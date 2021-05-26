@@ -110,8 +110,15 @@ img {
 
 ::ng-deep
 .mat-select-panel .mat-option {
+
+  &.primary {
+    width: 158;
+    height: 2.3em;
+    background: $chef-white;
+    color: $chef-black;
+  }
+
   &.secondary {
-    width: 115px;
     height: 2.3em;
     background: $chef-white;
     color: $chef-critical;
@@ -120,5 +127,16 @@ img {
   &:hover {
     background: $chef-primary-bright;
     color: $chef-white;
+
+    .add-icon {
+      background: $chef-primary-bright;
+      color: $chef-white;
+    }
   }
+}
+
+.add-icon {
+  margin-left: 27px;
+  margin-top: 13px;
+  color: $chef-primary-bright;
 }
