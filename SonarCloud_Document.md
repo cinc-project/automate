@@ -1,17 +1,20 @@
-Sonarcloud Document
+# Sonarcloud Document
 
+## SonarCloud
 
-##SonarCloud
-we have a dedicated static Analysis tool.
+Besides all the various linters for Go, TypeScript, and other languages included in system builds and in VSCode via plugins,
+we also have dedicated static analysis tools.
+
 SonarCloud is a cloud-based code analysis service designed to detect code quality issues in different programming languages, 
-continuously ensuring the maintainability, reliability and security of your code
-Early detection of problems ensures that fewer issues get through to the later stages of the process and ultimately helps to 
-increase the overall quality of your production code
+continuously ensuring the maintainability, reliability and security of your code.
 
-### Setting up Sonarcloud
+Early detection of problems ensures that fewer issues get through to the later stages of the process and ultimately helps to increase the overall quality of your production code.
 
+----
+## Setting up Sonarcloud
 
-Set up your organization
+### Set up your organization
+
 Connect your GitHub organization with SonarCloud
 When prompted, install the SonarCloud application on GitHub. This step allows SonarCloud to access your GitHub organization or personal account.
 You can select specific repositories to be connected to SonarCloud or just select all. You can always change this settings later.
@@ -28,38 +31,42 @@ Once you have successfully logged in you will see the SonarCloud welcome screen.
 
 On the SonarCloud Dashboard, Click on + option at the right hand side to select  project which you want to analyze.
 
-#Configuring Analysis with SonarCloud
+----
+## Configuring Analysis with SonarCloud
  
-Recommend to Congigure analysis with GitHub Action method and follow the steps recommended in SonarCloud Platform.
+Recommend to Configure analysis with GitHub Action method and follow the steps recommended in SonarCloud Platform.
  
-After follwing all the steps, Analysis will start on the dasboard in fwe minutes.
-After any merge in the master, SonarCloud will run the analysis, It will analyze master branch and the open PR'S.
- 
- # file Exclusion.
- 
-For exclusing some of the files to get not get scanned dusring analysis, We have to set file exclusion property in 
-Sonar-project. properties file.
-Files which we have already excluded.
- 
- sonar.exclusions=**/*.pb.*.go, **/*.pb.go, **/test*/**, .gitignore, .git/**, .semgrep/**, **/*.bindata.go, **/*.spec.ts, dev-docs/**, .buildkite/*, .expeditor/**, .studio/*, benchmarks/*, bin/*, cache/*, dev/*, ec2/*, protovendor/*, results/*, scripts/*, terraform/*, tools/*, **/*.sql, **/*.docs-chef-io, **/*.md
+After follwing all the steps, Analysis will start on the dasboard in few minutes.
 
+After any merge in the master, SonarCloud will run the analysis. It will analyze master branch and the open PR'S.
  
-#Coverage Report generation.
+ ----
+## Excluding Files from Code Analysis
  
-To generate code coverage report we have to set Coverage report property in  Sonar-project. properties file.
+For exclusing some of the files to not get scanned during analysis, we have to set file exclusion property in 
+Sonar-project.properties file.
+
+These are the files which we have already excluded:
+ ```
+ sonar.exclusions=**/*.pb.*.go, **/*.pb.go, **/test*/**, .gitignore, .git/**, .semgrep/**, **/*.bindata.go, **/*.spec.ts, dev-docs/**, .buildkite/*, .expeditor/**, .studio/*, benchmarks/*, bin/*, cache/*, dev/*, ec2/*, protovendor/*, results/*, scripts/*, terraform/*, tools/*, **/*.sql, **/*.docs-chef-io, **/*.md
+```
  
-We have set for go and java Script files 
+## Coverage Report generation.
  
+To generate code coverage report we have to set Coverage report property in  Sonar-project.properties file.
+ 
+We have set it for go and javascript files:
+``` 
 sonar.go.coverage.reportPaths=Coverage_report/cover.out
 sonar.javascript.lcov.reportPaths=Coverage_report/lcov.info
+```
 
-We have to keep the report files in Coverage_report folder at root directory at set the path accordingly in Sonar-project.
-properties files.
+We have to keep the report files in Coverage_report folder at root directory and set the path accordingly in Sonar-project.properties files.
 
 https://docs.sonarqube.org/latest/analysis/coverage/
 
  
-Code coverage report will be generated in SonarCloud dashboard, It will genearte one report for both the files. 
+Code coverage report will be shown in SonarCloud dashboard which will be a single report for both the files. 
   
   
  
