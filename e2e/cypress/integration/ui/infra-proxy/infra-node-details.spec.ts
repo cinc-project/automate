@@ -182,7 +182,7 @@ describe('infra node detail', () => {
     it('can select environment and display the confirmation box', () => {
       cy.get('.ng-arrow-wrapper').click();
       cy.get('.ng-dropdown-panel-items').should(('be.visible'));
-      cy.get('.ng-option').contains('chef-environment-971654600').click();
+      cy.get('.ng-option.ng-option-marked').click();
       cy.get('[data-cy=change-confirm]').should(('be.visible'));
     });
 
@@ -191,7 +191,7 @@ describe('infra node detail', () => {
       cy.get('.ng-dropdown-panel-items').should(('be.visible'));
       cy.get('.ng-option').contains('chef-environment-885598100').click();
       cy.get('[data-cy=change-confirm]').should(('be.visible'));
-      cy.get('[data-cy=cancel-button]').click();
+      cy.get('#button-env [data-cy=cancel-button]').click();
       cy.get('[data-cy=change-confirm]').should(('not.be.visible'));
     });
 
@@ -199,7 +199,7 @@ describe('infra node detail', () => {
       cy.get('.ng-arrow-wrapper').click();
       cy.get('.ng-dropdown-panel-items').should(('be.visible'));
 
-      cy.get('.ng-option').contains('chef-environment-275303900').click();
+      cy.get('.ng-option.ng-option-marked').click();
       cy.get('[data-cy=change-confirm]').should(('be.visible'));
       cy.get('[data-cy=save-button]').click();
       cy.get('.ng-value').contains('chef-environment-275303900');
