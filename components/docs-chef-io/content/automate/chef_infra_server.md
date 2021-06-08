@@ -309,6 +309,7 @@ A [node]({{< relref "/nodes" >}}) is a device that is managed by Chef Infra. Dur
 
 The Chef Infra Server integration lets you:
 
+<<<<<<< HEAD
 - Search for a specific node from a list of nodes
 - View a list of all the connected nodes
 - Details of a node
@@ -316,6 +317,12 @@ The Chef Infra Server integration lets you:
 - Edit Run list of a node
 - Reset a node key
 - Delete a node
+=======
+- Search for a specific node from a list of nodes.
+- View a list of all the connected nodes.
+- Details of a node.
+- Delete a node.
+>>>>>>> master
 
 #### Search for a Node
 
@@ -344,6 +351,7 @@ To select the environment:
 
 {{< figure src="/images/automate/update-node-environment.png" alt="Update Node Environment">}}
 
+<<<<<<< HEAD
 #### Manage Tags
 
 Chef Infra allows you to manage tags of the environment. You can add or remove multiple tags by:
@@ -358,6 +366,8 @@ Chef Infra allows you to manage tags of the environment. You can add or remove m
 
 #### Reset a Node Key
 
+=======
+>>>>>>> master
 #### Delete a Node
 
 Delete individual existing nodes by selecting the ellipses icon and then **Delete**:

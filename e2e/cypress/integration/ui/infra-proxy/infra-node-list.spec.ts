@@ -11,12 +11,7 @@ describe('infra node list', () => {
   const adminUser = 'chefadmin';
   const adminKey = Cypress.env('AUTOMATE_INFRA_ADMIN_KEY').replace(/\\n/g, '\n');
   const nodeName = `${cypressPrefix}-node-${now}-1`;
-  const nodePlatform = 'ubuntu';
-  const nodeFQDN = 'ip-172-31-20-111.us-east-2.compute.internal';
-  const nodeIpAddress = '1.1.1.1';
-  const nodeUptime = '8 days';
-  const nodeCheckIn = '2 days ago';
-  const nodeEnvironment = '_default';
+  const seachableNode = 'ec2-node-viv';
 
   before(() => {
     cy.adminLogin('/').then(() => {
@@ -171,6 +166,38 @@ describe('infra node list', () => {
       });
     });
 
+    it('can update node tag', () => {
+      cy.get('[data-cy=search-filter]').type('node-learn_chef_apache2');
+      cy.get('[data-cy=search-entity]').click();
+      getNodes('node-learn_chef_apache2', 1).then((response) => {
+        if (checkResponse(response)) {
+          cy.get('[data-cy=nodes-table-container]').contains('node-learn_chef_apache2')
+            .should('exist');
+          cy.get('app-infra-nodes [data-cy=nodes-table-container] chef-td a')
+            .contains('node-learn_chef_apache2').parent().parent().find('.mat-select-trigger')
+            .click();
+
+          cy.get('[data-cy=update-tag]').contains('Manage Tags')
+            .click();
+          cy.get('app-update-node-tag-modal chef-modal').should('exist');
+
+          cy.get('[data-cy=update-node-tag]').type('tag1');
+          // accept dialog
+          cy.get('[data-cy=update-node-tag-button]').contains('Update Tags').click();
+          cy.get('app-update-node-tag-modal chef-modal').should('not.be.visible');
+
+          // verify success notification and then dismiss it
+          cy.get('app-notification.info').contains('Successfully updated node tags.');
+          cy.get('app-notification.info chef-icon').click();
+        }
+      });
+      cy.get('[data-cy=nodes-table-container]').contains('node-learn_chef_apache2').click();
+      cy.get('[data-cy=tag-box]').scrollIntoView();
+      cy.get('[data-cy=tag-box]').should(('be.visible'));
+      cy.get('.display-node-tags').find('span').should('have.length.greaterThan', 1);
+      cy.get('.breadcrumbs .breadcrumb').contains('Nodes').click();
+    });
+
     it('can delete node', () => {
       cy.get('[data-cy=search-filter]').type(`${cypressPrefix}-node-${now}`);
       cy.get('[data-cy=search-entity]').click();
@@ -201,5 +228,61 @@ describe('infra node list', () => {
       });
     });
 
+    it('can successfully reset the node key', () => {
+      cy.get('[data-cy=search-filter]').type(`${seachableNode}`);
+      cy.get('[data-cy=search-entity]').click();
+      cy.get('[data-cy=nodes-table-container]').contains(seachableNode).should('exist');
+      cy.get('app-infra-nodes [data-cy=nodes-table-container] chef-td a')
+        .contains(seachableNode).parent().parent().find('.mat-select-trigger').click();
+
+      cy.get('[data-cy=reset-key]').should('be.visible')
+        .click();
+      // accept dialog
+      cy.get('app-infra-nodes chef-button').contains('Reset Key').click();
+      cy.get('[data-cy=close]').click();
+      // verify success notification and then dismiss it
+      cy.get('app-notification.info').contains(`Successfully reset the key - ${seachableNode}.`);
+      cy.get('app-notification.info chef-icon').click();
+    });
+
+    it('can successfully reset the node key and copy the key', () => {
+      cy.get('[data-cy=search-filter]').clear();
+      cy.get('[data-cy=search-entity]').click();
+      cy.get('[data-cy=search-filter]').type(`${seachableNode}`);
+      cy.get('[data-cy=search-entity]').click();
+      cy.get('[data-cy=nodes-table-container]').contains(seachableNode).should('exist');
+      cy.get('app-infra-nodes [data-cy=nodes-table-container] chef-td a')
+        .contains(seachableNode).parent().parent().find('.mat-select-trigger').click();
+
+      cy.get('[data-cy=reset-key]').should('be.visible')
+        .click();
+      // accept dialog
+      cy.get('app-infra-nodes chef-button').contains('Reset Key').click();
+      cy.get('[data-cy=copy]').click();
+      cy.get('[data-cy=close]').click();
+      // verify success notification and then dismiss it
+      cy.get('app-notification.info').contains(`Successfully reset the key - ${seachableNode}.`);
+      cy.get('app-notification.info chef-icon').click();
+    });
+
+    it('can successfully reset the node key and download the the key', () => {
+      cy.get('[data-cy=search-filter]').clear();
+      cy.get('[data-cy=search-entity]').click();
+      cy.get('[data-cy=search-filter]').type(`${seachableNode}`);
+      cy.get('[data-cy=search-entity]').click();
+      cy.get('[data-cy=nodes-table-container]').contains(seachableNode).should('exist');
+      cy.get('app-infra-nodes [data-cy=nodes-table-container] chef-td a')
+        .contains(seachableNode).parent().parent().find('.mat-select-trigger').click();
+
+      cy.get('[data-cy=reset-key]').should('be.visible')
+        .click();
+      // accept dialog
+      cy.get('app-infra-nodes chef-button').contains('Reset Key').click();
+      cy.get('[data-cy=download]').click();
+      cy.get('[data-cy=close]').click();
+      // verify success notification and then dismiss it
+      cy.get('app-notification.info').contains(`Successfully reset the key - ${seachableNode}.`);
+      cy.get('app-notification.info chef-icon').click();
+    });
   });
 });
