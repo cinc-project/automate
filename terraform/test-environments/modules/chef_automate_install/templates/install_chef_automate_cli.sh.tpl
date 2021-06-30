@@ -278,3 +278,15 @@ if [[ "${enable_workflow}" == "true" ]]; then
         workflow-ctl create-enterprise "${workflow_enterprise}" --ssh-pub-key-file=/root/builder_key.pub
     fi
 fi
+
+# Create the chef-ci user (if missing)
+if ! getent passwd chef-ci &> /dev/null; then
+  sudo useradd chef-ci
+fi
+
+# Add chef-ci's public key to authorized list
+sudo mkdir -p /home/chef-ci/.ssh
+cat << EOH > /tmp/.ssh-chef-ci
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDL7dFrKcXhUXg4N7gctokVtp8FumQyshesKbsPQbqBADaydvunwbxyZb2KpXAq/jLnFO49J0ABGdendrg4llK5LpdX1w3vjfMCZVvMjo0AeTDYGHNbRRTueKuN+wYzdP3bN5qYmURCQd+zQ05QAfG4Pc5ZNZ9NQ+FBJhhUPGlEh/ZsdXQRcNPEoWOVkTR8mJymxAhG8u9ckZTVLOMCwXnFKplBbCFQzqtyRWAl2jKuN36uhE5gaFZooIVkmApwnKsEIXH1NqTBIJqQrfgX7a/n67+ROoVXjabjfeXz5184M1ivApujlic3lMeZ1eqLTPNRUxlVbDVJVj05zjzsVmW2xmKzKmP+zQ/MKmJGipJwpTEkSER54r7UNcDvkpaLMB86f2UwvjGHf1ei3g86b9MFsZKLerr48tZp3t6T7xXFsco+d9F6DrbN/tPYXzY8LtLmPTLHDzTNkytq6vUW00MJ/6yOLhJdj46uc7YfKVGwYDsDKAES5sMDxGB2LlY6iQT01PwH3wvypNVkHjBPdFqfi81gBUHPN0DJPAJeCsxK0H2RbA4DydopRf71uAK+gpAGdYe6D9cULdaRYRRFd3/uSC1NfnsBPeKq5eIdFf/bD9Qh5TmobS/MUVgjkJFV3Q5zrIhekFK9b6ArZaDDJn+yO8AfQjK0xAmJUeiCss6K0Q== chef-ci-2017-05-02
+EOH
+sudo mv /tmp/.ssh-chef-ci /home/chef-ci/.ssh/authorized_keys
