@@ -47,3 +47,22 @@ chef-loading-spinner {
 .policy-file-list-paging {
   margin: 0 0 35px;
 }
+
+::ng-deep .mat-select-panel .mat-option {
+
+  &.secondary {
+    height: 2.3em;
+    background: $chef-white;
+    color: $chef-critical;
+  }
+
+  &:hover {
+    background: $chef-primary-bright;
+    color: $chef-white;
+
+    chef-icon.primary {
+      color: $chef-white;
+    }
+
+  }
+}
