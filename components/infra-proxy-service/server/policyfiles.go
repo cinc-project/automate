@@ -199,12 +199,12 @@ func (s *Server) GetPolicyfileRevisions(ctx context.Context, req *request.Policy
 	}
 
 	return &response.PolicyfileRevisions{
-		Revisions: fromAPIIncludedPolicyfileRevisions(policyfileRevision),
+		Revisions: FromAPIIncludedPolicyfileRevisions(policyfileRevision),
 	}, nil
 }
 
 // fromAPIIncludedPolicyfileRevisions a response included policyfile revision
-func fromAPIIncludedPolicyfileRevisions(p chef.PolicyGetResponse) []*response.PolicyfileRevision {
+func FromAPIIncludedPolicyfileRevisions(p chef.PolicyGetResponse) []*response.PolicyfileRevision {
 
 	var revisions []*response.PolicyfileRevision
 
