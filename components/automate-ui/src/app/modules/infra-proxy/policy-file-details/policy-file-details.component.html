@@ -8,7 +8,12 @@
           {{PolicyFile?.name}}
       </chef-breadcrumbs>
       <chef-page-header>
-        <chef-heading data-cy="policy-file-head">{{PolicyFile?.name}}</chef-heading>
+        <div class="header">
+          <chef-heading data-cy="policy-file-head">{{PolicyFile?.name}}</chef-heading>
+          <chef-button secondary (click)="revisionIdList()" data-cy="revisions">
+            Revisions
+          </chef-button>
+        </div>
         <div class="meta-box" *ngIf="!policyFileDetailsLoading">
           <div class="summary-body">
             <table summary="Policy file information">
@@ -53,6 +58,12 @@
           <chef-option value='details' data-cy="details-tab">Content</chef-option>
         </chef-tab-selector>
       </chef-page-header>
+      <app-revision-id
+        [openEvent]="openRevisionIdSlider"
+        [serverId]="serverId"
+        [orgId]="orgId"
+        [policyfileName]="name">
+      </app-revision-id>
       <section class="page-body" *ngIf="tabValue === 'details'">
         <chef-loading-spinner class="top-spinner" *ngIf="policyFileDetailsLoading" size="50"></chef-loading-spinner>
         <div class="details-tab" *ngIf="!policyFileDetailsLoading">
