@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	api "github.com/chef/automate/api/interservice/authn"
+	"github.com/chef/automate/api/interservice/session"
 	"github.com/chef/automate/components/authn-service/authenticator"
 	"github.com/chef/automate/components/authn-service/authenticator/mock"
 	"github.com/chef/automate/components/authn-service/authenticator/oidc"
@@ -55,6 +56,20 @@ func (s *Server) Authenticate(ctx context.Context, _ *api.AuthenticateRequest) (
 	requestor, err := s.authenticate(req)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+	for _, cookie := range req.Cookies() {
+		if cookie.Name == "session" {
+			sessionData, err := s.sessionClient.ValidateSessionCookie(ctx, &session.SessionKeyReq{Key: cookie.Value})
+
+			if err != nil {
+				return nil, status.Errorf(codes.Unauthenticated, err.Error())
+			}
+
+			if !sessionData.Valid || !sessionData.Exist {
+				return nil, status.Errorf(codes.Internal, "failed to verify session key: %v", err.Error())
+			}
+			break
+		}
 	}
 
 	if user, ok := requestor.(authenticator.LocalUser); ok {

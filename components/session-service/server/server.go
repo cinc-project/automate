@@ -9,9 +9,16 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"github.com/chef/automate/api/interservice/session"
+	"github.com/chef/automate/lib/version"
 
 	"github.com/alexedwards/scs"
 	"github.com/alexedwards/scs/stores/memstore"
@@ -19,6 +26,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
+	"google.golang.org/grpc"
 
 	"github.com/chef/automate/components/session-service/migration"
 	"github.com/chef/automate/components/session-service/oidc"
@@ -40,13 +48,18 @@ type BldrClient struct {
 type Server struct {
 	mux               http.Handler
 	log               logger.Logger
+	pgDB              *sql.DB
 	mgr               *scs.Manager
 	client            oidc.Client
 	bldrClient        *BldrClient
 	signInURL         *url.URL
 	remainingDuration time.Duration
 	serviceCerts      *certs.ServiceCerts
-	pgDB              *sql.DB
+	connFactory       *secureconn.Factory
+	grpcServer        *grpc.Server
+	httpServer        *http.Server
+	errC              chan error
+	sigC              chan os.Signal
 }
 
 const (
@@ -82,6 +95,11 @@ func New(
 	serviceCerts *certs.ServiceCerts,
 	persistent bool) (*Server, error) {
 
+	factory := secureconn.NewFactory(*serviceCerts, secureconn.WithVersionInfo(
+		version.Version,
+		version.GitSHA,
+	))
+
 	oidcClient, err := oidc.New(oidcCfg, 1, serviceCerts, l)
 	if err != nil {
 		return nil, errors.Wrap(err, "OIDC client")
@@ -106,14 +124,19 @@ func New(
 	s := Server{
 		log:               l,
 		client:            oidcClient,
+		pgDB:              pgDB,
 		signInURL:         signInURL,
 		bldrClient:        bldrClient,
 		remainingDuration: remainingDuration,
 
 		mgr:          scsManager,
 		serviceCerts: serviceCerts,
-		pgDB:         pgDB,
+		connFactory:  factory,
+		errC:         make(chan error, 5),
+		sigC:         make(chan os.Signal, 2),
 	}
+	signal.Notify(s.sigC, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT, syscall.SIGUSR1)
+
 	s.initHandlers()
 
 	return &s, nil
@@ -183,7 +206,7 @@ func (s *Server) initHandlers() {
 // http.ServeMux. Only ever returns with non-nil error.
 func (s *Server) ListenAndServe(addr string) error {
 	s.log.Debugf("listening (https) on %s", addr)
-	httpServer := http.Server{
+	s.httpServer = &http.Server{
 		Addr:    addr,
 		Handler: s.mux,
 		TLSConfig: &tls.Config{
@@ -193,11 +216,38 @@ func (s *Server) ListenAndServe(addr string) error {
 			CipherSuites:             secureconn.DefaultCipherSuites(),
 		},
 	}
-	return httpServer.ListenAndServeTLS("", "")
+	go func() {
+		err := s.httpServer.ListenAndServeTLS("", "")
+		if err != nil {
+			s.errC <- errors.Wrap(err, "serve HTTPS")
+		}
+	}()
+	return nil
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
+}
+
+func (s *Server) StartGRPCServer(addr string) error {
+	s.log.Debugf("listening (grpc) on %s", addr)
+	s.grpcServer = s.connFactory.NewServer()
+
+	session.RegisterValidateSessionServiceServer(s.grpcServer, &SessionCookieValidator{pgDB: s.pgDB})
+
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		return fmt.Errorf("failed to listen on port %v: %v", addr, err)
+	}
+	fmt.Println("listening on port", addr)
+	go func() {
+		err := s.grpcServer.Serve(lis)
+		if err != nil {
+			s.errC <- errors.Wrap(err, "serve gRPC")
+		}
+	}()
+
+	return nil
 }
 
 func (s *Server) catchAllElseHandler(w http.ResponseWriter, _ *http.Request) {
@@ -723,4 +773,66 @@ func (s *Server) invalidRedirectURIError(w http.ResponseWriter, clientID, expect
 		fmt.Sprintf("failed to pass valid redirect_uri for client_id: %s, expected: %s, registered for client: %s",
 			clientID, expected, actual),
 		http.StatusUnauthorized)
+}
+
+func (s *Server) stopHTTPServer() error {
+	s.log.Info("stopping HTTPS server")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := s.httpServer.Shutdown(ctx)
+	if err != nil {
+		return errors.Wrap(err, "shutting down https server")
+	}
+
+	return nil
+}
+
+func (s *Server) stopGRPCServer() {
+	s.log.Info("stopping gRPC server")
+	s.grpcServer.GracefulStop()
+}
+
+func (s *Server) stop() error {
+	s.log.Info("stopping automate-gateway")
+
+	err := s.stopHTTPServer()
+
+	s.stopGRPCServer()
+
+	return err
+}
+
+func (s *Server) StartSignalHandler() error {
+	s.log.Info("starting signal handlers")
+
+	for {
+		select {
+		case err := <-s.errC:
+			switch errors.Cause(err) {
+			// ErrServerClosed is returned if an HTTP server is shutdown, which
+			// can only happen if it's triggered by a shutdown signal or a
+			// reconfigure signal, in which case the server shutting down is
+			// intended. The is only returned nothing goes wrong when shutting
+			// down, therefore we'll log it and move on.
+			case http.ErrServerClosed:
+				s.log.Debug("HTTP server was recently shutdown")
+			default:
+				s.log.WithError(err).Error("exiting")
+				err1 := s.stop()
+				if err1 != nil {
+					return errors.Wrap(err, err1.Error())
+				}
+				return err
+			}
+		case sig := <-s.sigC:
+			switch sig {
+			case syscall.SIGUSR1, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP:
+				s.log.WithField("signal", sig).Info("handling received signal")
+				return s.stop()
+			default:
+				s.log.WithField("signal", sig).Warn("unable to handle received signal")
+			}
+		}
+	}
 }
