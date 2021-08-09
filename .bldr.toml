@@ -1112,6 +1112,12 @@ paths = [
   "lib/user/*",
   "lib/version/*"
 ]
+
+[automate-backend-elasticsidecar]
+plan_path = "components/automate-backend-elasticsidecar"
+paths = [
+  "components/automate-backend-elasticsidecar/*"
+]
 # GENERATED_HAB_PACKAGE_CONFIG_END
 
 [automate-workflow-ctl]
