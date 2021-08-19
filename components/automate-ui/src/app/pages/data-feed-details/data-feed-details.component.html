@@ -6,16 +6,28 @@
         {{ destination?.name }}
       </chef-breadcrumbs>
       <chef-page-header>
-        <chef-heading>{{ destination?.name }}</chef-heading>
+        <div class="">
+          <chef-heading class="btn-alignleft">{{ destination?.name }}</chef-heading>
+          <div class="btn-alignright">
+            <label for="enableDatafeed" class="btn-data-feed btn-Enable">Enable</label>
+            <label for="disableDatafeed" class="btn-data-feed btn-Disable">Disable</label>
+            <label for="deleteDatafeed" class="btn-data-feed btn-Delete">Delete</label>
+          </div>
+        </div>
+
         <table>
           <thead>
             <tr class="detail-row">
-              <th class="header-column">URL</th>
+              <th class="header-column">SERVICE</th>
+              <th class="header-column">INTEGRATION TYPE</th>
             </tr>
           </thead>
           <tbody>
             <tr class="detail-row">
-              <td class="header-column" data-cy="destination-url">{{ destination?.url }}</td>
+              <td class="header-column">Servicenow</td>
+              <td class="header-column">Webhook</td>
+              <!-- <td class="header-column" data-cy="destination-url">{{ destination?.url }}</td> -->
+              <!-- <td class="header-column" data-cy="destination-url">{{ destination?.url }}</td> -->
             </tr>
           </tbody>
         </table>
@@ -23,7 +35,7 @@
           <chef-option value='details'>Details</chef-option>
         </chef-tab-selector>
       </chef-page-header>
-      <section class="page-body">
+      <section class="page-body alignleft">
         <form [formGroup]="updateForm">
           <chef-form-field>
             <label for="name">Name <span aria-hidden="true">*</span></label>
@@ -41,17 +53,40 @@
           </chef-form-field>
         </form>
         <div>
-          <chef-button secondary [disabled]="testInProgress" (click)="sendTestForDataFeedUrl()">
+          <chef-button primary [disabled]="testInProgress" (click)="sendTestForDataFeedUrl()">
             <chef-loading-spinner *ngIf="testInProgress"></chef-loading-spinner>
             <span *ngIf="testInProgress">Testing...</span>
             <span *ngIf="!testInProgress">Test Data Feed</span>
+          </chef-button>
+        </div>
+        <div>
+          <chef-button tertiary>
+            <!-- <chef-loading-spinner *ngIf="saveInProgress"></chef-loading-spinner> -->
+            <!-- <span *ngIf="saveInProgress">Saving...</span> -->
+            <span >Cancel</span>
           </chef-button>
           <chef-button primary [disabled]="saveInProgress || !updateForm.valid || !updateForm.dirty" (click)="saveDataFeed()">
             <chef-loading-spinner *ngIf="saveInProgress"></chef-loading-spinner>
             <span *ngIf="saveInProgress">Saving...</span>
             <span *ngIf="!saveInProgress">Save</span>
           </chef-button>
+
         </div>
+      </section>
+      <section class="page-body alignright">
+        <chef-card>
+          <span style='display:block; padding: 1em 0;' slot='label'>This is the card's label</span>
+          <p>Once upon a midnight dreary, while I pondered, weak and weary. Over many a
+             quaint and curious volume of forgotten lore. While I nodded, nearly napping,
+             suddenly there came a tapping. As of some one gently rapping, rapping at my
+             chamber door. 'Tis some visiter, I muttered, tapping at my chamber door. Only
+             this, and nothing more. Ah, distinctly I remember it was in the bleak December.
+             And each separate dying ember wrought its ghost upon the floor. Eagerly I wished
+             the morrow;—vainly I had sought to borrow. From my books surcease of
+             sorrow—sorrow for the lost Lenore. For the rare and radiant maiden whom the
+             angels name Lenore. Nameless here for evermore. And the silken sad uncertain
+             rustling of each purple curtain Thrilled me, filled me with fantastic terrors</p>
+        </chef-card>
       </section>
     </main>
   </div>

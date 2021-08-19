@@ -3,7 +3,37 @@
 chef-page-header {
   padding-bottom: 0;
 }
+.btn-alignleft {
+	float: left;
+  margin-bottom: 3em;
+}
 
+
+.btn-alignright {
+	float: right;
+  display: flex;
+  margin-bottom: 3em;
+
+  .btn-data-feed{
+    padding-right: 1em;
+    font-size: 1.3em;
+  }
+  .btn-Enable{
+    color: $sirocco;
+  }
+  .btn-Disable{
+    color: $royal-blue;
+  }
+  .btn-Delete{
+    color: $pink;
+  }
+}
+.alignright {
+	float: right;
+}
+.alignleft {
+	float: left;
+}
 .detail-row {
   display: flex;
   color: $chef-primary-dark;
@@ -23,6 +53,17 @@ th {
 tbody > .detail-row {
   padding-top: 0px;
   padding-bottom: 15px;
+}
+
+table th{
+  padding: 2em 2em;
+}
+
+table td {
+  padding: 0em 2em 3em
+}
+table{
+  border: 0.5px solid $lavender-light-9;
 }
 
 .header-column {
