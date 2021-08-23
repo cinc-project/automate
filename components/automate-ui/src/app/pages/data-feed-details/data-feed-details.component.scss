@@ -4,19 +4,23 @@ chef-page-header {
   padding-bottom: 0;
 }
 .btn-alignleft {
-	float: left;
   margin-bottom: 3em;
+}
+.details-border {
+  border: .12em solid #CFD2D2;
+  border-radius: 4px;
+  margin-top: 4em;
 }
 
 
 .btn-alignright {
-	float: right;
+  float: right;
   display: flex;
   margin-bottom: 3em;
 
   .btn-data-feed{
     padding-right: 1em;
-    font-size: 1.3em;
+    font-size: 14px;
   }
   .btn-Enable{
     color: $sirocco;
@@ -35,7 +39,6 @@ chef-page-header {
 	float: left;
 }
 .detail-row {
-  display: flex;
   color: $chef-primary-dark;
 }
 
@@ -62,9 +65,6 @@ table th{
 table td {
   padding: 0em 2em 3em
 }
-table{
-  border: 0.5px solid $lavender-light-9;
-}
 
 .header-column {
   padding-top: 0px;
@@ -78,9 +78,11 @@ chef-tab-selector {
     color: $chef-primary-dark;
   }
 }
-
+chef-card{
+  width: 38em;
+}
 chef-form-field {
-  width: 310px;
+  width: 45em;
   padding-bottom: 30px;
 }
 
@@ -94,7 +96,7 @@ section {
   }
 
   chef-button {
-    margin: 0;
+    margin-top: -7px;
 
     chef-loading-spinner {
       position: relative;
@@ -123,6 +125,9 @@ chef-modal {
       margin-top: 20px;
     }
   }
+}
+.config-details{
+  padding-top: 3.7em;
 }
 
 .status-icon {
