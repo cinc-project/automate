@@ -2,15 +2,23 @@ package server
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/chef/automate/api/interservice/infra_proxy/request"
 	"github.com/chef/automate/api/interservice/infra_proxy/response"
-	"net/http"
 
 	"github.com/chef/automate/components/infra-proxy-service/service"
 	"github.com/chef/automate/components/infra-proxy-service/storage"
 	"github.com/chef/automate/components/infra-proxy-service/validation"
 )
+
+type statusResponse struct {
+	status    string            `json:"status,omitempty"`
+	upstreams map[string]string `json:"upstreams,omitempty"`
+	keygen    map[string]int32  `json:"keygen,omitempty"`
+}
 
 // CreateServer creates a new server
 func (s *Server) CreateServer(ctx context.Context, req *request.CreateServer) (*response.CreateServer, error) {
@@ -133,17 +141,26 @@ func (s *Server) UpdateServer(ctx context.Context, req *request.UpdateServer) (*
 
 // GetServerStatus get the status of server
 func (s *Server) GetServerStatus(ctx context.Context, req *request.GetServerStatus) (*response.GetServerStatus, error) {
-
-	status, err := http.Get(req.GetFqdn() + "/_status")
+	// make http request to get the status
+	res, err := http.Get(req.GetFqdn() + "/_status")
 	if err != nil {
 		return nil, service.ParseStorageError(err, *req, "server")
 	}
+	// read all response body
+	data, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	// close response body
+	defer res.Body.Close()
 
-	fmt.Println(":::::: &status :::::::", &status)
+	statusRes := &response.GetServerStatus{}
+	err = json.Unmarshal(data, statusRes)
+	if err != nil {
+		return nil, err
+	}
 
-	return &response.GetServerStatus{
-		Status: status.Status,
-	}, nil
+	return statusRes, nil
 }
 
 // Create a response.Server from a storage.Server
