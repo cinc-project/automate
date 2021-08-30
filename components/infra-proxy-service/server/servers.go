@@ -2,9 +2,10 @@ package server
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/chef/automate/api/interservice/infra_proxy/request"
 	"github.com/chef/automate/api/interservice/infra_proxy/response"
+	"net/http"
 
 	"github.com/chef/automate/components/infra-proxy-service/service"
 	"github.com/chef/automate/components/infra-proxy-service/storage"
@@ -133,10 +134,12 @@ func (s *Server) UpdateServer(ctx context.Context, req *request.UpdateServer) (*
 // GetServerStatus get the status of server
 func (s *Server) GetServerStatus(ctx context.Context, req *request.GetServerStatus) (*response.GetServerStatus, error) {
 
-	status, err := s.GetServerStatus(ctx, req)
+	status, err := http.Get(req.GetFqdn() + "/_status")
 	if err != nil {
 		return nil, service.ParseStorageError(err, *req, "server")
 	}
+
+	fmt.Println(":::::: &status :::::::", &status)
 
 	return &response.GetServerStatus{
 		Status: status.Status,
