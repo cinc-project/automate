@@ -12,6 +12,8 @@ export interface DestinationEntityState extends EntityState<Destination> {
   getStatus: EntityStatus;
   updateStatus: EntityStatus;
   deleteStatus: EntityStatus;
+  enableStatus: EntityStatus;
+  
 }
 
 const GET_ALL_STATUS = 'getAllStatus';
@@ -20,6 +22,7 @@ const SAVE_ERROR = 'saveError';
 const UPDATE_STATUS = 'updateStatus';
 const GET_STATUS = 'getStatus';
 const DELETE_STATUS = 'deleteStatus';
+const ENABLE_STATUS = 'enableStatus';
 
 export const destinationEntityAdapter: EntityAdapter<Destination> =
   createEntityAdapter<Destination>();
@@ -31,7 +34,8 @@ destinationEntityAdapter.getInitialState({
     saveError: null,
     updateStatus: EntityStatus.notLoaded,
     getStatus: EntityStatus.notLoaded,
-    deleteStatus: EntityStatus.notLoaded
+    deleteStatus: EntityStatus.notLoaded,
+    enableStatus: EntityStatus.notLoaded
   });
 
 export function destinationEntityReducer(
@@ -124,6 +128,20 @@ export function destinationEntityReducer(
 
     case DestinationActionTypes.UPDATE_FAILURE:
       return set(UPDATE_STATUS, EntityStatus.loadingFailure, state);
+
+    case DestinationActionTypes.ENABLE_DISABLE:
+      return set(ENABLE_STATUS, EntityStatus.loading, state);
+
+      case DestinationActionTypes.ENABLE_DISABLE_SUCCESS:
+      return set(ENABLE_STATUS, EntityStatus.loadingSuccess,
+        destinationEntityAdapter.updateOne({
+          id: action.payload.id,
+          changes: action.payload
+        }, state));
+
+    case DestinationActionTypes.ENABLE_DISABLE_FAILURE: {
+      return set(ENABLE_STATUS, EntityStatus.loadingFailure, state);
+    }
 
   }
   return state;
