@@ -2,23 +2,18 @@ package server
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
-	"io/ioutil"
-	"net/http"
-
+	"errors"
 	"github.com/chef/automate/api/interservice/infra_proxy/request"
 	"github.com/chef/automate/api/interservice/infra_proxy/response"
+	"io/ioutil"
+	"net/http"
 
 	"github.com/chef/automate/components/infra-proxy-service/service"
 	"github.com/chef/automate/components/infra-proxy-service/storage"
 	"github.com/chef/automate/components/infra-proxy-service/validation"
 )
-
-type statusResponse struct {
-	status    string            `json:"status,omitempty"`
-	upstreams map[string]string `json:"upstreams,omitempty"`
-	keygen    map[string]int32  `json:"keygen,omitempty"`
-}
 
 // CreateServer creates a new server
 func (s *Server) CreateServer(ctx context.Context, req *request.CreateServer) (*response.CreateServer, error) {
@@ -34,6 +29,16 @@ func (s *Server) CreateServer(ctx context.Context, req *request.CreateServer) (*
 
 	if err != nil {
 		return nil, err
+	}
+
+	statusReqObj := &request.GetServerStatus{
+		Fqdn: req.Fqdn,
+	}
+
+	_, err = s.GetServerStatus(ctx, statusReqObj)
+
+	if err != nil {
+		return nil, service.ParseStorageError(err, *req, "server")
 	}
 
 	server, err := s.service.Storage.StoreServer(ctx, req.Id, req.Name, req.Fqdn, req.IpAddress)
@@ -142,7 +147,17 @@ func (s *Server) UpdateServer(ctx context.Context, req *request.UpdateServer) (*
 // GetServerStatus get the status of server
 func (s *Server) GetServerStatus(ctx context.Context, req *request.GetServerStatus) (*response.GetServerStatus, error) {
 	// make http request to get the status
-	res, err := http.Get(req.GetFqdn() + "/_status")
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore expired SSL certificates
+	}
+	client := &http.Client{Transport: transCfg}
+
+	res, err := client.Get("https://" + req.GetFqdn() + "/_status")
+
+	if res.StatusCode != 200 {
+		return nil, errors.New("Invalid server FQDN or IP")
+	}
+
 	if err != nil {
 		return nil, service.ParseStorageError(err, *req, "server")
 	}
@@ -152,7 +167,7 @@ func (s *Server) GetServerStatus(ctx context.Context, req *request.GetServerStat
 		return nil, err
 	}
 	// close response body
-	defer res.Body.Close()
+	_ = res.Body.Close()
 
 	statusRes := &response.GetServerStatus{}
 	err = json.Unmarshal(data, statusRes)
