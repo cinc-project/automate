@@ -4,8 +4,8 @@ export interface Destination {
   url: string;
   secret: string;
   enable?: boolean;
-  integration_type?: string;
-  meta_data?: string;
+  integration_types?: string;
+  meta_data?: [];
   services?: string;
 }
 export interface Metadata {
