@@ -3,7 +3,7 @@
   "info": {
     "title": "external/ingest/job_scheduler.proto",
     "version": "version not set"
-  },
+  }
   "consumes": [
     "application/json"
   ],
