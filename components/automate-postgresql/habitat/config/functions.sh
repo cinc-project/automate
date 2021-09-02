@@ -43,4 +43,3 @@ ensure_key_ownership() {
     chmod 0600 "{{pkg.svc_config_path}}/$k"
   done
 }
-test
