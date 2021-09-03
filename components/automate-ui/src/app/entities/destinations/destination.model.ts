@@ -17,4 +17,4 @@ export interface Metadata {
 export interface EnableDestination {
   id: string;
   enable: boolean;
-} 
+}
