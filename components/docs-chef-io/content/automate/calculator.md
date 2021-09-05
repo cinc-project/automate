@@ -12,6 +12,20 @@ gh_repo = "automate"
     weight = 15
 +++
 
+Use this calculator to determine the storage capacity you need to support your Chef Automate instllation.
+
+TODO:
+- Think in terms of context + action + impact
+- What is the takeaway (the action needed based on estimated # of ES notes)
+- Is there one number that the user needs? Where should the user go and act on the information
+- Whatever that information is, it needs to be REALLY CLEAR on the copy page
+- tool tips that explain each category
+- Explain what node Data Size is and where to find it
+- Run interval
+- How does run interval interact with event feed data
+- Where does Service Groups data come from and how does a user find it?
+- Does the spreadsheet calculations reflect reality?
+
 <!-- markdownlint-disable-file MD033  -->
 <div class="grid-container padding-0">
   <div class="grid-x align-justify large-up-4 small-up-1">
