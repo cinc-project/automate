@@ -203,7 +203,21 @@ export class DataFeedCreateComponent {
       this.showFieldStorage();
       this.showFields.region = false;
       this.integrationSelected = true;
-
+      this.integTitle = integration;
+      setTimeout(() => {
+        this.showSelect = true;
+        this.name.nativeElement.focus();
+      });
+    } else if (integration === WebhookIntegrationTypes.ELK_KIBANA) {
+      this.createForm.reset();
+      this.authSelected = AuthTypes.ACCESSTOKEN;
+      this.createForm.controls['tokenType'].setValue('ELK/Kibana');
+      this.integrationSelected = true;
+      this.integTitle = integration;
+      setTimeout(() => {
+        this.showSelect = true;
+        this.name.nativeElement.focus();
+      });
     }
 
     // else if (integration === WebhookIntegrationTypes.ELK_KIBANA) {
