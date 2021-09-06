@@ -232,3 +232,4 @@ export class DataFeedComponent implements OnInit, OnDestroy {
     }
   }
 }
+
