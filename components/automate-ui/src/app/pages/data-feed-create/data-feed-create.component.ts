@@ -13,7 +13,7 @@ import { Revision } from 'app/entities/revisions/revision.model';
 export enum WebhookIntegrationTypes {
   SERVICENOW = 'ServiceNow',
   SPLUNK = 'Splunk',
-  ELK_KIBANA = 'ELK/Kibana',
+  ELK_KIBANA = 'ELK',
   CUSTOM = 'Custom'
 }
 
@@ -200,6 +200,13 @@ export class DataFeedCreateComponent {
         this.showFieldWebhook();
         this.authSelected = AuthTypes.ACCESSTOKEN;
         this.createForm.controls['tokenType'].setValue('Splunk');
+        this.integrationSelected = true;
+        break;
+      }
+      case WebhookIntegrationTypes.ELK_KIBANA: {
+        this.showFieldWebhook();
+        this.authSelected = AuthTypes.USERNAMEANDPASSWORD;
+        this.createForm.controls['tokenType'].setValue('Bearer');
         this.integrationSelected = true;
         break;
       }
