@@ -46,7 +46,6 @@
     "chef/sample-data-service",
     "chef/automate-cli",
     "chef/user-settings-service",
-    "chef/automate-backend-deployment",
     "chef/automate-backend-elasticsearch",
     "chef/automate-backend-elasticsidecar",
     "chef/automate-backend-kibana",
