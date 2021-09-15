@@ -1,0 +1,9 @@
+[mlsa]
+accept = false
+
+[service]
+port = 10152
+
+[log]
+level = "info"
+format = "json"

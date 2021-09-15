@@ -46,6 +46,7 @@
     "chef/sample-data-service",
     "chef/automate-cli",
     "chef/user-settings-service",
+    "chef/report-manager-service",
     "core/rsync"
   ],
 
@@ -151,6 +152,7 @@
       "dependencies": ["automate"],
       "services": [
         "chef/automate-cds",
+        "chef/report-manager-service",
         "chef/user-settings-service"
       ]
     },

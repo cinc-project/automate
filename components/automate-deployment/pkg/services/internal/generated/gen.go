@@ -445,6 +445,16 @@ var ProductMetadataJSON = `
       }
     },
     {
+      "name": "chef/report-manager-service",
+      "metadata": {
+        "name": "chef/report-manager-service",
+        "data_service": false,
+        "binlinks": null,
+        "uses_platform_scaffolding": true,
+        "bootstrap": null
+      }
+    },
+    {
       "name": "core/rsync",
       "metadata": null
     }
@@ -580,6 +590,7 @@ var ProductMetadataJSON = `
       "type": "product",
       "services": [
         "chef/automate-cds",
+        "chef/report-manager-service",
         "chef/user-settings-service"
       ],
       "packages": null,

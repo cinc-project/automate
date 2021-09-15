@@ -1,0 +1,10 @@
+{
+  "service": {
+    "port": "{{cfg.service.port}}",
+    "message": "{{cfg.service.message}}"
+  },
+  "log": {
+    "format": "{{cfg.log.format}}",
+    "level": "{{cfg.log.level}}"
+  }
+}
