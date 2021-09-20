@@ -692,8 +692,8 @@ func(s *Server) NodeFetchHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 	const (
-		resource = "compliance:reporting:nodeinfo"
-		action = "compliance:nodeinfo:get"
+		resource = "compliance:reporting:nodeheader"
+		action = "compliance:nodeheader:get"
 	)
 
 	ctx, err := s.authRequest(r, resource, action)
