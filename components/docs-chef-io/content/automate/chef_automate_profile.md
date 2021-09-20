@@ -22,7 +22,7 @@ Select **Profile** to view the details. The **Details** tab lets you update your
 
 ### Change a Display Name
 
-You can change the display name for your Chef Automate in the bar.
+Change your display name by entering your preferred name.
 
 {{< figure src="/images/automate/display-name-in-profile.png" alt="Display Name of Chef Automate">}}
 
@@ -30,7 +30,7 @@ You can change the display name for your Chef Automate in the bar.
 The **Display Name** gets updated as soon as you change the name in the bar.
 {{< /note >}}
 
-The Display Name bar should not be kept empty or else it throws error.
+Every user needs a display name. An empty display name causes an error.
 
 {{< figure src="/images/automate/error-in-display-name-bar.png" alt="Error in Display Name">}}
 
@@ -48,7 +48,7 @@ The **Date/Time Format** gets updated as soon as you select a new time format fr
 
 ### Reset Password
 
-You can reset the password of Chef Automate login from the **Reset Password** tab in Profile.
+Reset your password of Chef Automate login from the **Reset Password** tab in Profile.
 
 {{< figure src="/images/automate/reset-password-from-profile.png" alt="Reset Password From Profile">}}
 
