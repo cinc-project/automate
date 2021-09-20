@@ -375,6 +375,7 @@ func (backend *ES2Backend) GetReport(reportId string, filters map[string][]strin
 			"hits.hits._id",
 			"hits.hits._source",
 			"hits.hits.inner_hits").
+		StoredFields("end_time").
 		Do(context.Background())
 
 	if err != nil {
@@ -554,6 +555,144 @@ func (backend *ES2Backend) GetReport(reportId string, filters map[string][]strin
 		return report, nil
 	}
 
+	return report, errorutils.ProcessNotFound(nil, reportId)
+}
+
+// GetNodeReport returns header information about a single report
+func (backend *ES2Backend) GetNodeReport(reportId string, filters map[string][]string) (*reportingapi.Report, error) {
+	var report *reportingapi.Report
+	depth, err := backend.NewDepth(filters, false)
+	if err != nil {
+		return report, errors.Wrap(err, "GetNodeReport unable to get depth level for report")
+	}
+	queryInfo := depth.getQueryInfo()
+
+	//normally, we compute the boolQuery when we create a new Depth obj.. here we, instead call a variation of the full
+	// query builder. we need to do this because this variation of filter query provides this func with deeper
+	// information about the report being retrieved.
+	queryInfo.filtQuery = backend.getFiltersQueryForDeepReport(reportId, filters)
+
+	logrus.Debugf("GetNodeReport will retrieve report %s based on filters %+v", reportId, filters)
+
+	fsc := elastic.NewFetchSourceContext(true).Include(
+		"node_uuid",
+		"node_name",
+		"environment",
+		"roles",
+		"platform",
+		"profiles",
+		"end_time",
+		"status",
+		"status_message",
+		"version")
+
+	if queryInfo.level != ReportLevel {
+		fsc.Exclude("profiles")
+	}
+	logrus.Debugf("GetNodeReport for reportid=%s, filters=%+v", reportId, filters)
+
+	searchSource := elastic.NewSearchSource().
+		FetchSourceContext(fsc).
+		Query(queryInfo.filtQuery).
+		Size(1)
+
+	source, err := searchSource.Source()
+	if err != nil {
+		return report, errors.Wrap(err, "GetNodeReport unable to get Source")
+	}
+	LogQueryPartMin(queryInfo.esIndex, source, "GetNodeReport query searchSource")
+
+	searchResult, err := queryInfo.client.Search().
+		SearchSource(searchSource).
+		Index(queryInfo.esIndex).
+		FilterPath(
+			"took",
+			"hits.total",
+			"hits.hits._source",
+		).
+		Do(context.Background())
+
+	if err != nil {
+		return report, errors.Wrap(err, "GetNodeReport unable to complete search")
+	}
+
+	logrus.Debugf("GetNodeReport got %d reports in %d milliseconds\n", searchResult.TotalHits(),
+		searchResult.TookInMillis)
+
+	// we should only receive one value
+	if searchResult.TotalHits() > 0 && searchResult.Hits.TotalHits > 0 {
+		for _, hit := range searchResult.Hits.Hits {
+			esInSpecReport := ESInSpecReport{}
+			if hit.Source != nil {
+				err := json.Unmarshal(*hit.Source, &esInSpecReport)
+				if err == nil {
+					var esInspecProfiles []ESInSpecReportProfile //`json:"profiles"`
+					var status string
+
+					switch queryInfo.level {
+					case ReportLevel:
+						esInspecProfiles = esInSpecReport.Profiles
+						status = esInSpecReport.Status
+					case ProfileLevel, ControlLevel:
+						esInspecProfiles, status, err = getDeepInspecProfiles(hit, queryInfo)
+						if err != nil {
+							logrus.Errorf("GetNodeReport time error: %s", err.Error())
+						}
+					}
+					esInSpecReport.Status = status
+					profiles := make([]*reportingapi.Profile, 0)
+					for _, esInSpecReportProfileMin := range esInspecProfiles {
+						logrus.Debugf("Determine profile: %s", esInSpecReportProfileMin.Name)
+						esInSpecProfile, err := backend.GetProfile(esInSpecReportProfileMin.SHA256)
+						if err != nil {
+							logrus.Errorf("GetNodeReport - Could not get profile '%s' error: %s", esInSpecReportProfileMin.SHA256, err.Error())
+							logrus.Debug("GetNodeReport - Making the most from the profile information in esInSpecReportProfileMin")
+							esInSpecProfile.Name = esInSpecReportProfileMin.Name
+						}
+
+						reportProfile := inspec.Profile{}
+						reportProfile.Name = esInSpecProfile.Name
+						reportProfile.Status = esInSpecReportProfileMin.Status
+
+						if esInSpecReportProfileMin.StatusMessage != "" {
+							reportProfile.StatusMessage = esInSpecReportProfileMin.StatusMessage
+						} else {
+							// Legacy message only available for the skipped status
+							reportProfile.StatusMessage = esInSpecReportProfileMin.SkipMessage
+						}
+
+						convertedProfile := reportingapi.Profile{
+							Name:          reportProfile.Name,
+							Status:        reportProfile.Status,
+							StatusMessage: reportProfile.StatusMessage,
+						}
+						profiles = append(profiles, &convertedProfile)
+					}
+					timestamp, _ := ptypes.TimestampProto(esInSpecReport.EndTime)
+
+					report = &reportingapi.Report{
+						NodeId:        esInSpecReport.NodeID,
+						NodeName:      esInSpecReport.NodeName,
+						Environment:   esInSpecReport.Environment,
+						Status:        esInSpecReport.Status,
+						StatusMessage: esInSpecReport.StatusMessage,
+						EndTime:       timestamp,
+						Version:       esInSpecReport.InSpecVersion,
+						Profiles:      profiles,
+						Roles:         esInSpecReport.Roles,
+					}
+					report.Platform = &reportingapi.Platform{
+						Name:    esInSpecReport.Platform.Name,
+						Release: esInSpecReport.Platform.Release,
+						Full:    esInSpecReport.Platform.Full,
+					}
+				} else {
+					logrus.Errorf("GetNodeReport unmarshal error: %s", err.Error())
+				}
+			}
+		}
+		return report, nil
+	}
 	return report, errorutils.ProcessNotFound(nil, reportId)
 }
 

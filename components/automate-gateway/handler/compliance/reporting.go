@@ -90,6 +90,20 @@ func (a *Reporting) ReadReport(ctx context.Context, in *reporting.Query) (*repor
 	return out, nil
 }
 
+// should cover /reports/:reportid
+func (a *Reporting) ReadNodeInfo(ctx context.Context, in *reporting.Query) (*reporting.Report, error) {
+	inDomain := &reportingService.Query{}
+	out := &reporting.Report{}
+	f := func() (proto.Message, error) {
+		return a.client.ReadNodeInfo(ctx, inDomain)
+	}
+	err := protobuf.CallDomainService(in, inDomain, f, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // should cover /suggestions
 func (a *Reporting) ListSuggestions(ctx context.Context, in *reporting.SuggestionRequest) (*reporting.Suggestions, error) {
 	inDomain := &reportingService.SuggestionRequest{}

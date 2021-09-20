@@ -17,6 +17,7 @@ service ReportingService {
 	rpc ReadNode(Id) returns (Node) {};
 	rpc ListNodes(Query) returns (Nodes) {};
 	rpc ListControlItems(ControlItemRequest) returns (ControlItems) {};
+	rpc ReadNodeInfo(Query) returns (Report) {};
 }
 message ExportData {
 	bytes content = 1;

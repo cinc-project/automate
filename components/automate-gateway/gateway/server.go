@@ -226,6 +226,8 @@ func (s *Server) loadAuthorizer() error {
 	return nil
 }
 
+// func (s *Server) fetchNodeDetails() 
+
 // startNullBackendServer starts the unimplemented backend server
 func (s *Server) startNullBackendServer() error {
 	var err error
@@ -450,6 +452,9 @@ func (s *Server) startHTTPServer() error {
 	// custom mux route for export of all reports for a single node
 	mux.HandleFunc("/api/v0/compliance/reporting/node/export", s.NodeExportHandler)
 
+	// custom mux route for fetching report details of a single node
+	mux.HandleFunc("/api/v0/compliance/reporting/nodeheader/id/", s.NodeFetchHandler)
+
 	// custom mux route for export (ignores its request method)
 	// needed b/c gateway does not support stream; corresponds to
 	// https://github.com/chef/automate/blob/master/api/interservice/cfgmgmt/service/cfgmgmt.proto
@@ -474,6 +479,14 @@ func (s *Server) startHTTPServer() error {
 
 	// Register Prometheus metrics handler.
 	mux.Handle("/api/v0/metrics", promhttp.Handler())
+
+	// nodeFetchHandler := func(w http.ResponseWriter, r *http.Request){
+	// 	// rsc, _ := s.clientsFactory.ComplianceReportingServiceClient()
+	// 	// rsc.ReadReport(ctx context.Context, in *reporting.Query, opts ...grpc.CallOption)
+	// 	v0Mux.ServeHTTP(w, r)
+	// }
+	// custom mux router for read report with id
+	// mux.HandleFunc("/api/v1/reporting/report", s.NodeFetchHandler)
 
 	// start https server
 	uri := fmt.Sprintf("%s:%d", s.Config.Hostname, s.Config.Port)

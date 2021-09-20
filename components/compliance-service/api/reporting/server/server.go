@@ -110,6 +110,25 @@ func (srv *Server) ReadReport(ctx context.Context, in *reporting.Query) (*report
 	return report, nil
 }
 
+// ReadNodeInfo takes the report Id as input and returns a report showing specific header details of report. 
+func (srv *Server) ReadNodeInfo(ctx context.Context, in *reporting.Query) (*reporting.Report, error) {
+	formattedFilters := formatFilters(in.Filters)
+	logrus.Debugf("ReadNodeInfo called with filters %+v", formattedFilters)
+
+	if len(formattedFilters["profile_id"]) > 1 {
+		return nil, status.Error(codes.InvalidArgument, "Only one 'profile_id' filter is allowed")
+	}
+	formattedFilters, err := filterByProjects(ctx, formattedFilters)
+	if err != nil {
+		return nil, errorutils.FormatErrorMsg(err, in.Id)
+	}
+	report, err := srv.es.GetNodeReport(in.Id, formattedFilters)
+	if err != nil {
+		return nil, errorutils.FormatErrorMsg(err, in.Id)
+	}
+	return report, nil
+}
+
 // ListSuggestions returns a list of suggestions based on query
 func (srv *Server) ListSuggestions(ctx context.Context, in *reporting.SuggestionRequest) (*reporting.Suggestions, error) {
 	var suggestions reporting.Suggestions

@@ -683,6 +683,59 @@ func (s *Server) ReportExportHandler(w http.ResponseWriter, r *http.Request) {
 	writeContent(w, stream, query.Type)
 }
 
+func(s *Server) NodeFetchHandler(w http.ResponseWriter, r *http.Request){
+	// id is the node id field of url. This is required since we are using 
+	// the default server mux.
+	urlPath := strings.SplitN(r.URL.Path, "/", 9)
+	if len(urlPath) < 7{
+		http.Error(w, "node id not available in url", http.StatusBadRequest)
+		return
+	}
+	const (
+		resource = "compliance:reporting:nodeinfo"
+		action = "compliance:nodeinfo:get"
+	)
+
+	ctx, err := s.authRequest(r, resource, action)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusForbidden)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	var query reporting.Query
+	if err := decoder.Decode(&query); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// extract the node id field from the url field slice
+	query.Id  = urlPath[7]
+
+	reportingClient, err := s.clientsFactory.ComplianceReportingServiceClient()
+	if err != nil {
+		http.Error(w, "grpc service for compliance unavailable", http.StatusServiceUnavailable)
+		return
+	}
+	stream, err := reportingClient.ReadNodeInfo(ctx, &query)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// reportResults is required as the time returned in report will be of type 
+	// protobuf timestamppb in unix epoch format. Convert that to datetime format.
+	var reportResults map[string]interface{}
+    records, _ := json.Marshal(stream)
+    json.Unmarshal(records, &reportResults)
+	reportResults["end_time"] = stream.EndTime.AsTime()
+	b, err := json.Marshal(reportResults)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Write([]byte(b))
+}
+
 func writeContent(w http.ResponseWriter, stream reporting.ReportingService_ExportClient, queryType string) {
 	//when the type is json, we will be retrieving a json array of objects and since we will be getting them one at a
 	// time, we need to provide the '[' to open and the ']' to close (the close will happen on EOF, below)
@@ -739,6 +792,7 @@ func (s *Server) NodeExportHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	stream, err := reportingClient.ExportNode(ctx, &query)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

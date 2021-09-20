@@ -3890,7 +3890,7 @@ var file_interservice_compliance_reporting_reporting_proto_rawDesc = []byte{
 	0x02, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x16, 0x0a,
 	0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73,
 	0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x66, 0x75, 0x6c, 0x6c, 0x18, 0x05, 0x20,
-	0x01, 0x28, 0x09, 0x52, 0x04, 0x66, 0x75, 0x6c, 0x6c, 0x32, 0xf3, 0x09, 0x0a, 0x10, 0x52, 0x65,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x66, 0x75, 0x6c, 0x6c, 0x32, 0xea, 0x0a, 0x0a, 0x10, 0x52, 0x65,
 	0x70, 0x6f, 0x72, 0x74, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x84,
 	0x01, 0x0a, 0x0b, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x73, 0x12, 0x30,
 	0x2e, 0x63, 0x68, 0x65, 0x66, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2e, 0x64,
@@ -3969,12 +3969,19 @@ var file_interservice_compliance_reporting_reporting_proto_rawDesc = []byte{
 	0x75, 0x65, 0x73, 0x74, 0x1a, 0x37, 0x2e, 0x63, 0x68, 0x65, 0x66, 0x2e, 0x61, 0x75, 0x74, 0x6f,
 	0x6d, 0x61, 0x74, 0x65, 0x2e, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x6d, 0x70,
 	0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x2e, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x69, 0x6e, 0x67,
-	0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x00, 0x42,
-	0x40, 0x5a, 0x3e, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x68,
-	0x65, 0x66, 0x2f, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f,
-	0x69, 0x6e, 0x74, 0x65, 0x72, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2f, 0x63, 0x6f, 0x6d,
-	0x70, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x2f, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x69, 0x6e,
-	0x67, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x49, 0x74, 0x65, 0x6d, 0x73, 0x22, 0x00, 0x12,
+	0x75, 0x0a, 0x0c, 0x52, 0x65, 0x61, 0x64, 0x4e, 0x6f, 0x64, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12,
+	0x30, 0x2e, 0x63, 0x68, 0x65, 0x66, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2e,
+	0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x6d, 0x70, 0x6c, 0x69, 0x61, 0x6e, 0x63,
+	0x65, 0x2e, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x51, 0x75, 0x65, 0x72,
+	0x79, 0x1a, 0x31, 0x2e, 0x63, 0x68, 0x65, 0x66, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74,
+	0x65, 0x2e, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x63, 0x6f, 0x6d, 0x70, 0x6c, 0x69, 0x61,
+	0x6e, 0x63, 0x65, 0x2e, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x52, 0x65,
+	0x70, 0x6f, 0x72, 0x74, 0x22, 0x00, 0x42, 0x40, 0x5a, 0x3e, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x68, 0x65, 0x66, 0x2f, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61,
+	0x74, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x73, 0x65, 0x72, 0x76,
+	0x69, 0x63, 0x65, 0x2f, 0x63, 0x6f, 0x6d, 0x70, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x2f, 0x72,
+	0x65, 0x70, 0x6f, 0x72, 0x74, 0x69, 0x6e, 0x67, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -4099,18 +4106,20 @@ var file_interservice_compliance_reporting_reporting_proto_depIdxs = []int32{
 	2,  // 56: chef.automate.domain.compliance.reporting.ReportingService.ReadNode:input_type -> chef.automate.domain.compliance.reporting.Id
 	3,  // 57: chef.automate.domain.compliance.reporting.ReportingService.ListNodes:input_type -> chef.automate.domain.compliance.reporting.Query
 	8,  // 58: chef.automate.domain.compliance.reporting.ReportingService.ListControlItems:input_type -> chef.automate.domain.compliance.reporting.ControlItemRequest
-	12, // 59: chef.automate.domain.compliance.reporting.ReportingService.ListReports:output_type -> chef.automate.domain.compliance.reporting.ReportsSummaryLevelOne
-	16, // 60: chef.automate.domain.compliance.reporting.ReportingService.ListReportIds:output_type -> chef.automate.domain.compliance.reporting.ReportIds
-	15, // 61: chef.automate.domain.compliance.reporting.ReportingService.ReadReport:output_type -> chef.automate.domain.compliance.reporting.Report
-	35, // 62: chef.automate.domain.compliance.reporting.ReportingService.ListSuggestions:output_type -> chef.automate.domain.compliance.reporting.Suggestions
-	36, // 63: chef.automate.domain.compliance.reporting.ReportingService.ListProfiles:output_type -> chef.automate.domain.compliance.reporting.ProfileMins
-	1,  // 64: chef.automate.domain.compliance.reporting.ReportingService.Export:output_type -> chef.automate.domain.compliance.reporting.ExportData
-	1,  // 65: chef.automate.domain.compliance.reporting.ReportingService.ExportNode:output_type -> chef.automate.domain.compliance.reporting.ExportData
-	39, // 66: chef.automate.domain.compliance.reporting.ReportingService.ReadNode:output_type -> chef.automate.domain.compliance.reporting.Node
-	40, // 67: chef.automate.domain.compliance.reporting.ReportingService.ListNodes:output_type -> chef.automate.domain.compliance.reporting.Nodes
-	11, // 68: chef.automate.domain.compliance.reporting.ReportingService.ListControlItems:output_type -> chef.automate.domain.compliance.reporting.ControlItems
-	59, // [59:69] is the sub-list for method output_type
-	49, // [49:59] is the sub-list for method input_type
+	3,  // 59: chef.automate.domain.compliance.reporting.ReportingService.ReadNodeInfo:input_type -> chef.automate.domain.compliance.reporting.Query
+	12, // 60: chef.automate.domain.compliance.reporting.ReportingService.ListReports:output_type -> chef.automate.domain.compliance.reporting.ReportsSummaryLevelOne
+	16, // 61: chef.automate.domain.compliance.reporting.ReportingService.ListReportIds:output_type -> chef.automate.domain.compliance.reporting.ReportIds
+	15, // 62: chef.automate.domain.compliance.reporting.ReportingService.ReadReport:output_type -> chef.automate.domain.compliance.reporting.Report
+	35, // 63: chef.automate.domain.compliance.reporting.ReportingService.ListSuggestions:output_type -> chef.automate.domain.compliance.reporting.Suggestions
+	36, // 64: chef.automate.domain.compliance.reporting.ReportingService.ListProfiles:output_type -> chef.automate.domain.compliance.reporting.ProfileMins
+	1,  // 65: chef.automate.domain.compliance.reporting.ReportingService.Export:output_type -> chef.automate.domain.compliance.reporting.ExportData
+	1,  // 66: chef.automate.domain.compliance.reporting.ReportingService.ExportNode:output_type -> chef.automate.domain.compliance.reporting.ExportData
+	39, // 67: chef.automate.domain.compliance.reporting.ReportingService.ReadNode:output_type -> chef.automate.domain.compliance.reporting.Node
+	40, // 68: chef.automate.domain.compliance.reporting.ReportingService.ListNodes:output_type -> chef.automate.domain.compliance.reporting.Nodes
+	11, // 69: chef.automate.domain.compliance.reporting.ReportingService.ListControlItems:output_type -> chef.automate.domain.compliance.reporting.ControlItems
+	15, // 70: chef.automate.domain.compliance.reporting.ReportingService.ReadNodeInfo:output_type -> chef.automate.domain.compliance.reporting.Report
+	60, // [60:71] is the sub-list for method output_type
+	49, // [49:60] is the sub-list for method input_type
 	49, // [49:49] is the sub-list for extension type_name
 	49, // [49:49] is the sub-list for extension extendee
 	0,  // [0:49] is the sub-list for field type_name
@@ -4682,6 +4691,7 @@ type ReportingServiceClient interface {
 	ReadNode(ctx context.Context, in *Id, opts ...grpc.CallOption) (*Node, error)
 	ListNodes(ctx context.Context, in *Query, opts ...grpc.CallOption) (*Nodes, error)
 	ListControlItems(ctx context.Context, in *ControlItemRequest, opts ...grpc.CallOption) (*ControlItems, error)
+	ReadNodeInfo(ctx context.Context, in *Query, opts ...grpc.CallOption) (*Report, error)
 }
 
 type reportingServiceClient struct {
@@ -4828,6 +4838,15 @@ func (c *reportingServiceClient) ListControlItems(ctx context.Context, in *Contr
 	return out, nil
 }
 
+func (c *reportingServiceClient) ReadNodeInfo(ctx context.Context, in *Query, opts ...grpc.CallOption) (*Report, error) {
+	out := new(Report)
+	err := c.cc.Invoke(ctx, "/chef.automate.domain.compliance.reporting.ReportingService/ReadNodeInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReportingServiceServer is the server API for ReportingService service.
 type ReportingServiceServer interface {
 	ListReports(context.Context, *Query) (*ReportsSummaryLevelOne, error)
@@ -4840,6 +4859,7 @@ type ReportingServiceServer interface {
 	ReadNode(context.Context, *Id) (*Node, error)
 	ListNodes(context.Context, *Query) (*Nodes, error)
 	ListControlItems(context.Context, *ControlItemRequest) (*ControlItems, error)
+	ReadNodeInfo(context.Context, *Query) (*Report, error)
 }
 
 // UnimplementedReportingServiceServer can be embedded to have forward compatible implementations.
@@ -4875,6 +4895,9 @@ func (*UnimplementedReportingServiceServer) ListNodes(context.Context, *Query) (
 }
 func (*UnimplementedReportingServiceServer) ListControlItems(context.Context, *ControlItemRequest) (*ControlItems, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListControlItems not implemented")
+}
+func (*UnimplementedReportingServiceServer) ReadNodeInfo(context.Context, *Query) (*Report, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReadNodeInfo not implemented")
 }
 
 func RegisterReportingServiceServer(s *grpc.Server, srv ReportingServiceServer) {
@@ -5067,6 +5090,24 @@ func _ReportingService_ListControlItems_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ReportingService_ReadNodeInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Query)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReportingServiceServer).ReadNodeInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/chef.automate.domain.compliance.reporting.ReportingService/ReadNodeInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReportingServiceServer).ReadNodeInfo(ctx, req.(*Query))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _ReportingService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "chef.automate.domain.compliance.reporting.ReportingService",
 	HandlerType: (*ReportingServiceServer)(nil),
@@ -5102,6 +5143,10 @@ var _ReportingService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListControlItems",
 			Handler:    _ReportingService_ListControlItems_Handler,
+		},
+		{
+			MethodName: "ReadNodeInfo",
+			Handler:    _ReportingService_ReadNodeInfo_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
