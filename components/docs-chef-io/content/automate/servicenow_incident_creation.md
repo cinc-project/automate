@@ -68,6 +68,7 @@ Follow these steps to report the failed client runs on nodes managed by Chef Aut
 
 ### Chef InSpec Scan Incidents
 
+
 Follow these steps to report the failed Chef InSpec scans on node managed by Chef Automate:
 
 1. Confirm that you have the `x_chef_automate.api` role.
@@ -167,3 +168,4 @@ To uninstall the Chef Automate Incident App:
 1. Open the **Downloads** tab and select the **Chef Automate Incident Creation**.
 1. Navigate to **Related Links**.
 1. Select **Uninstall**.
+
