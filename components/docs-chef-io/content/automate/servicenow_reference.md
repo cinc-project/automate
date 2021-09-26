@@ -187,7 +187,9 @@ The Chef Automate Integration App does not provide any reconciliation rules.
 
 Refer to ServiceNow's [Discovery](https://docs.servicenow.com/bundle/paris-it-operations-management/page/product/discovery/reference/r-discovery.html) page for information on Discovery and its types.
 
-## Integration App Roles
+
+## Integration App
+### Integration App Roles
 
 You can associate a single user with more than one roles.
 
@@ -253,7 +255,29 @@ For integration with CMDB data, you need to assign the _OOB ITIL_ role. Also, yo
 `node_batch_size`
 : The testing executed for a benchmark. The size of a compliance scan is proportional to the number of profiles applied. Scans exceeding 4MB may fail or display incorrectly in reports. Use a lower `node_batch_size` setting to reduce the number of profiles applied in a single batch. Valid values: Between `1` and `30`.  Default: `15`.
 
-### Application Properties
+### Integration App Configuration
+
+You can configure the Integration App from either ServiceNow or Chef Automate.
+
+#### Change Integration App Properties in ServiceNow
+
+1. Find Chef Automate in ServiceNow.
+1. Select the **Chef Automate** > **Properties** in the left navigation pane to open the **Chef Automate Properties**.
+
+   {{< figure src="/images/automate/snow_integration_appproperties.png" alt="Chef Automate Properties">}}
+
+1. Make your changes.
+1. Select **Save**.
+
+#### Chef Automate Settings
+
+`feed_interval`
+: The frequency in hours for refreshing the data feed. The duration between data feed refreshes is proportional to the node count, with more nodes requiring higher settings. Valid values: Any integer in the range of `2` to `8`. Default: `4`.
+
+`node_batch_size`
+: The testing executed for a benchmark. The size of a compliance scan is proportional to the number of profiles applied. Scans exceeding 4MB may fail or display incorrectly in reports. Use a lower `node_batch_size` setting to reduce the number of profiles applied in a single batch. Valid values: Between `1` and `30`.  Default: `15`.
+
+#### Integration App Properties
 
 The Integration App has nine configurable **Application Properties**. Changing these settings requires the ServiceNow `admin` or `x_chef_automate.admin` permissions.
 
@@ -284,11 +308,13 @@ The Integration App has nine configurable **Application Properties**. Changing t
 `x_chef_automate.enable.system.app`
 : Used to enable software installed mappings. Valid Values: `Yes`, `No`. Default: `No`.
 
-## Incident App Roles
+
+## Incident App
+### Incident App Roles
 
 You can associate a single user with more than one role.
 
-### Role `x_chef_incident.admin`
+#### Role `x_chef_incident.admin`
 
 You can assign the `x_chef_incident.admin` role to a user other than a System Administrator to allow another user to manage the application properties and logs.
 
@@ -303,7 +329,7 @@ The **Admin** role grants user access to the:
 * Support menu item
 * Logs menu item
 
-### Role `x_chef_incident.user`
+#### Role `x_chef_incident.user`
 
 The `x_chef_incident.user` role is suitable for those users who require application access without administration rights. The role grants a user access to the:
 
@@ -318,34 +344,47 @@ Client run and Chef InSpec scan records are linked to incidents and is appropria
 
 {{< /note >}}
 
-### Role x_chef_incident.api
+#### Role x_chef_incident.api
 
 The `x_chef_incident.api` role is suitable for users responsible for integrating the Chef Automate data into ServiceNow. We recommend creating a new user specifically for this role. The Chef Automate Incident App requires the API role to set up communication with Chef Automate.
 
-## Incident App Propertie
+### Incident App Configuration
+
+The Chef Automate Incident App has nine configurable **Application Properties**. You must have the `admin` or `x_chef_incident.admin` roles to change the default values in the **Application Properties**.
+
+To change the Incident App properties:
+
+1. Find **Chef Incidents** in ServiceNow
+1. Select **Chef Incidents** > **Properties** from the navigation.
+1. Enter your changes in the **Chef Incident Properties** form.
+1. Select **Save**.
+
+   ![ServiceNow Configuration Page](/images/automate/SNOW_config_page.png)
+
+#### Incident App Properties
 
 `x_chef_incident.association`
 : Used to associate a Chef Infra Client run record with an Incident record. The possible values are: `cookbook` and `node`. Default: `cookbook`.
 
-Setting the value to `cookbook` creates an incident for the failed cookbook. All failing Chef Infra Client runs on nodes associates with the corresponding incident. `cookbook` is the default value as the number of nodes exceeds the number of cookbooks. The short description of the incident indicates the failed cookbook:
+   Setting the value to `cookbook` creates an incident for the failed cookbook. All failing Chef Infra Client runs on nodes associates with the corresponding incident. `cookbook` is the default value as the number of nodes exceeds the number of cookbooks. The short description of the incident indicates the failed cookbook:
 
-![CCR Failed Cookbook Description](/images/automate/SNOW_Failed_Cookbook.png)
+   ![CCR Failed Cookbook Description](/images/automate/SNOW_Failed_Cookbook.png)
 
-The **Chef Infra Client runs** tab of the incident displays the associated client runs. Setting the value to `node` creates an incident for each failed node. All failing Chef Infra Client runs for a node associates with the corresponding incident. The short description of the incident indicates the failed node.
+   The **Chef Infra Client runs** tab of the incident displays the associated client runs. Setting the value to `node` creates an incident for each failed node. All failing Chef Infra Client runs for a node associates with the corresponding incident. The short description of the incident indicates the failed node.
 
-![CCR Failed Node Description](/images/automate/SNOW_Failed_Node_CCR.png)
+   ![CCR Failed Node Description](/images/automate/SNOW_Failed_Node_CCR.png)
 
 `x_chef_incident.scan_association`
 
 : Used to associate the Chef InSpec scan record with an incident record. The possible values are: `profile` and `node`. Deault: `profile`.
 
-Setting the value to `profile` creates an incident for the failed Chef InSpec compliance profile. All Chef InSpec scans on failing nodes associates with the corresponding incident. `profile` is the default value as the number of nodes exceeds the number of profiles. The short description of the incident indicates the failed profile.
+   Setting the value to `profile` creates an incident for the failed Chef InSpec compliance profile. All Chef InSpec scans on failing nodes associates with the corresponding incident. `profile` is the default value as the number of nodes exceeds the number of profiles. The short description of the incident indicates the failed profile.
 
-![Scan Failed Profile Description](/images/automate/SNOW_Failed_Profile_Scan.png)
+   ![Scan Failed Profile Description](/images/automate/SNOW_Failed_Profile_Scan.png)
 
-The **Chef InSpec scans** tab of the incident displays the associated Chef InSpec scans. Setting the value to `node` creates an incident for each failed node. All Chef InSpec scans failing for a node associates with the corresponding incident. The short description of the incident indicates the failed node.
+   The **Chef InSpec scans** tab of the incident displays the associated Chef InSpec scans. Setting the value to `node` creates an incident for each failed node. All Chef InSpec scans failing for a node associates with the corresponding incident. The short description of the incident indicates the failed node.
 
-![Scan Failed Node Description](/images/automate/SNOW_Failed_Node_Scan.png)
+   ![Scan Failed Node Description](/images/automate/SNOW_Failed_Node_Scan.png)
 
 `x_chef_incident.assigned_to`
 
@@ -367,7 +406,7 @@ The **Chef InSpec scans** tab of the incident displays the associated Chef InSpe
 
 : Used to define number of days to maintain the Chef Infra Client run and Chef InSpec scan records in ServiceNow. Default: `30`.
 
-The ServiceNow app deletes these records of the corresponding closed incidents, deleted incidents, and the removed incidents from the Chef Infra Client run or Chef InSpec scan record by a user update.
+   The ServiceNow app deletes these records of the corresponding closed incidents, deleted incidents, and the removed incidents from the Chef Infra Client run or Chef InSpec scan record by a user update.
 
 `x_chef_incident.logging.enabled`
 

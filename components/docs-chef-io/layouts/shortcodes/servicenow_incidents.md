@@ -1,26 +1,33 @@
-### Chef Infra Client Incidents
+### ServiceNow Webhook URL
 
-To set up automatic incident reporting for failed Chef Infra Client runs from Chef Automate:
+Your ServiceNow **Webhook URL** will be similar to:
 
-1. Confirm that you have the `x_chef_automate.api` role.
-1. Navigate to **Settings** > **Notifications**
-1. Select the **Create Notification** button.
-1. Enter or select:
-   * **Name**: A unique name for this notification.
-   * **Webhook Type**: The product or proccess receiving the notification. Options: **Slack**, **Webhook**, and **ServiceNow**.
-   * **Failure Type**: The Chef process for the notification. Options: **Infra Client Run failures** and ** Inspec compliance scan failures**
-   * **Webhook URL**: The API address that the notification uses.
-   * **ServiceNow Username**: The name you use to sign in to ServiceNow.
-   * **ServiceNow Password**: The password you use to sign in to ServiceNow.
-1. Select **Test Connectivity**. A successful test displays **Notification test connected successfully**. An unsuccessful test displays a message with information about any connection or credential problems to help you fix the error.
+* Chef Infra Client failures: `https://ven12345.service-now.com/api/x_chef_incident/inspec_scan`
+* Chef InSpec scan failures: `https://ven12345.service-now.com/api/x_chef_incident/client_run`
 
-   ![Chef Automate Notification for CCR Failures](/images/automate/SNOW_CCR_Setup.png)
+### Add a Chef Infra Client Incident
 
-1. Select **Create Notification** to save the configuration details for this notification.
+To add a ServiceNow Incident for Chef Infra Client runs in Chef Automate:
 
-### Chef InSpec Scan Incidents
+   1. Confirm that you have the `x_chef_automate.api` role.
+   1. Navigate to **Settings** > **Notifications**
+   1. Select the **Create Notification** button.
+   1. Enter or select:
+      * **Name**: A unique name for this notification.
+      * **Webhook Type**: The product or proccess receiving the notification. Options: **Slack**, **Webhook**, and **ServiceNow**.
+      * **Failure Type**: The Chef process for the notification. Options: **Infra Client Run         failures** and **InSpec compliance scan failures**
+      * **Webhook URL**: The API address that the notification uses.
+      * **ServiceNow Username**: The name you use to sign in to ServiceNow.
+      * **ServiceNow Password**: The password you use to sign in to ServiceNow.
+   1. Select **Test Connectivity**. A successful test displays **Notification test connected successfully**. An unsuccessful test displays a message with information about any connection or credential problems to help you fix the error.
 
-Follow these steps to report failed Chef InSpec scans from Chef Automate:
+      ![Chef Automate Notification for CCR Failures](/images/automate/SNOW_CCR_Setup.png)
+
+   1. Select **Create Notification** to save the configuration details for this notification.
+
+### Add a Chef InSpec Scan Incident
+
+To add a ServiceNow Incident for a failed Chef InSpec scans in Chef Automate:
 
 1. Navigate to **Settings** > **Notifications**
 1. Select the **Create Notification** button.

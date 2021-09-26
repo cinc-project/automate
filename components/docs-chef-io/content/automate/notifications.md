@@ -15,7 +15,7 @@ gh_repo = "automate"
 
 ## About Notifications
 
-Chef Automate notifications uses webhooks to send alerts for failures of Chef Infra Client runs and InSpec compliance scans. You can send notifications to Slack channels, Slack users, or any other service that supports webhook integrations. Notifications are sent for all failures. To ignore a failure, set the `ignore_failure` attribute to `true` on the resource. 
+Chef Automate notifications uses webhooks to send alerts for failures of Chef Infra Client runs and InSpec compliance scans. You can send notifications to Slack channels, Slack users, or any other service that supports webhook integrations. Notifications are sent for all failures. To ignore a failure, set the `ignore_failure` attribute to `true` on the resource.
 
 By default only Admins of Chef Automate may create and manage notifications.
 
@@ -56,6 +56,10 @@ To delete a Slack notification for Chef Automate:
 
 1. From the Notifications page, select **Delete** from the menu at the end of the table row.
 1. Confirm that you wish to permanently delete this notification.
+
+## ServiceNow Notifications
+
+{{% servicenow_incidents %}}
 
 ## Webhook Notifications
 

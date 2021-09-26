@@ -14,7 +14,7 @@ gh_repo = "automate"
 
 [ServiceNow](https://www.servicenow.com/) provides cloud-based services that automate enterprise IT operations. ServiceNow specializes in IT service management (ITSM) applications and provides forms-based workflow application development. It supports third-party application and data integrations. The most common integrations are for configuration management, incident management, problem management, change management, user administration, and single sign-on authentication.
 
-The Chef Automate Integration App for ServiceNow, also called the Integration App, integrates Chef Automate with ServiceNow. This app is a ServiceNow-certified scoped application available from the ServiceNow store. It integrates existing Chef Automate infrastructure and compliance functionality with ServiceNow enterprise services. Once installed and configured, this integration enables Chef Automate to create and update a ServiceNow Configuration Management Database (CMDB) with data from nodes managed by Chef Automate. Chef Automate aggregates information about infrastructure nodes, the Chef Infra Client runs, and Chef Compliance scans, helping you monitor your infrastructure in real time.
+The Chef Automate Integration App for ServiceNow, also called the Integration App, integrates Chef Automate with ServiceNow. This app is a ServiceNow-certified scoped application available from the ServiceNow store. It integrates existing Chef Automate infrastructure and compliance functionality with ServiceNow enterprise services. Once installed and configured, this integration enables Chef Automate to create and update a ServiceNow Configuration Management Database (CMDB) with data from nodes managed by Chef Automate. Chef Automate aggregates information about infrastructure nodes, the Chef Infra Client runs, and Chef Compliance scans, helping you observe your infrastructure in real time.
 
 The Integration App works by exposing the REST API endpoints for communication between Chef Automate and ServiceNow. Chef Automate sends HTTPS JSON data feeds to the app in ServiceNow to create and update the _ServiceNow CMDB_, client run, and compliance report tables.
 
@@ -43,6 +43,7 @@ Install following ServiceNow plugins from the Service Management dashboard:
 - Configuration Management for Scoped Apps (com.snc.cmdb.scoped) 1.0.0.
 
 {{< figure src="/images/automate/snow_integration_plugins.png" alt="Plugins" >}}
+
 ## Install the Integration App
 
 Install the Integration App from the [ServiceNow Store](https://store.servicenow.com)
@@ -133,7 +134,7 @@ Integration App updates the CMDB file systems and software tables. It adds assoc
 
 #### Discovery Source
 
-The Integration App augments the existing CMDB servers and inserts new servers into the ServiceNow CMDB. The Integration App uses the ServiceNow Discovery IRE (Identification and Reconciliation Engine) to insert or update servers.
+The Integration App augments the existing CMDB servers and inserts new servers into the ServiceNow CMDB. The Integration App uses the ServiceNow Discovery Identification and Reconciliation Engine (IRE)to insert or update servers.
 
 The Integration App distinguishes between discovered Configuration Items (CIs) and imported CIs. CIs discovered by the Integration App have a default value of **Chef Automate** in the **Discovery Source** field in the `cmdb_servers` table.
 
@@ -149,7 +150,7 @@ The complete Chef Infra Client run details are available for each server. Chef I
 
 #### Attributes
 
-You can view the current attributes for a server by selecting the attributes record. The entire OHAI attributes are available for each server.
+You can view the current attributes for a server by selecting the attributes record. All Ohai attributes are available for each server.
 
 #### Compliance Reports
 
@@ -160,60 +161,9 @@ You can view the **Compliance** report detail from a server record by selecting 
 
 Also, you can view the **Compliance** report profile to display the individual results for each profile. The entire Chef Compliance Report details are available for each server. Compliance reports are also available from the **Compliance** report module.
 
-### Automate Instances Module
+For more information about configuration, see the [ServiceNow Administrator Reference]({{< relref "servicenow_reference" >}}).
 
-You can configure the Integration App from either ServiceNow or Chef Automate.
-
-#### Change Integration App Properties in ServiceNow
-
-1. Find Chef Automate in ServiceNow.
-1. Select the **Chef Automate** > **Properties** in the left navigation pane to open the **Chef Automate Properties**.
-
-   {{< figure src="/images/automate/snow_integration_appproperties.png" alt="Chef Automate Properties">}}
-
-1. Make your changes.
-1. Select **Save**.
-
-#### Chef Automate Settings
-
-`feed_interval`
-: The frequency in hours for refreshing the data feed. The duration between data feed refreshes is proportional to the node count, with more nodes requiring higher settings. Valid values: Any integer in the range of `2` to `8`. Default: `4`.
-
-`node_batch_size`
-: The testing executed for a benchmark. The size of a compliance scan is proportional to the number of profiles applied. Scans exceeding 4MB may fail or display incorrectly in reports. Use a lower `node_batch_size` setting to reduce the number of profiles applied in a single batch. Valid values: Between `1` and `30`.  Default: `15`.
-
-#### Integration App Properties
-
-The Integration App has nine configurable **Application Properties**. Changing these settings requires the ServiceNow `admin` or `x_chef_automate.admin` permissions.
-
-`x_chef_automate.chef.default.status`
-: Used to set up the status of the service record as **inserted** or **updated**. Default: `1`.
-
-`x_chef_automate.client_runs_per_node`
-: Used to set a highest number of clients runs for a node. Default: `5`.
-
-`x_chef_automate.compliance_reports_per_node`
-: Used to set a highest number of compliance reports for a node. Default: `5`.
-
-`x_chef_automate.insert_manufacturer`
-: Inserts the new record during the import if a model is not found in the _core\_company_ table by settingthe property to **Yes**. Default: `Yes`.
-
-`x_chef_automate.insert_model`
-: Inserts the new record during the import if a model is not found in the _cmdb\_model_ table by setting the property to **Yes**. Default: `Yes`
-
-`x_chef_automate. logging.enabled`
-: Used to flag the logging with **enable** or **disable** values. Default: `No`.
-
-`x_chef_automate.logging.verbosity`
-: Debugs the data in ServiceNow. Enables the selected logging level and is visible in logs. Valid values: `Debug`, `Warn`, `Info`, `Error`. Default: `Error`.
-
-`x_chef_automate.Rest.api`
-: Enables the Chef Automate API from ServiceNow. Set to `Yes` to enable and `No` to disable. Valid Values: `Yes`, `No`. Default: `Yes`.
-
-`x_chef_automate.enable.system.app`
-: Used to enable software installed mappings. Valid Values: `Yes`, `No`. Default: `No`.
-
-## Uninstallation
+## Uninstalling
 
 To uninstall the Integration App:
 
