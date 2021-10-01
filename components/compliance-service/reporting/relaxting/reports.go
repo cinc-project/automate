@@ -608,7 +608,7 @@ func (backend *ES2Backend) GetNodeInfoFromReportID(reportId string, filters map[
 			"took",
 			"hits.total",
 			"hits.hits._source",
-		).
+			"hits.hits.inner_hits").
 		Do(context.Background())
 
 	if err != nil {
