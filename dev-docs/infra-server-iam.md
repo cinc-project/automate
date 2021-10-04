@@ -43,3 +43,5 @@ Specify the action to restrict user access to the specific action.
 | Create Infra Server | POST | infra:infraServers:create | /api/v0/infra/servers | https://{{< example_fqdn "automate" >}}/api/v0/infra/servers |
 | Update Infra Server | PUT | infra:infraServers:update | /api/v0/infra/servers/{id} | https://{{< example_fqdn "automate" >}}/api/v0/infra/servers/{id} |
 | Delete Infra Server | DELETE | infra:infraServers:delete | /api/v0/infra/servers/{id} | https://{{< example_fqdn "automate" >}}/api/v0/infra/servers/{id} |
+| List Cookbooks | GET | infra:infraServersOrgsCookbooks:list | /api/v0/infra/servers/{server_id}/orgs/{org_id}/cookbooks | https://{{< example_fqdn "automate" >}}/api/v0/infra/servers/{server_id}/orgs/{org_id}/cookbooks |
+| Get Cookbooks | GET | infra:infraServersOrgsCookbooks:get | /api/v0/infra/servers/{server_id}/orgs/{org_id}/cookbooks/{name} | https://{{< example_fqdn "automate" >}}/api/v0/infra/servers/{server_id}/orgs/{org_id}/cookbooks/{name} |
