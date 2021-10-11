@@ -7,8 +7,17 @@ import "google/protobuf/empty.proto";
 
 service ReportManagerService {
 	rpc StoreReport(stream ReportData) returns (google.protobuf.Empty) {};
+	rpc PrepareCustomReport(CustomReportRequest) returns (CustomReportResponse) {};
 }
 
 message ReportData {
 	bytes content = 1;
+}
+
+message CustomReportRequest {
+	string requestorID = 1;
+}
+
+message CustomReportResponse {
+	string acknowledgementID = 1;
 }
