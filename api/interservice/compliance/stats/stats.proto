@@ -5,6 +5,7 @@ option go_package = "github.com/chef/automate/api/interservice/compliance/stats"
 
 import "google/api/annotations.proto";
 import "interservice/compliance/reporting/reporting.proto";
+import "google/protobuf/timestamp.proto";
 
 service StatsService {
 	rpc ReadSummary(Query) returns (Summary) {};

@@ -6,6 +6,7 @@ option go_package = "github.com/chef/automate/api/external/compliance/reporting/
 import "google/api/annotations.proto";
 import "external/annotations/iam/annotations.proto";
 import "external/compliance/reporting/reporting.proto";
+import "google/protobuf/timestamp.proto";
 
 service StatsService {
 	/*
