@@ -11,6 +11,7 @@ service StatsService {
 	rpc ReadTrend(Query) returns (Trends) {};
 	rpc ReadProfiles(Query) returns (Profile) {};
 	rpc ReadFailures(Query) returns (Failures) {};
+	rpc UpdateTelemetryReported(UpdateTelemetryReportedRequest) returns (UpdateTelemetryReportedResponse) {};
 }
 
 message ListFilter {
@@ -156,4 +157,13 @@ message FailureSummary {
 	int32 failures = 2;
 	string id = 3;
 	string profile = 4;
+}
+
+message UpdateTelemetryReportedRequest {
+	google.protobuf.Timestamp lastTelemetryReportedAt = 1;
+}
+
+message UpdateTelemetryReportedResponse {
+	string id = 1;
+	google.protobuf.Timestamp lastTelemetryReportedAt = 2;
 }
