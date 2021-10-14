@@ -25,7 +25,7 @@ const DocVersion = "1"
 // Elasticsearch rejects documents with values for keyword fields with more
 // than this number of bytes.
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.4/ignore-above.html
-const maxESKeywordBytes = 32766
+const maxESKeywordBytes = 1024
 
 // ProfileControlSummary returns a NodeControlSummary struct with the counted controls based on their status and criticality,
 // This is working on all profiles embedded in a full json report.
