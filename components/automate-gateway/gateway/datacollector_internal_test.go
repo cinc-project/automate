@@ -1,4 +1,3 @@
-//go:build !mockgen
 // +build !mockgen
 
 //
