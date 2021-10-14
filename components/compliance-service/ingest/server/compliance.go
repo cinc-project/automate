@@ -1,12 +1,16 @@
 package server
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/blang/semver"
 	"github.com/gofrs/uuid"
 	gp "github.com/golang/protobuf/ptypes/empty"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
@@ -59,7 +63,7 @@ func (srv *ComplianceIngestServer) ProjectUpdateStatus(ctx context.Context,
 	return nil, status.Error(codes.Unimplemented, "Endpoint no longer used")
 }
 
-func (s *ComplianceIngestServer) ProcessComplianceReport(ctx context.Context, in *compliance.Report) (*gp.Empty, error) {
+func SendComplianceReport(ctx context.Context, in *compliance.Report, s *ComplianceIngestServer) (*gp.Empty, error) {
 	logrus.Debugf("ProcessComplianceReport with id: %s", in.ReportUuid)
 	if s == nil {
 		return nil, fmt.Errorf("ProcessComplianceReport, ComplianceIngestServer == nil")
@@ -89,4 +93,54 @@ func (s *ComplianceIngestServer) ProcessComplianceReport(ctx context.Context, in
 	logrus.Debugf("Calling compliancePipeline.Run for report id %s", in.ReportUuid)
 	err = s.compliancePipeline.Run(in)
 	return &gp.Empty{}, err
+}
+
+// ProcessComplianceReport receives messages in chunks and creates report
+func (s *ComplianceIngestServer) ProcessComplianceReport(stream ingest_api.ComplianceIngesterService_ProcessComplianceReportServer) error {
+	var err error
+	reportData := bytes.Buffer{}
+
+	// loop until all data is read in chunks or any error occur.
+	for {
+		err = contextError(stream.Context())
+		if err != nil {
+			return err
+		}
+		log.Info("waiting to receive more data")
+
+		req, err := stream.Recv()
+		if err == io.EOF {
+			log.Info("no more data")
+			break
+		}
+		if err != nil {
+			logrus.Infof("cannot receive chunk data: %v", err)
+			return err
+		}
+		chunk := req.GetContent()
+		log.Infof("received a chunk with size: %d", len(chunk))
+		_, err = reportData.Write(chunk)
+		if err != nil {
+			log.Info("cannot write chunk data: %v", err)
+			return err
+		}
+	}
+	in := &compliance.Report{}
+	err = json.Unmarshal(reportData.Bytes(), &in)
+	if err != nil {
+		return fmt.Errorf("error in converting report bytes to compliance report struct: %w", err)
+	}
+	_, err = SendComplianceReport(context.Background(), in, s)
+	return err
+}
+
+func contextError(ctx context.Context) error {
+	switch ctx.Err() {
+	case context.Canceled:
+		return errors.Wrap(ctx.Err(), "request is canceled")
+	case context.DeadlineExceeded:
+		return errors.Wrap(ctx.Err(), "deadline is exceeded")
+	default:
+		return nil
+	}
 }
