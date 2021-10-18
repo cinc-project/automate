@@ -17,6 +17,7 @@ import (
 
 	"github.com/chef/automate/api/external/lib/errorutils"
 	reportingapi "github.com/chef/automate/api/interservice/compliance/reporting"
+	reportmanager "github.com/chef/automate/api/interservice/report_manager"
 	authzConstants "github.com/chef/automate/components/authz-service/constants"
 	"github.com/chef/automate/components/compliance-service/ingest/ingestic/mappings"
 	"github.com/chef/automate/components/compliance-service/inspec"
@@ -1142,6 +1143,143 @@ func (backend *ES2Backend) GetNodeControlListItems(ctx context.Context, filters 
 		return contNodeList, nil
 	}
 	return nil, errorutils.ProcessNotFound(nil, reportID)
+}
+
+// GetReportManagerRequest returns the request for report manager service.
+func (backend *ES2Backend) GetReportManagerRequest(reportId string, filters map[string][]string) (*reportmanager.ReportMgrRequest, error) {
+	reportRequest := &reportmanager.ReportMgrRequest{}
+	depth, err := backend.NewDepth(filters, false)
+	if err != nil {
+		return reportRequest, errors.Wrap(err, "GetReportManagerRequest unable to get depth level for report")
+	}
+	queryInfo := depth.getQueryInfo()
+
+	//normally, we compute the boolQuery when we create a new Depth obj.. here we, instead call a variation of the full
+	// query builder. we need to do this because this variation of filter query provides this func with deeper
+	// information about the report being retrieved.
+	queryInfo.filtQuery = getFiltersQueryForDeepReport(reportId, filters)
+	logrus.Debugf("GetReportManagerRequest will retrieve report %s based on filters %+v", reportId, filters)
+
+	fsc := elastic.NewFetchSourceContext(true)
+
+	if queryInfo.level != ReportLevel {
+		fsc.Exclude("profiles")
+	}
+	logrus.Debugf("GetReportManagerRequest for reportid=%s, filters=%+v", reportId, filters)
+
+	searchSource := elastic.NewSearchSource().
+		FetchSourceContext(fsc).
+		Query(queryInfo.filtQuery).
+		Size(1)
+
+	source, err := searchSource.Source()
+	if err != nil {
+		return reportRequest, errors.Wrap(err, "GetReportManagerRequest unable to get Source")
+	}
+	LogQueryPartMin(queryInfo.esIndex, source, "GetReportManagerRequest query searchSource")
+
+	searchResult, err := queryInfo.client.Search().
+		SearchSource(searchSource).
+		Index(queryInfo.esIndex).
+		FilterPath(
+			"took",
+			"hits.total",
+			"hits.hits._id",
+			"hits.hits._source",
+			"hits.hits.inner_hits").
+		Do(context.Background())
+
+	if err != nil {
+		return reportRequest, errors.Wrap(err, "GetReportManagerRequest unable to complete search")
+	}
+
+	logrus.Debugf("GetReportManagerRequest got %d reports in %d milliseconds\n", searchResult.TotalHits(),
+		searchResult.TookInMillis)
+
+	// we should only receive one value
+	if searchResult.TotalHits() > 0 && searchResult.Hits.TotalHits > 0 {
+		for _, hit := range searchResult.Hits.Hits {
+			esInSpecReport := ESInSpecReport{}
+			if hit.Source != nil {
+				err := json.Unmarshal(*hit.Source, &esInSpecReport)
+				if err == nil {
+					//TODO: FIX Unmarshal error(json: cannot unmarshal array into Go struct field
+					// ESInSpecReportControl.results) and move the read all profiles section here
+				} else {
+					logrus.Errorf("GetReportManagerRequest unmarshal error: %s", err.Error())
+				}
+
+				var esInspecProfiles []ESInSpecReportProfile //`json:"profiles"`
+
+				if queryInfo.level == ReportLevel {
+					esInspecProfiles = esInSpecReport.Profiles
+				} else if queryInfo.level == ProfileLevel || queryInfo.level == ControlLevel {
+					esInspecProfiles, _, err = getDeepInspecProfiles(hit, queryInfo)
+					if err != nil {
+						//todo - handle this
+						logrus.Errorf("GetReportManagerRequest time error: %s", err.Error())
+					}
+				}
+				// read all profiles
+				profiles := make([]*reportingapi.Profile, 0)
+				for _, esInSpecReportProfileMin := range esInspecProfiles {
+					logrus.Debugf("Determine profile: %s", esInSpecReportProfileMin.Name)
+					esInSpecProfile, err := backend.GetProfile(esInSpecReportProfileMin.SHA256)
+					if err != nil {
+						logrus.Errorf("GetReportManagerRequest - Could not get profile '%s' error: %s", esInSpecReportProfileMin.SHA256, err.Error())
+						logrus.Debug("GetReportManagerRequest - Making the most from the profile information in esInSpecReportProfileMin")
+						esInSpecProfile.Sha256 = esInSpecReportProfileMin.SHA256
+					}
+
+					reportProfile := inspec.Profile{}
+					reportProfile.Sha256 = esInSpecProfile.Sha256
+
+					reportProfile.Controls = make([]inspec.Control, len(esInSpecReportProfileMin.Controls))
+					// Creating a map of report control ids to avoid a n^2 complexity later on when we look for the
+					// matching profile control id
+					profileControlsMap := make(map[string]*reportingapi.Control, len(esInSpecProfile.Controls))
+					for _, control := range esInSpecProfile.Controls {
+						profileControlsMap[control.Id] = control
+					}
+
+					convertedControls := make([]*reportingapi.Control, 0)
+					// Enrich min report controls with profile metadata
+					for _, reportControlMin := range esInSpecReportProfileMin.Controls {
+						if controlFromMap, ok := profileControlsMap[reportControlMin.ID]; ok {
+							reportControlMin.Tags = controlFromMap.Tags
+							// store controls to returned request
+							convertedControl := convertControl(profileControlsMap, reportControlMin, filters)
+							if convertedControl != nil {
+								convertedControls = append(convertedControls, convertedControl)
+							}
+
+						} else {
+							logrus.Warnf("GetReportManagerRequest: %s was not found in the profile control map",
+								reportControlMin.ID)
+						}
+					}
+					if len(convertedControls) > 0 {
+						convertedProfile := reportingapi.Profile{
+							Sha256:   reportProfile.Sha256,
+							Controls: convertedControls,
+						}
+						profiles = append(profiles, &convertedProfile)
+					}
+				}
+				reportRequest.Id = hit.Id
+				for _, profile := range profiles {
+					tempProfile := &reportmanager.Profile{}
+					tempProfile.Sha256 = profile.Sha256
+					for _, control := range profile.Controls {
+						tempProfile.Control = append(tempProfile.Control, control.Id)
+					}
+					reportRequest.Profile = append(reportRequest.Profile, tempProfile)
+				}
+			}
+		}
+		return reportRequest, nil
+	}
+	return reportRequest, errorutils.ProcessNotFound(nil, reportRequest.Id)
 }
 
 func (backend *ES2Backend) getControlItem(controlBucket *elastic.AggregationBucketKeyItem) (reportingapi.ControlItem, error) {

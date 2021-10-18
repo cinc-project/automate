@@ -77,16 +77,18 @@ func (x *StoreReportRequest) GetContent() []byte {
 	return nil
 }
 
-type CustomReportRequest struct {
+type ReportRequests struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RequestorId string `protobuf:"bytes,1,opt,name=requestor_id,json=requestorId,proto3" json:"requestor_id,omitempty" toml:"requestor_id,omitempty" mapstructure:"requestor_id,omitempty"`
+	ReportType    string              `protobuf:"bytes,1,opt,name=report_type,json=reportType,proto3" json:"report_type,omitempty" toml:"report_type,omitempty" mapstructure:"report_type,omitempty"`
+	RequestorId   string              `protobuf:"bytes,2,opt,name=requestor_id,json=requestorId,proto3" json:"requestor_id,omitempty" toml:"requestor_id,omitempty" mapstructure:"requestor_id,omitempty"`
+	Reportrequest []*ReportMgrRequest `protobuf:"bytes,3,rep,name=reportrequest,proto3" json:"reportrequest,omitempty" toml:"reportrequest,omitempty" mapstructure:"reportrequest,omitempty"`
 }
 
-func (x *CustomReportRequest) Reset() {
-	*x = CustomReportRequest{}
+func (x *ReportRequests) Reset() {
+	*x = ReportRequests{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_interservice_report_manager_report_manager_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -94,13 +96,13 @@ func (x *CustomReportRequest) Reset() {
 	}
 }
 
-func (x *CustomReportRequest) String() string {
+func (x *ReportRequests) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CustomReportRequest) ProtoMessage() {}
+func (*ReportRequests) ProtoMessage() {}
 
-func (x *CustomReportRequest) ProtoReflect() protoreflect.Message {
+func (x *ReportRequests) ProtoReflect() protoreflect.Message {
 	mi := &file_interservice_report_manager_report_manager_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -112,28 +114,43 @@ func (x *CustomReportRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CustomReportRequest.ProtoReflect.Descriptor instead.
-func (*CustomReportRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ReportRequests.ProtoReflect.Descriptor instead.
+func (*ReportRequests) Descriptor() ([]byte, []int) {
 	return file_interservice_report_manager_report_manager_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *CustomReportRequest) GetRequestorId() string {
+func (x *ReportRequests) GetReportType() string {
+	if x != nil {
+		return x.ReportType
+	}
+	return ""
+}
+
+func (x *ReportRequests) GetRequestorId() string {
 	if x != nil {
 		return x.RequestorId
 	}
 	return ""
 }
 
-type CustomReportResponse struct {
+func (x *ReportRequests) GetReportrequest() []*ReportMgrRequest {
+	if x != nil {
+		return x.Reportrequest
+	}
+	return nil
+}
+
+type ReportMgrRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	AcknowledgementId string `protobuf:"bytes,1,opt,name=acknowledgement_id,json=acknowledgementId,proto3" json:"acknowledgement_id,omitempty" toml:"acknowledgement_id,omitempty" mapstructure:"acknowledgement_id,omitempty"`
+	Id      string     `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty" toml:"id,omitempty" mapstructure:"id,omitempty"`
+	Profile []*Profile `protobuf:"bytes,2,rep,name=profile,proto3" json:"profile,omitempty" toml:"profile,omitempty" mapstructure:"profile,omitempty"`
 }
 
-func (x *CustomReportResponse) Reset() {
-	*x = CustomReportResponse{}
+func (x *ReportMgrRequest) Reset() {
+	*x = ReportMgrRequest{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_interservice_report_manager_report_manager_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -141,13 +158,13 @@ func (x *CustomReportResponse) Reset() {
 	}
 }
 
-func (x *CustomReportResponse) String() string {
+func (x *ReportMgrRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CustomReportResponse) ProtoMessage() {}
+func (*ReportMgrRequest) ProtoMessage() {}
 
-func (x *CustomReportResponse) ProtoReflect() protoreflect.Message {
+func (x *ReportMgrRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_interservice_report_manager_report_manager_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -159,12 +176,121 @@ func (x *CustomReportResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CustomReportResponse.ProtoReflect.Descriptor instead.
-func (*CustomReportResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ReportMgrRequest.ProtoReflect.Descriptor instead.
+func (*ReportMgrRequest) Descriptor() ([]byte, []int) {
 	return file_interservice_report_manager_report_manager_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *CustomReportResponse) GetAcknowledgementId() string {
+func (x *ReportMgrRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ReportMgrRequest) GetProfile() []*Profile {
+	if x != nil {
+		return x.Profile
+	}
+	return nil
+}
+
+type Profile struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Sha256  string   `protobuf:"bytes,1,opt,name=sha256,proto3" json:"sha256,omitempty" toml:"sha256,omitempty" mapstructure:"sha256,omitempty"`
+	Control []string `protobuf:"bytes,2,rep,name=control,proto3" json:"control,omitempty" toml:"control,omitempty" mapstructure:"control,omitempty"`
+}
+
+func (x *Profile) Reset() {
+	*x = Profile{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_interservice_report_manager_report_manager_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Profile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Profile) ProtoMessage() {}
+
+func (x *Profile) ProtoReflect() protoreflect.Message {
+	mi := &file_interservice_report_manager_report_manager_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Profile.ProtoReflect.Descriptor instead.
+func (*Profile) Descriptor() ([]byte, []int) {
+	return file_interservice_report_manager_report_manager_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Profile) GetSha256() string {
+	if x != nil {
+		return x.Sha256
+	}
+	return ""
+}
+
+func (x *Profile) GetControl() []string {
+	if x != nil {
+		return x.Control
+	}
+	return nil
+}
+
+type ReportMgrResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AcknowledgementId string `protobuf:"bytes,1,opt,name=acknowledgement_id,json=acknowledgementId,proto3" json:"acknowledgement_id,omitempty" toml:"acknowledgement_id,omitempty" mapstructure:"acknowledgement_id,omitempty"`
+}
+
+func (x *ReportMgrResponse) Reset() {
+	*x = ReportMgrResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_interservice_report_manager_report_manager_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ReportMgrResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReportMgrResponse) ProtoMessage() {}
+
+func (x *ReportMgrResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_interservice_report_manager_report_manager_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReportMgrResponse.ProtoReflect.Descriptor instead.
+func (*ReportMgrResponse) Descriptor() ([]byte, []int) {
+	return file_interservice_report_manager_report_manager_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ReportMgrResponse) GetAcknowledgementId() string {
 	if x != nil {
 		return x.AcknowledgementId
 	}
@@ -184,15 +310,34 @@ var file_interservice_report_manager_report_manager_proto_rawDesc = []byte{
 	0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x2e, 0x0a, 0x12,
 	0x53, 0x74, 0x6f, 0x72, 0x65, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65,
 	0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x0c, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x38, 0x0a, 0x13,
-	0x43, 0x75, 0x73, 0x74, 0x6f, 0x6d, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x21, 0x0a, 0x0c, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x6f, 0x72,
-	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x72, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x6f, 0x72, 0x49, 0x64, 0x22, 0x45, 0x0a, 0x14, 0x43, 0x75, 0x73, 0x74, 0x6f, 0x6d,
-	0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2d,
+	0x01, 0x28, 0x0c, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0xb9, 0x01, 0x0a,
+	0x0e, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x73, 0x12,
+	0x1f, 0x0a, 0x0b, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x54, 0x79, 0x70, 0x65,
+	0x12, 0x21, 0x0a, 0x0c, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x6f, 0x72, 0x5f, 0x69, 0x64,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x6f,
+	0x72, 0x49, 0x64, 0x12, 0x63, 0x0a, 0x0d, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x72, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x3d, 0x2e, 0x63, 0x68, 0x65,
+	0x66, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2e, 0x64, 0x6f, 0x6d, 0x61, 0x69,
+	0x6e, 0x2e, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72,
+	0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x4d,
+	0x67, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x52, 0x0d, 0x72, 0x65, 0x70, 0x6f, 0x72,
+	0x74, 0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x72, 0x0a, 0x10, 0x52, 0x65, 0x70, 0x6f,
+	0x72, 0x74, 0x4d, 0x67, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02,
+	0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x02, 0x69, 0x64, 0x12, 0x4e, 0x0a, 0x07,
+	0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x34, 0x2e,
+	0x63, 0x68, 0x65, 0x66, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2e, 0x64, 0x6f,
+	0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x5f, 0x6d, 0x61, 0x6e, 0x61,
+	0x67, 0x65, 0x72, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x50, 0x72, 0x6f, 0x66,
+	0x69, 0x6c, 0x65, 0x52, 0x07, 0x70, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x22, 0x3b, 0x0a, 0x07,
+	0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x12, 0x16, 0x0a, 0x06, 0x73, 0x68, 0x61, 0x32, 0x35,
+	0x36, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x73, 0x68, 0x61, 0x32, 0x35, 0x36, 0x12,
+	0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09,
+	0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x6f, 0x6c, 0x22, 0x42, 0x0a, 0x11, 0x52, 0x65, 0x70,
+	0x6f, 0x72, 0x74, 0x4d, 0x67, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x2d,
 	0x0a, 0x12, 0x61, 0x63, 0x6b, 0x6e, 0x6f, 0x77, 0x6c, 0x65, 0x64, 0x67, 0x65, 0x6d, 0x65, 0x6e,
 	0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x11, 0x61, 0x63, 0x6b, 0x6e,
-	0x6f, 0x77, 0x6c, 0x65, 0x64, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x32, 0xa1, 0x02,
+	0x6f, 0x77, 0x6c, 0x65, 0x64, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x49, 0x64, 0x32, 0x99, 0x02,
 	0x0a, 0x14, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x53,
 	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x6a, 0x0a, 0x0b, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x52,
 	0x65, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x3f, 0x2e, 0x63, 0x68, 0x65, 0x66, 0x2e, 0x61, 0x75, 0x74,
@@ -201,21 +346,20 @@ var file_interservice_report_manager_report_manager_proto_rawDesc = []byte{
 	0x69, 0x63, 0x65, 0x2e, 0x53, 0x74, 0x6f, 0x72, 0x65, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e,
 	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x22, 0x00,
-	0x28, 0x01, 0x12, 0x9c, 0x01, 0x0a, 0x13, 0x50, 0x72, 0x65, 0x70, 0x61, 0x72, 0x65, 0x43, 0x75,
-	0x73, 0x74, 0x6f, 0x6d, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x40, 0x2e, 0x63, 0x68, 0x65,
+	0x28, 0x01, 0x12, 0x94, 0x01, 0x0a, 0x13, 0x50, 0x72, 0x65, 0x70, 0x61, 0x72, 0x65, 0x43, 0x75,
+	0x73, 0x74, 0x6f, 0x6d, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x3b, 0x2e, 0x63, 0x68, 0x65,
 	0x66, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2e, 0x64, 0x6f, 0x6d, 0x61, 0x69,
 	0x6e, 0x2e, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72,
-	0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x43, 0x75, 0x73, 0x74, 0x6f, 0x6d, 0x52,
-	0x65, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x41, 0x2e, 0x63,
-	0x68, 0x65, 0x66, 0x2e, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2e, 0x64, 0x6f, 0x6d,
-	0x61, 0x69, 0x6e, 0x2e, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67,
-	0x65, 0x72, 0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x43, 0x75, 0x73, 0x74, 0x6f,
-	0x6d, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22,
-	0x00, 0x42, 0x3a, 0x5a, 0x38, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
-	0x63, 0x68, 0x65, 0x66, 0x2f, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2f, 0x61, 0x70,
-	0x69, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2f, 0x72,
-	0x65, 0x70, 0x6f, 0x72, 0x74, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x2e, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x73, 0x1a, 0x3e, 0x2e, 0x63, 0x68, 0x65, 0x66, 0x2e, 0x61,
+	0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2e, 0x64, 0x6f, 0x6d, 0x61, 0x69, 0x6e, 0x2e, 0x72,
+	0x65, 0x70, 0x6f, 0x72, 0x74, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x72, 0x2e, 0x73, 0x65,
+	0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x4d, 0x67, 0x72, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x3a, 0x5a, 0x38, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x68, 0x65, 0x66, 0x2f, 0x61, 0x75, 0x74,
+	0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x73,
+	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2f, 0x72, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x5f, 0x6d, 0x61,
+	0x6e, 0x61, 0x67, 0x65, 0x72, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -230,23 +374,27 @@ func file_interservice_report_manager_report_manager_proto_rawDescGZIP() []byte 
 	return file_interservice_report_manager_report_manager_proto_rawDescData
 }
 
-var file_interservice_report_manager_report_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_interservice_report_manager_report_manager_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_interservice_report_manager_report_manager_proto_goTypes = []interface{}{
-	(*StoreReportRequest)(nil),   // 0: chef.automate.domain.report_manager.service.StoreReportRequest
-	(*CustomReportRequest)(nil),  // 1: chef.automate.domain.report_manager.service.CustomReportRequest
-	(*CustomReportResponse)(nil), // 2: chef.automate.domain.report_manager.service.CustomReportResponse
-	(*empty.Empty)(nil),          // 3: google.protobuf.Empty
+	(*StoreReportRequest)(nil), // 0: chef.automate.domain.report_manager.service.StoreReportRequest
+	(*ReportRequests)(nil),     // 1: chef.automate.domain.report_manager.service.ReportRequests
+	(*ReportMgrRequest)(nil),   // 2: chef.automate.domain.report_manager.service.ReportMgrRequest
+	(*Profile)(nil),            // 3: chef.automate.domain.report_manager.service.Profile
+	(*ReportMgrResponse)(nil),  // 4: chef.automate.domain.report_manager.service.ReportMgrResponse
+	(*empty.Empty)(nil),        // 5: google.protobuf.Empty
 }
 var file_interservice_report_manager_report_manager_proto_depIdxs = []int32{
-	0, // 0: chef.automate.domain.report_manager.service.ReportManagerService.StoreReport:input_type -> chef.automate.domain.report_manager.service.StoreReportRequest
-	1, // 1: chef.automate.domain.report_manager.service.ReportManagerService.PrepareCustomReport:input_type -> chef.automate.domain.report_manager.service.CustomReportRequest
-	3, // 2: chef.automate.domain.report_manager.service.ReportManagerService.StoreReport:output_type -> google.protobuf.Empty
-	2, // 3: chef.automate.domain.report_manager.service.ReportManagerService.PrepareCustomReport:output_type -> chef.automate.domain.report_manager.service.CustomReportResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: chef.automate.domain.report_manager.service.ReportRequests.reportrequest:type_name -> chef.automate.domain.report_manager.service.ReportMgrRequest
+	3, // 1: chef.automate.domain.report_manager.service.ReportMgrRequest.profile:type_name -> chef.automate.domain.report_manager.service.Profile
+	0, // 2: chef.automate.domain.report_manager.service.ReportManagerService.StoreReport:input_type -> chef.automate.domain.report_manager.service.StoreReportRequest
+	1, // 3: chef.automate.domain.report_manager.service.ReportManagerService.PrepareCustomReport:input_type -> chef.automate.domain.report_manager.service.ReportRequests
+	5, // 4: chef.automate.domain.report_manager.service.ReportManagerService.StoreReport:output_type -> google.protobuf.Empty
+	4, // 5: chef.automate.domain.report_manager.service.ReportManagerService.PrepareCustomReport:output_type -> chef.automate.domain.report_manager.service.ReportMgrResponse
+	4, // [4:6] is the sub-list for method output_type
+	2, // [2:4] is the sub-list for method input_type
+	2, // [2:2] is the sub-list for extension type_name
+	2, // [2:2] is the sub-list for extension extendee
+	0, // [0:2] is the sub-list for field type_name
 }
 
 func init() { file_interservice_report_manager_report_manager_proto_init() }
@@ -268,7 +416,7 @@ func file_interservice_report_manager_report_manager_proto_init() {
 			}
 		}
 		file_interservice_report_manager_report_manager_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CustomReportRequest); i {
+			switch v := v.(*ReportRequests); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -280,7 +428,31 @@ func file_interservice_report_manager_report_manager_proto_init() {
 			}
 		}
 		file_interservice_report_manager_report_manager_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CustomReportResponse); i {
+			switch v := v.(*ReportMgrRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_interservice_report_manager_report_manager_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Profile); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_interservice_report_manager_report_manager_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ReportMgrResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -298,7 +470,7 @@ func file_interservice_report_manager_report_manager_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_interservice_report_manager_report_manager_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -325,7 +497,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ReportManagerServiceClient interface {
 	StoreReport(ctx context.Context, opts ...grpc.CallOption) (ReportManagerService_StoreReportClient, error)
-	PrepareCustomReport(ctx context.Context, in *CustomReportRequest, opts ...grpc.CallOption) (*CustomReportResponse, error)
+	PrepareCustomReport(ctx context.Context, in *ReportRequests, opts ...grpc.CallOption) (*ReportMgrResponse, error)
 }
 
 type reportManagerServiceClient struct {
@@ -370,8 +542,8 @@ func (x *reportManagerServiceStoreReportClient) CloseAndRecv() (*empty.Empty, er
 	return m, nil
 }
 
-func (c *reportManagerServiceClient) PrepareCustomReport(ctx context.Context, in *CustomReportRequest, opts ...grpc.CallOption) (*CustomReportResponse, error) {
-	out := new(CustomReportResponse)
+func (c *reportManagerServiceClient) PrepareCustomReport(ctx context.Context, in *ReportRequests, opts ...grpc.CallOption) (*ReportMgrResponse, error) {
+	out := new(ReportMgrResponse)
 	err := c.cc.Invoke(ctx, "/chef.automate.domain.report_manager.service.ReportManagerService/PrepareCustomReport", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -382,7 +554,7 @@ func (c *reportManagerServiceClient) PrepareCustomReport(ctx context.Context, in
 // ReportManagerServiceServer is the server API for ReportManagerService service.
 type ReportManagerServiceServer interface {
 	StoreReport(ReportManagerService_StoreReportServer) error
-	PrepareCustomReport(context.Context, *CustomReportRequest) (*CustomReportResponse, error)
+	PrepareCustomReport(context.Context, *ReportRequests) (*ReportMgrResponse, error)
 }
 
 // UnimplementedReportManagerServiceServer can be embedded to have forward compatible implementations.
@@ -392,7 +564,7 @@ type UnimplementedReportManagerServiceServer struct {
 func (*UnimplementedReportManagerServiceServer) StoreReport(ReportManagerService_StoreReportServer) error {
 	return status.Errorf(codes.Unimplemented, "method StoreReport not implemented")
 }
-func (*UnimplementedReportManagerServiceServer) PrepareCustomReport(context.Context, *CustomReportRequest) (*CustomReportResponse, error) {
+func (*UnimplementedReportManagerServiceServer) PrepareCustomReport(context.Context, *ReportRequests) (*ReportMgrResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PrepareCustomReport not implemented")
 }
 
@@ -427,7 +599,7 @@ func (x *reportManagerServiceStoreReportServer) Recv() (*StoreReportRequest, err
 }
 
 func _ReportManagerService_PrepareCustomReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CustomReportRequest)
+	in := new(ReportRequests)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -439,7 +611,7 @@ func _ReportManagerService_PrepareCustomReport_Handler(srv interface{}, ctx cont
 		FullMethod: "/chef.automate.domain.report_manager.service.ReportManagerService/PrepareCustomReport",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReportManagerServiceServer).PrepareCustomReport(ctx, req.(*CustomReportRequest))
+		return srv.(ReportManagerServiceServer).PrepareCustomReport(ctx, req.(*ReportRequests))
 	}
 	return interceptor(ctx, in, info, handler)
 }
