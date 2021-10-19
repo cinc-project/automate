@@ -15,6 +15,7 @@ type Service struct {
 	certs.TLSConfig
 	ConfigFilePath    string
 	MessageBufferSize int
+	IsUpdated         bool
 }
 
 // Compliance service specific config options

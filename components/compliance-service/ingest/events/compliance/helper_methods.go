@@ -25,7 +25,10 @@ const DocVersion = "1"
 // Elasticsearch rejects documents with values for keyword fields with more
 // than this number of bytes.
 // https://www.elastic.co/guide/en/elasticsearch/reference/6.4/ignore-above.html
-const maxESKeywordBytes = 1024
+const (
+	maxESKeywordBytesv1 = 32766
+	maxESKeywordBytesv2 = 1024
+)
 
 // ProfileControlSummary returns a NodeControlSummary struct with the counted controls based on their status and criticality,
 // This is working on all profiles embedded in a full json report.
@@ -110,7 +113,7 @@ func WaivedStr(data *inspec_api.WaiverData) (str string) {
 
 // ReportProfilesFromInSpecProfiles extracts the reports specific information
 // from the profile, leaving out the static profile data
-func ReportProfilesFromInSpecProfiles(profiles []*inspec_api.Profile, profilesSums []relaxting.ESInSpecSummaryProfile) (profilesRep []relaxting.ESInSpecReportProfile) {
+func ReportProfilesFromInSpecProfiles(profiles []*inspec_api.Profile, profilesSums []relaxting.ESInSpecSummaryProfile, isUpdated bool) (profilesRep []relaxting.ESInSpecReportProfile) {
 	// Creating a profilesSums hash to lookup the sums based on the profile (name|sha) string
 	profilesSumsHash := make(map[string]relaxting.ESInSpecSummaryProfile, len(profilesSums))
 	for _, profileSums := range profilesSums {
@@ -125,12 +128,22 @@ func ReportProfilesFromInSpecProfiles(profiles []*inspec_api.Profile, profilesSu
 		for i, control := range profile.Controls {
 			minResults := make([]*relaxting.ESInSpecReportControlsResult, len(control.Results))
 			for i, result := range control.Results {
-				minResults[i] = &relaxting.ESInSpecReportControlsResult{
-					Status:      result.Status,
-					CodeDesc:    stringLimitBytes(result.CodeDesc, maxESKeywordBytes),
-					RunTime:     result.RunTime,
-					Message:     stringLimitBytes(result.Message, maxESKeywordBytes),
-					SkipMessage: stringLimitBytes(result.SkipMessage, maxESKeywordBytes),
+				if isUpdated {
+					minResults[i] = &relaxting.ESInSpecReportControlsResult{
+						Status:      result.Status,
+						CodeDesc:    stringLimitBytes(result.CodeDesc, maxESKeywordBytesv2),
+						RunTime:     result.RunTime,
+						Message:     stringLimitBytes(result.Message, maxESKeywordBytesv2),
+						SkipMessage: stringLimitBytes(result.SkipMessage, maxESKeywordBytesv2),
+					}
+				} else {
+					minResults[i] = &relaxting.ESInSpecReportControlsResult{
+						Status:      result.Status,
+						CodeDesc:    stringLimitBytes(result.CodeDesc, maxESKeywordBytesv1),
+						RunTime:     result.RunTime,
+						Message:     stringLimitBytes(result.Message, maxESKeywordBytesv1),
+						SkipMessage: stringLimitBytes(result.SkipMessage, maxESKeywordBytesv1),
+					}
 				}
 			}
 

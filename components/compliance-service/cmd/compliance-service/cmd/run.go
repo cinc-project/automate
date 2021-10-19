@@ -45,9 +45,10 @@ var conf = config.Compliance{
 		ProfilesPath: "./profiles",
 	},
 	Service: config.Service{
-		Name:     "compliance",
-		Port:     10121,
-		HostBind: "127.0.0.1",
+		Name:      "compliance",
+		Port:      10121,
+		HostBind:  "127.0.0.1",
+		IsUpdated: false,
 	},
 	Secrets:       config.Secrets{},
 	Notifications: config.Notifications{},
