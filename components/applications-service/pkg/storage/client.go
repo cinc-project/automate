@@ -1,10 +1,12 @@
 package storage
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/chef/automate/api/external/habitat"
+	"github.com/chef/automate/components/compliance-service/dao/pgdb"
 )
 
 type Client interface {
@@ -36,6 +38,9 @@ type Client interface {
 	GetServiceGroupsCount() (int32, error)
 	GetSupervisorsCount() (int32, error)
 	GetDeploymentsCount() (int32, error)
+
+	GetTelemetry(context.Context) (pgdb.Telemetry, error)
+	GetUniqueServicesFromPostgres(context.Context) (int64, error)
 
 	// Used by our Integration Tests
 	EmptyStorage() error

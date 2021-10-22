@@ -599,3 +599,17 @@ func toProtoTimestamp(t *time.Time) *timestamp.Timestamp {
 	}
 	return ts
 }
+
+//GetServicesUsageCount returns the count of unique nodes with lastRun in a given time.
+func (app *ApplicationsServer) GetServicesUsageCount(ctx context.Context,
+	e *applications.GetServicesUsageCountRequest) (*applications.GetServicesUsageCountResponse, error) {
+
+	uniqueCount, err := app.storageClient.GetUniqueServicesFromPostgres(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &applications.GetServicesUsageCountResponse{
+		TotalServices: uniqueCount,
+	}, nil
+}

@@ -103,4 +103,7 @@ func init() {
 	policy.MapMethodTo("/chef.automate.api.applications.ApplicationsService/RunDeleteDisconnectedServicesJob", "retention:serviceGroups", "retention:serviceGroups:update", "POST", "/api/v0/retention/service_groups/delete_disconnected_services/run", func(unexpandedResource string, input interface{}) string {
 		return unexpandedResource
 	})
+	policy.MapMethodTo("/chef.automate.api.applications.ApplicationsService/GetsServicesUsageCount", "iam:introspect", "iam:introspect:getAll", "GET", "/api/v0/applications/telemetry/nodes/count", func(unexpandedResource string, input interface{}) string {
+		return unexpandedResource
+	})
 }

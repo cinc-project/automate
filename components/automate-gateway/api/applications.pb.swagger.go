@@ -451,6 +451,28 @@ func init() {
         ]
       }
     },
+    "/api/v0/applications/telemetry/nodes/count": {
+      "get": {
+        "operationId": "ApplicationsService_GetsServicesUsageCount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/chef.automate.api.applications.GetServicesUsageCountResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "tags": [
+          "ApplicationsService"
+        ]
+      }
+    },
     "/api/v0/applications/version": {
       "get": {
         "summary": "Show Version",
@@ -677,6 +699,16 @@ func init() {
         }
       },
       "description": "Request message for GetDisconnectedServices."
+    },
+    "chef.automate.api.applications.GetServicesUsageCountResponse": {
+      "type": "object",
+      "properties": {
+        "total_services": {
+          "type": "string",
+          "format": "int64",
+          "title": "unique services count in a duration"
+        }
+      }
     },
     "chef.automate.api.applications.HealthCheckResult": {
       "type": "object",

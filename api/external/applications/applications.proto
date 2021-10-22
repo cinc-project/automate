@@ -418,6 +418,31 @@ service ApplicationsService {
 			tags: "retention";
 		};
   }
+
+  /*
+  GetservicesUsageCount
+
+  Returns the count of unique services with lastRun in a given time.
+  The time duration can be between the last time Telemetry data sent and the day before the current date.
+  If the duration < 15 days --> 15 days
+  duration > 15 days --> duration
+  Authorization Action:
+  ```
+  iam:introspect:getAll
+  ```
+  */
+
+
+  rpc GetsServicesUsageCount(GetServicesUsageCountRequest) returns (GetServicesUsageCountResponse) {
+    option (google.api.http) = {
+      get: "/api/v0/applications/telemetry/nodes/count"
+    };
+    option (chef.automate.api.iam.policy) = {
+      resource: "iam:introspect"
+      action: "iam:introspect:getAll"
+    };
+  }
+
 }
 
 
@@ -587,7 +612,6 @@ message PeriodicJobInfo {
 	google.protobuf.Duration last_elapsed = 4;
 	google.protobuf.Timestamp next_due_at = 5;
 }
-
 
 message GetDisconnectedServicesConfigReq{}
 message UpdateDisconnectedServicesConfigRes {}
@@ -764,4 +788,11 @@ message HealthCheckResult {
   string stdout = 1;
   string stderr = 2;
   int32 exit_status = 3;
+}
+
+message GetServicesUsageCountRequest {}
+
+message	GetServicesUsageCountResponse {
+  // unique services count in a duration
+  int64 total_services = 1;
 }
