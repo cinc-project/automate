@@ -12,6 +12,7 @@ import (
 
 	"github.com/chef/automate/api/external/lib/errorutils"
 	"github.com/chef/automate/api/interservice/compliance/reporting"
+	reportmanager "github.com/chef/automate/api/interservice/report_manager"
 	"github.com/chef/automate/components/compliance-service/reporting/relaxting"
 	"github.com/chef/automate/components/compliance-service/reporting/util"
 	"github.com/chef/automate/components/compliance-service/utils"
@@ -28,12 +29,15 @@ const streamBufferSize = 262144
 
 // Server implementation for reporting
 type Server struct {
-	es *relaxting.ES2Backend
+	es        *relaxting.ES2Backend
+	reportMgr reportmanager.ReportManagerServiceClient
 }
 
 // New creates a new server
-func New(es *relaxting.ES2Backend) *Server {
-	return &Server{es: es}
+// TODO: Using as variadic function is not recommended to achieve optional parameter. We might need to change this
+// to non variadic and update the calls from integration tests.
+func New(es *relaxting.ES2Backend, rm ...reportmanager.ReportManagerServiceClient) *Server {
+	return &Server{es: es, reportMgr: rm[0]}
 }
 
 // ListReports returns a list of reports based on query
@@ -101,6 +105,7 @@ func (srv *Server) ReadReport(ctx context.Context, in *reporting.Query) (*report
 	}
 	formattedFilters, err := filterByProjects(ctx, formattedFilters)
 	if err != nil {
+		logrus.Info(errorutils.FormatErrorMsg(err, in.Id))
 		return nil, errorutils.FormatErrorMsg(err, in.Id)
 	}
 	report, err := srv.es.GetReport(in.Id, formattedFilters)
@@ -275,6 +280,56 @@ func (srv *Server) Export(in *reporting.Query, stream reporting.ReportingService
 	}
 
 	return nil
+}
+
+// ExportReportManager populate the report manager request and sent for processing
+func (srv *Server) ExportReportManager(ctx context.Context, in *reporting.Query) (*reporting.CustomReportResponse, error) {
+	responseID := &reporting.CustomReportResponse{}
+	formattedFilters := formatFilters(in.Filters)
+	logrus.Debugf("Export called with filters %+v", formattedFilters)
+	formattedFilters, err := filterByProjects(ctx, formattedFilters)
+	if err != nil {
+		return responseID, err
+	}
+
+	err = validateReportQueryParams(formattedFilters)
+	if err != nil {
+		return responseID, err
+	}
+
+	// Retrieving the latest report ID for each node based on the provided filters
+	esIndex, err := relaxting.GetEsIndex(formattedFilters, false)
+	if err != nil {
+		return responseID, status.Error(codes.Internal, fmt.Sprintf("Failed to determine how many reports exist: %s", err))
+	}
+
+	reportIDs, err := srv.es.GetReportIds(esIndex, formattedFilters)
+	if err != nil {
+		return responseID, status.Error(codes.Internal, fmt.Sprintf("Failed to determine how many reports exist: %s", err))
+	}
+
+	if reportIDs == nil || len(reportIDs.Ids) == 0 {
+		return nil, status.Error(codes.NotFound, fmt.Sprint("No reports found"))
+	}
+
+	total := len(reportIDs.Ids)
+	// get all report manager requests one by one.
+	reportMgrRequests := &reportmanager.CustomReportRequest{}
+	for idx := total - 1; idx >= 0; idx-- {
+		cur, err := srv.es.GetReportManagerRequest(reportIDs.Ids[idx], formattedFilters)
+		if err != nil {
+			return responseID, fmt.Errorf("Failed to retrieve report %d/%d with ID %s . Error: %s", idx, total, reportIDs.Ids[idx], err)
+		}
+		reportMgrRequests.Reports = append(reportMgrRequests.Reports, cur)
+	}
+	// send request to report manager
+	reportMgrResponse, err := srv.reportMgr.PrepareCustomReport(ctx, reportMgrRequests)
+	if err != nil {
+		return responseID, status.Error(codes.Internal, fmt.Sprintf("Failed to retrieve report manager acknowedgement: %s", err))
+	}
+	responseID.AcknowledgementId = reportMgrResponse.AcknowledgementId
+
+	return responseID, nil
 }
 
 func validateReportQueryParams(formattedFilters map[string][]string) error {

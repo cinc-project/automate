@@ -146,6 +146,20 @@ func (a *Reporting) ListProfiles(ctx context.Context, in *reporting.Query) (*rep
 	return out, nil
 }
 
+// should cover /reporting/exportv1
+func (a *Reporting) ExportReportManager(ctx context.Context, in *reporting.Query) (*reporting.CustomReportResponse, error) {
+	inDomain := &reportingService.Query{}
+	out := &reporting.CustomReportResponse{}
+	f := func() (proto.Message, error) {
+		return a.client.ExportReportManager(ctx, inDomain)
+	}
+	err := protobuf.CallDomainService(in, inDomain, f, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (a *Reporting) Export(*reporting.Query, reporting.ReportingService_ExportServer) error {
 	// Please see components/automate-gateway/services.go ReportExportHandler for implementation
 	return nil
