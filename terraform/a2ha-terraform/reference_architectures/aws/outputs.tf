@@ -10,16 +10,8 @@ output "automate_private_ips" {
   value = formatlist("%s", module.aws.automate_private_ips)
 }
 
-output "automate_public_ips" {
-  value = formatlist("%s", module.aws.automate_public_ips)
-}
-
 output "chef_server_private_ips" {
   value = formatlist("%s", module.aws.chef_server_private_ips)
-}
-
-output "chef_server_public_ips" {
-  value = formatlist("%s", module.aws.chef_server_public_ips)
 }
 
 output "elasticsearch_private_ips" {
@@ -32,9 +24,5 @@ output "elasticsearch_public_ips" {
 
 output "postgresql_private_ips" {
   value = formatlist("%s", module.aws.postgresql_private_ips)
-}
-
-output "postgresql_public_ips" {
-  value = formatlist("%s", module.aws.postgresql_public_ips)
 }
 

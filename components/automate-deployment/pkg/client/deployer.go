@@ -271,8 +271,24 @@ func Deploy(writer cli.FormatWriter,
 	d.deployAll()
 	d.saveDeploymentCreds()
 	d.showTelemetryNotice()
-
 	return d.err
+}
+
+func DeployHA(writer cli.FormatWriter,
+	overrideConfig *dc.AutomateConfig,
+	manifestProvider manifest.ReleaseManifestProvider,
+	cliVersion string,
+	airgap bool) error {
+	d := newDeployer(writer, overrideConfig, manifestProvider, cliVersion, airgap)
+	d.genMergedConfig()
+	ctx := context.Background()
+	currentM, err := manifestProvider.GetCurrentManifest(ctx, d.mergedCfg.Deployment.V1.Svc.Channel.GetValue())
+	if err != nil {
+		logrus.Debug("Failed to get manifest for current channel")
+	}
+	b := bootstrap.NewCompatBootstrapper(target.NewLocalTarget(false))
+	err = bootstrap.FullBootstrapHA(context.Background(), b, d.mergedCfg.Deployment, currentM, writer)
+	return err
 }
 
 func Destroy(writer cli.FormatWriter, opts UninstallOpts) error {

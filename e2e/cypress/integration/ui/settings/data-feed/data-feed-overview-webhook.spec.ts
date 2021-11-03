@@ -13,12 +13,6 @@ describe('chef datafeed', () => {
       adminIdToken = admin.id_token;
       cy.get('app-welcome-modal').invoke('hide');
       cy.restoreStorage();
-      cy.get('body').type('feat');
-      cy.get('.title').contains('Chef Automate Data Feed').parent().parent()
-      .find('.onoffswitch').click();
-      cy.get('chef-button').contains('Close').click();
-      cy.reload();
-      cy.contains('know').click();
     });
     cy.restoreStorage();
   });
@@ -104,8 +98,6 @@ describe('chef datafeed', () => {
       cy.get('[data-cy=name-input]').type('-1');
       cy.get('[data-cy=url-input]').type('/v1');
       cy.get('[data-cy=save-connection]').click();
-      cy.get('app-notification.error').should('be.visible');
-      cy.get('app-notification.error chef-icon').click();
     });
 
     it('check GlobalDataFeedConfig details', () => {

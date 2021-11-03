@@ -8,14 +8,11 @@ all packages therein including their transitive dependencies. It accomplishes
 this by wrapping the 'chef-automate' cli utility.
 The following arguments are available:
  [REQUIRED]
- -t [frontend]            Generate an Air Gap Bundle for either frontend.
+ -t [frontend|backend|all]            Generate an Air Gap Bundle for either frontend or backend or both
  -o [output tarball]              Output file for archive (.tar.gz)
  [OPTIONS]
- -d [download path]               Download path for chef-automate binary (default: /tmp/chef-automate)
- -w [workspace]                   Workspace where packages will be downloaded (default: /tmp/workspace)
  -h                               Print this help message
- ex. $0 -t backend -m /path/to/manifest.json -o /tmp/bundle.tar.gz
- ex. $0 -t frontend -c current -o /tmp/bundle.tar.gz -o /tmp/bundle.tar.gz
+ ex. $0 -t upgradebackends  -o /tmp/bundle.tar.gz
 "
 export DOCKER_IMAGE="chefes/lita-worker"
 # Some sane defaults
@@ -23,13 +20,15 @@ export CHEF_AUTOMATE_BIN_PATH="/tmp/chef-automate"
 export WORKSPACE_PATH="/tmp/workspace"
 # These are required args so we ensure they are not given a default value
 export BUNDLE_TYPE=
+export BACKENDAIB_TFVARS=
+export FRONTENDAIB_TFVARS=
 export TARBALL_PATH=
-export MANIFEST_PATH="manifest.json"
 TEMP_DIR=/tmp
 export TEMP_BUNDLE_FILE=$TEMP_DIR/bundle.aib.$$.$RANDOM
 export TEMP_TAR_FILE=$TEMP_DIR/my.aib.$$.$RANDOM
 export MANIFEST_TFVARS="terraform/a2ha_manifest.auto.tfvars"
 export BACKENDAIB=
+export PACKAGES_INFO="/tmp/packages.info"
 # Helper Functions
 echo_env() {
     echo "=============================================="
@@ -79,117 +78,66 @@ clean_up() {
   exit "${1:-0}"
 }
 trap clean_up SIGHUP SIGINT SIGTERM ERR
+
 airgap_bundle_create() {
   original_aib_path="${TEMP_BUNDLE_FILE}"
   args=('airgap' 'bundle' 'create')
-  if [[ "${BUNDLE_TYPE}" == "frontend" ]]; then
-    args+=('-c' "${CHANNEL}")
-  else
-    args+=('-m' "${MANIFEST_PATH}")
-  fi
   args+=("${original_aib_path}")
   # printf '%s\n' "Running: ${CHEF_AUTOMATE_BIN_PATH} ${args[*]}"
   if "${CHEF_AUTOMATE_BIN_PATH}" "${args[@]}" > /tmp/thelog.log; then
-    if [[ "${BUNDLE_TYPE}" == "backend" ]]; then
-      # this removes the magic header from the .aib
-      # making it usable with the tar command
-      # https://github.com/chef/a2/blob/4c51540f822d7ddcb32d192bc7dbf33803789a8e/components/automate-deployment/pkg/airgap/bundle_creator.go#L3
-      tail -c +8 "${original_aib_path}" > "${TEMP_TAR_FILE}" && cat "${TEMP_TAR_FILE}" > ${TARBALL_PATH}
-      rm -f ${TEMP_TAR_FILE}
-    else
-      cat "${original_aib_path}" > ${TARBALL_PATH}
+    if [ "$BUNDLE_TYPE" == "upgradefrontends" ] || [ "$BUNDLE_TYPE" == "all" ]
+    then
+          cat "${original_aib_path}" > ${TARBALL_PATH}
+          outfile=${ORIGINAL_TARBALL:-${TARBALL_PATH}}
+          bname=$(basename "${outfile}")
+          echo "frontend_aib_dest_file = \"/var/tmp/${bname}\""  > ${FRONTENDAIB_TFVARS}
+          echo "frontend_aib_local_file = \"${bname}\"" >> ${FRONTENDAIB_TFVARS}
     fi
-    rm -f "${original_aib_path}"
-    outfile=${ORIGINAL_TARBALL:-${TARBALL_PATH}}
-    # echo "Airgap Bundle: ${outfile}"
-    bname=$(basename "${outfile}")
-    if [[ "${BUNDLE_TYPE}" == "frontend" ]]; then
-      echo "frontend_aib_dest_file = \"/var/tmp/${bname}\""
-      echo "frontend_aib_local_file = \"${bname}\""
-    else
-      echo "backend_aib_dest_file = \"/var/tmp/${bname}\""
-      echo "backend_aib_local_file = \"${bname}\""
-    fi
-  else
-    echo "✘ ERROR"
-    cat /tmp/thelog.log
-    exit 1
-  fi
-}
 
-new_airgap_bundle_create() {
-  original_aib_path="${TEMP_BUNDLE_FILE}"
-  args=('airgap' 'bundle' 'create')
-  args+=("${original_aib_path}")
-  # printf '%s\n' "Running: ${CHEF_AUTOMATE_BIN_PATH} ${args[*]}"
-  if "${CHEF_AUTOMATE_BIN_PATH}" "${args[@]}" > /tmp/thelog.log; then
-    cat "${original_aib_path}" > ${TARBALL_PATH}
-    # this removes the magic header from the .aib
-    # making it usable with the tar command
-    tail -c +8 "${original_aib_path}" > "${TEMP_TAR_FILE}" && cat "${TEMP_TAR_FILE}" > ${BACKENDAIB}
-    rm -f ${TEMP_TAR_FILE}
+    if [ "$BUNDLE_TYPE" == "upgradebackends" ] || [ "$BUNDLE_TYPE" == "all" ]
+    then
+          # getting packges info from airgap bundle       
+          ${CHEF_AUTOMATE_BIN_PATH}  airgap bundle info ${original_aib_path} > ${PACKAGES_INFO}
+          tail -c +8 "${original_aib_path}" > "${TEMP_TAR_FILE}" && cat "${TEMP_TAR_FILE}" > ${BACKENDAIB}
+          # this removes the magic header from the .aib
+          # making it usable with the tar command
+          rm -f ${TEMP_TAR_FILE}    
+          outfile_backend=${ORIGINAL_TARBALL:-${BACKENDAIB}}
+          backend_name=$(basename "${outfile_backend}")
+          echo "backend_aib_dest_file = \"/var/tmp/${backend_name}\"" > ${BACKENDAIB_TFVARS} 
+          echo "backend_aib_local_file = \"${backend_name}\"" >> ${BACKENDAIB_TFVARS}
+    fi
     rm -f "${original_aib_path}"
-    outfile=${ORIGINAL_TARBALL:-${TARBALL_PATH}}
-    outfile_backend=${ORIGINAL_TARBALL:-${BACKENDAIB}}
-    bname=$(basename "${outfile}")
-    backend_name=$(basename "${outfile_backend}")
-    echo "frontend_aib_dest_file = \"/var/tmp/${bname}\""
-    echo "frontend_aib_local_file = \"${bname}\""
-    echo "backend_aib_dest_file = \"/var/tmp/${backend_name}\""
-    echo "backend_aib_local_file = \"${backend_name}\""
-    
   else
     echo "✘ ERROR"
     cat /tmp/thelog.log
     exit 1
   fi
   
-
-  if [ -f "${MANIFEST_PATH}" ]; then
+    #Create Manifest auto_tfvars
     create_manifest_auto_tfvars
-  else
-    hardcode_manifest_auto_tfvars
-  fi
 
 }
 
 exec_linux() {
   download_automate_cli
-  new_airgap_bundle_create
+  airgap_bundle_create
 }
 
 # We are creating a2ha_manifest.auto.tfvars as they will be used by terraform modules while deployment
 create_manifest_auto_tfvars(){
   cat >"${MANIFEST_TFVARS}" <<EOL
-  $(echo "pgleaderchk_pkg_ident =$(grep "automate-backend-pgleaderchk" ${MANIFEST_PATH})" | sed 's/,*$//g')
-  $(echo "postgresql_pkg_ident =$(grep "automate-backend-postgresql" ${MANIFEST_PATH})" | sed 's/,*$//g')
-  $(echo "proxy_pkg_ident = $(grep "automate-backend-haproxy" ${MANIFEST_PATH})" | sed 's/,*$//g')
-  $(echo "journalbeat_pkg_ident = $(grep "automate-backend-journalbeat" ${MANIFEST_PATH})" | sed 's/,*$//g')
-  $(echo "metricbeat_pkg_ident = $(grep "automate-backend-metricbeat" ${MANIFEST_PATH})" | sed 's/,*$//g')
-  $(echo "kibana_pkg_ident = $(grep "automate-backend-kibana" ${MANIFEST_PATH})" | sed 's/,*$//g')
-  $(echo "elasticsearch_pkg_ident = $(grep "automate-backend-elasticsearch" ${MANIFEST_PATH})" | sed 's/,*$//g')
-  $(echo "elasticsidecar_pkg_ident = $(grep "automate-backend-elasticsidecar" ${MANIFEST_PATH})" | sed 's/,*$//g')
-  $(echo "curator_pkg_ident = $(grep "automate-backend-curator" ${MANIFEST_PATH})" | sed 's/,*$//g')
+  pgleaderchk_pkg_ident = " $(grep "automate-backend-pgleaderchk" ${PACKAGES_INFO})"
+  postgresql_pkg_ident = " $(grep "automate-backend-postgresql" ${PACKAGES_INFO})" 
+  proxy_pkg_ident = " $(grep "automate-backend-haproxy" ${PACKAGES_INFO})"
+  journalbeat_pkg_ident = " $(grep "automate-backend-journalbeat" ${PACKAGES_INFO})"
+  metricbeat_pkg_ident = " $(grep "automate-backend-metricbeat" ${PACKAGES_INFO})"
+  kibana_pkg_ident = " $(grep "automate-backend-kibana" ${PACKAGES_INFO})"
+  elasticsearch_pkg_ident = " $(grep "automate-backend-elasticsearch" ${PACKAGES_INFO})"
+  elasticsidecar_pkg_ident = " $(grep "automate-backend-elasticsidecar" ${PACKAGES_INFO})"
+  curator_pkg_ident = " $(grep "automate-backend-curator" ${PACKAGES_INFO})"
 EOL
 }
-
-hardcode_manifest_auto_tfvars(){
-    # We are hardcoding this value as of now for a2ha_manifest.auto.tfvars, because when we will be moving this in automate repo there will be automate manifest file so 
-   # from that file we will be creating the a2ha_manifest.auto.tfvars like we are doing in elif section 
-    echo "
-    pgleaderchk_pkg_ident    = \"chef/automate-backend-pgleaderchk/1.0.22/20201118194223\"
-    postgresql_pkg_ident     = \"chef/automate-backend-postgresql/1.0.22/20201118194223\"
-    proxy_pkg_ident          = \"chef/automate-backend-haproxy/1.0.22/20201118194223\"
-    journalbeat_pkg_ident    = \"chef/automate-backend-journalbeat/1.0.22/20201118194223\"
-    metricbeat_pkg_ident     = \"chef/automate-backend-metricbeat/1.0.22/20201118194223\"
-    kibana_pkg_ident         = \"chef/automate-backend-kibana/1.0.22/20201118194223\"
-    elasticsearch_pkg_ident  = \"chef/automate-backend-elasticsearch/1.0.22/20201118194201\"
-    elasticsidecar_pkg_ident = \"chef/automate-backend-elasticsidecar/1.0.22/20201118194223\"
-    curator_pkg_ident        = \"chef/automate-backend-curator/1.0.22/20201118193951\"
-   " > ${MANIFEST_TFVARS}
-}
-
-  
 
 exec_docker() {
   # in Docker mode we hard code various arguments
@@ -200,7 +148,7 @@ exec_docker() {
   else
     args+=('-m' '/workspace/manifest.json')
   fi
-  touch ${TARBALL_PATH}
+  touch "${TARBALL_PATH}"
   docker run --rm -it \
     --env="ORIGINAL_TARBALL=${TARBALL_PATH}" \
     --volume "${REPO_PATH}":/workspace:ro \
@@ -225,7 +173,7 @@ do_tasks() {
 if [ $# -eq 0 ]; then
   usage
 fi
-while getopts ":b:d:t:w:o:h" opt; do
+while getopts ":b:d:t:w:o:h:v:q:" opt; do
   case "${opt}" in
     d)
       export CHEF_AUTOMATE_BIN_PATH=${OPTARG}
@@ -241,6 +189,12 @@ while getopts ":b:d:t:w:o:h" opt; do
       ;;  
     t)
       export BUNDLE_TYPE=${OPTARG}
+      ;;
+    v)
+      export FRONTENDAIB_TFVARS=${OPTARG}
+      ;;
+    q)
+      export BACKENDAIB_TFVARS=${OPTARG}
       ;;
     h)
       usage
@@ -261,11 +215,6 @@ if [[ -z ${BUNDLE_TYPE} ]]; then
   echo "ERROR: required option -t not specified!"
   usage
 fi
-if [[ -z ${TARBALL_PATH} ]]; then
-  echo "ERROR: required option -o not specified!"
-  usage
-fi
-# Set up some path context variables
 ABSOLUTE_PATH=$(abs_path "${0}")
 export ABSOLUTE_PATH
 REPO_PATH=$(dirname "$(dirname "${ABSOLUTE_PATH}")")

@@ -15,7 +15,7 @@
             <ul>
               <li>
                 <span class="heading">Environment</span>
-                <span data-cy="node-env">{{InfraNode?.environment}}</span>
+                <span data-cy="node-env">{{environmentName}}</span>
               </li>
               <li>
                 <span class="heading">Policy Group</span>
@@ -70,11 +70,11 @@
       </app-edit-infra-node-attribute-modal>
 
       <section class="page-body" *ngIf="tabValue === 'details'">
-        <chef-loading-spinner class="top-spinner" *ngIf="nodeDetailsLoading" size="50"></chef-loading-spinner>
+        <chef-loading-spinner class="full-screen-spinner" *ngIf="nodeDetailsLoading" size="50"></chef-loading-spinner>
         <div class="details-tab" *ngIf="!nodeDetailsLoading">
           <div class="spinner">
-            <chef-loading-spinner *ngIf="nodeDetailsLoading" size="50" fixed></chef-loading-spinner>
-            <chef-loading-spinner *ngIf="updatingTags" size="50" fixed></chef-loading-spinner>
+            <chef-loading-spinner class="full-screen-spinner" *ngIf="nodeDetailsLoading" size="50" fixed></chef-loading-spinner>
+            <chef-loading-spinner class="full-screen-spinner" *ngIf="updatingTags" size="50" fixed></chef-loading-spinner>
           </div>
           <ng-container *ngIf="!nodeDetailsLoading">
             <div class="node-details-section">
@@ -235,7 +235,7 @@
                 <img alt="No preview" src="/assets/img/no_preview.gif" />
                 <p>No run list is set for the node.</p>
               </div>
-              <div *ngIf="!hasRun_List && !runListLoading && conflictError" class="empty-section">
+              <div data-cy="error-runlist" *ngIf="!hasRun_List && !runListLoading && conflictError" class="empty-section">
                 <img alt="No preview" src="/assets/img/no_preview.gif" />
                 <p>Cannot load run_list!</p>
               </div>
@@ -269,7 +269,6 @@
                     <span>Collapse All</span>
                   </chef-button>
                   <chef-button tertiary class="right-button-box"
-                    [disabled]="conflictError"
                     (click)="openEditAttrModal(InfraNode.normal_attributes)"
                     data-cy="node-edit-attributes">
                     <span class="material-icons edit-item">mode_edit</span>
