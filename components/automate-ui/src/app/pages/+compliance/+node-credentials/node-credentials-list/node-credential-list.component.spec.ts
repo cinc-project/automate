@@ -10,6 +10,8 @@ import { FeatureFlagsService } from 'app/services/feature-flags/feature-flags.se
 import { FormBuilder } from '@angular/forms';
 import { NodeCredential, NodeCredentialTypes } from 'app/entities/node-credentials/node-credential.model';
 import { MatOptionSelectionChange } from '@angular/material/core';
+import { RouterTestingModule } from '@angular/router/testing';
+
 
 describe('NodeCredentialListComponent', () => {
   let store: Store<NgrxStateAtom>;
@@ -57,6 +59,7 @@ describe('NodeCredentialListComponent', () => {
       ],
       imports: [
         ChefPipesModule,
+        RouterTestingModule,
         StoreModule.forRoot(ngrxReducers, { initialState: defaultInitialState, runtimeChecks })
       ]
     }).compileComponents();
