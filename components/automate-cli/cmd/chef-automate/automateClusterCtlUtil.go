@@ -26,7 +26,8 @@ func executeAutomateClusterCtlCommand(command string, args []string, helpDocs st
 	if len(command) < 1 {
 		return errors.New("Invalid or empty command")
 	}
-	writer.Printf("%s command execution started \n\n\n", command)
+	//writer.Printf("%s command execution started \n\n\n", command)
+	writer.StartSpinner()
 	args = append([]string{command}, args...)
 	c := exec.Command("automate-cluster-ctl", args...)
 	c.Dir = "/hab/a2_deploy_workspace"
@@ -49,7 +50,8 @@ func executeAutomateClusterCtlCommand(command string, args []string, helpDocs st
 	if len(errStr) > 0 {
 		writer.Printf("\nerr:\n%s\n", errStr)
 	}
-	writer.Printf("%s command execution done, exiting\n", command)
+	//writer.Printf("%s command execution done, exiting\n", command)
+	writer.StopSpinner()
 	return err
 }
 

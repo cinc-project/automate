@@ -55,6 +55,10 @@ var (
 
 func runStatusCmd(cmd *cobra.Command, args []string) error {
 	if isA2HARBFileExist() {
+		err := executeShellCommand("stty", []string{"rows", "100", "cols", "150"})
+		if err != nil {
+			return err
+		}
 		return executeAutomateClusterCtlCommand("status", args, statusHAHelpDocs)
 	}
 	writeStatus := func(res *api.StatusResponse) {
