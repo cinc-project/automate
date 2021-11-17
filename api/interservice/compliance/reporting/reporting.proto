@@ -352,6 +352,7 @@ message ControlElement {
 	string profile = 3;
 	float impact = 4;
 	int32 results = 5;
+	string status = 6;
 }
 message ControlElements {
 	repeated ControlElement control_elements = 1;

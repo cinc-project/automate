@@ -555,6 +555,10 @@ func init() {
           "type": "integer",
           "format": "int32",
           "description": "The total number of results."
+        },
+        "status": {
+          "type": "string",
+          "title": "The control's status"
         }
       }
     },

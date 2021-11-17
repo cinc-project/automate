@@ -1675,6 +1675,11 @@ func getProfileAndControlQueryWithPagination(filters map[string][]string) (*elas
 	numberOfProfiles := len(filters["profile_id"])
 	numberOfControls := len(filters["control"])
 
+	var status string
+	if temp, ok := filters["status"]; ok {
+		status = strings.Join(temp, "|")
+	}
+
 	if numberOfProfiles == 0 {
 		profileIds = ".*"
 	} else {
@@ -1689,19 +1694,28 @@ func getProfileAndControlQueryWithPagination(filters map[string][]string) (*elas
 
 	if numberOfProfiles > 0 && numberOfControls > 0 {
 		profileQuery := elastic.NewQueryStringQuery(fmt.Sprintf("profiles.sha256:/(%s)/", profileIds))
-		controlQuery := elastic.NewQueryStringQuery(fmt.Sprintf("profiles.controls.id:/(%s)/", controlIds))
-		nestedControlQuery := elastic.NewNestedQuery("profiles.controls", controlQuery)
-		nestedControlQuery = nestedControlQuery.InnerHit(elastic.NewInnerHit())
+		controlQuery := controlQuery(controlIds, status)
+		nestedControlQuery, err := createPaginatedControl(controlQuery, filters)
+		if err != nil {
+			return nil, err
+		}
 		profileControlQuery = profileControlQuery.Must(profileQuery)
 		profileControlQuery = profileControlQuery.Must(nestedControlQuery)
 	} else if numberOfControls > 0 {
-		controlQuery := elastic.NewQueryStringQuery(fmt.Sprintf("profiles.controls.id:/(%s)/", controlIds))
-		nestedControlQuery := elastic.NewNestedQuery("profiles.controls", controlQuery)
-		nestedControlQuery = nestedControlQuery.InnerHit(elastic.NewInnerHit())
+		controlQuery := controlQuery(controlIds, status)
+		nestedControlQuery, err := createPaginatedControl(controlQuery, filters)
+		if err != nil {
+			return nil, err
+		}
 		profileControlQuery = profileControlQuery.Must(nestedControlQuery)
 	} else if numberOfProfiles > 0 {
 		profileQuery := elastic.NewQueryStringQuery(fmt.Sprintf("profiles.sha256:/(%s)/", profileIds))
-		controlQuery := elastic.NewMatchAllQuery()
+		var controlQuery elastic.Query
+		if status != "" {
+			controlQuery = elastic.NewQueryStringQuery(fmt.Sprintf("profiles.controls.status:/(%s)/", status))
+		} else {
+			controlQuery = elastic.NewMatchAllQuery()
+		}
 		nestedControlQuery, err := createPaginatedControl(controlQuery, filters)
 		if err != nil {
 			return nil, err
@@ -1709,7 +1723,12 @@ func getProfileAndControlQueryWithPagination(filters map[string][]string) (*elas
 		profileControlQuery = profileControlQuery.Must(profileQuery)
 		profileControlQuery = profileControlQuery.Must(nestedControlQuery)
 	} else {
-		controlQuery := elastic.NewMatchAllQuery()
+		var controlQuery elastic.Query
+		if status != "" {
+			controlQuery = elastic.NewQueryStringQuery(fmt.Sprintf("profiles.controls.status:/(%s)/", status))
+		} else {
+			controlQuery = elastic.NewMatchAllQuery()
+		}
 		nestedControlQuery, err := createPaginatedControl(controlQuery, filters)
 		if err != nil {
 			return nil, err
@@ -1722,6 +1741,20 @@ func getProfileAndControlQueryWithPagination(filters map[string][]string) (*elas
 	return nestedQuery, nil
 }
 
+// controlQuery creates a query based on controlIds and status
+func controlQuery(controlIds, status string) elastic.Query {
+	var controlQuery elastic.Query
+	if status != "" {
+		idQuery := elastic.NewQueryStringQuery(fmt.Sprintf("profiles.controls.id:/(%s)/", controlIds))
+		statusQuery := elastic.NewQueryStringQuery(fmt.Sprintf("profiles.controls.status:/(%s)/", status))
+		boolQuery := elastic.NewBoolQuery()
+		controlQuery = boolQuery.Must(idQuery, statusQuery)
+	} else {
+		controlQuery = elastic.NewQueryStringQuery(fmt.Sprintf("profiles.controls.id:/(%s)/", controlIds))
+	}
+	return controlQuery
+}
+
 // populateControlElements creates the control lists for each search hit.
 func populateControlElements(searchHits *elastic.SearchHit, profiles []string) ([]*reportingapi.ControlElement, error) {
 	var listControls = make([]*reportingapi.ControlElement, 0)
@@ -1730,6 +1763,7 @@ func populateControlElements(searchHits *elastic.SearchHit, profiles []string) (
 		Impact  float32
 		Results []*reportingapi.Result
 		Title   string
+		Status  string
 	}
 	for _, innerhit := range searchHits.InnerHits["profiles.controls"].Hits.Hits {
 		control := &reportingapi.ControlElement{}
@@ -1745,6 +1779,7 @@ func populateControlElements(searchHits *elastic.SearchHit, profiles []string) (
 		control.Results = int32(len(tempControl.Results))
 		control.Title = tempControl.Title
 		control.Profile = profiles[profileID]
+		control.Status = tempControl.Status
 		listControls = append(listControls, control)
 	}
 	return listControls, nil
