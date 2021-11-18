@@ -40,3 +40,26 @@ ES volume size also depends on the number of nodes and frequency of Chef Infra C
 For **Elasticsearch** and **PostgresSQL**, a minimum of three node clusters is required.
 
 {{< /note >}}
+
+## Amazon's Virtual Private Cloud (VPC)
+
+Amazon VPC, a virtual network dedicated to your AWS account that enables you to launch AWS resources into a virtual network. This virtual network resembles a traditional network that you had operate in your own data center, with the benefits of using the scalable infrastructure of AWS.
+
+Amazon VPC is the networking layer for Amazon EC2. 
+
+Amazon Elastic Compute Cloud (Amazon EC2) provides scalable computing capacity in the Amazon Web Services (AWS) Cloud. Using Amazon EC2 eliminates your need to invest in hardware up front, so you can develop and deploy applications faster. You can use Amazon EC2 to launch as many or as few virtual servers as you need, configure security and networking, and manage storage. Amazon EC2 enables you to scale up or down to handle changes in requirements or spikes in popularity, reducing your need to forecast traffic.
+
+### Amazon's Virtual Private Cloud (VPC) Limit
+
+The default limit to create a VPC in a region is 5. Chef Automate HA on AWS deployment creates two VPCs, each for the bastion host and for the rest of the node in a cluster.
+
+{{< note >}}
+
+You require a minimum of three node clusters for ElaticSearcg and Postgres-sql instances.
+
+{{< /note >}}
+
+!--  Do we need to cover about firewall settings? https://github.com/chef/a2ha-docs/wiki/FireWall-Setting
+
+CIDR block —Classless Inter-Domain Routing. An internet protocol address allocation and route aggregation methodology. For more information, see Classless Inter-Domain Routing in Wikipedia.
+Subnet — A range of IP addresses in your VPC.
