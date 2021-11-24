@@ -6,12 +6,10 @@ import (
 	"time"
 
 	"github.com/go-gorp/gorp"
-	"github.com/golang/protobuf/ptypes"
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/chef/automate/api/interservice/report_manager"
 	"github.com/chef/automate/components/report-manager-service/config"
 	libdb "github.com/chef/automate/lib/db"
 	"github.com/chef/automate/lib/db/migrator"
@@ -24,12 +22,12 @@ type DB struct {
 
 // customReportRequestStatus used to read custom report request status from DB
 type customReportRequestStatus struct {
-	ID         string    `db:"id"`
-	Status     string    `db:"status"`
-	Message    string    `db:"message"`
-	ReportSize int64     `db:"custom_report_size"`
-	StartTime  time.Time `db:"created_at"`
-	EndTime    time.Time `db:"updated_at"`
+	ID         string         `db:"id"`
+	Status     string         `db:"status"`
+	Message    sql.NullString `db:"message"`
+	ReportSize sql.NullInt64  `db:"custom_report_size"`
+	StartTime  time.Time      `db:"created_at"`
+	EndTime    time.Time      `db:"updated_at"`
 }
 
 // ConnectAndMigrate creates a new Postgres connection, connects to the database server and runs
@@ -102,32 +100,13 @@ func (db *DB) UpdateTask(id, status, msg string, updatedTime time.Time, objSize 
 	return err
 }
 
-func (db *DB) GetAllStatus(id string, endTime time.Time) (*report_manager.AllStatusResponse, error) {
+func (db *DB) GetAllStatus(id string, endTime time.Time) ([]*customReportRequestStatus, error) {
 	var dbResp []*customReportRequestStatus
-	resp := report_manager.AllStatusResponse{}
 	_, err := db.Select(&dbResp, getStatus, id, endTime)
 	if err != nil {
 		return nil, errors.Wrap(err, "error in fetching the report request status from db")
 	}
-	for _, reportStatus := range dbResp {
-		createdAt, err := ptypes.TimestampProto(reportStatus.StartTime)
-		if err != nil {
-			return nil, errors.Wrapf(err, "error in converting the created at with value %s to timestamppb.Timestamp", reportStatus.StartTime)
-		}
-		endedAt, err := ptypes.TimestampProto(reportStatus.EndTime)
-		if err != nil {
-			return nil, errors.Wrapf(err, "error in converting the ended at with value %s to timestamppb.Timestamp", reportStatus.EndTime)
-		}
-		resp.Data = append(resp.Data, &report_manager.StatusResponse{
-			AcknowledgementId: reportStatus.ID,
-			Status:            reportStatus.Status,
-			ReportSize:        reportStatus.ReportSize,
-			ErrMessage:        reportStatus.Message,
-			CreatedAt:         createdAt,
-			EndedAt:           endedAt,
-		})
-	}
-	return &resp, nil
+	return dbResp, nil
 }
 
 const insertTask = `

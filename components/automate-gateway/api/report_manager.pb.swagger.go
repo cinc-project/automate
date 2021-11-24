@@ -63,6 +63,9 @@ func init() {
         "ended_at": {
           "type": "string",
           "format": "date-time"
+        },
+        "duration": {
+          "type": "string"
         }
       }
     },
