@@ -1,7 +1,7 @@
 @import "~styles/variables";
 
 
-chef-modal {
+chef-modal.reset-client-modal {
 
   [slot=title] {
     font-style: normal;
@@ -68,19 +68,6 @@ chef-modal {
       position: relative;
     }
 
-    .key-tab-body {
-      display: flex;
-      background: $chef-white;
-      border: 0.5px solid $chef-key-tab;
-      height: 300px;
-
-      chef-snippet {
-        height: 298px;
-        width: 99.9%;
-      }
-
-    }
-
     .detail {
       background: $chef-success;
       color: $white;
@@ -100,7 +87,7 @@ chef-modal {
           width: 16px;
           background-image: url('/assets/img/icon-check-circle.png');
           position: absolute;
-          top: -51px;
+          top: -30px;
           left: 8px;
         }
 
@@ -137,9 +124,7 @@ chef-modal {
       }
     }
   }
-}
 
-chef-modal.reset-client-modal {
   ::ng-deep {
     .modal {
       box-shadow: 0px 0px 30px 0px #CCC;
@@ -247,91 +232,30 @@ chef-modal.reset-client-modal {
     }
 
     chef-snippet pre {
-      font-size: 12px;
-      height: 297px;
-      width: 100%;
-      line-height: 20px;
-      letter-spacing: 0.25px;
-      padding: 1.5em;
-      color: $chef-black;
+      display: inline-block;
     }
 
   }
 
-}
-
-chef-modal.reset-modal {
-  ::ng-deep {
-    .modal {
-      box-shadow: 0px 0px 30px 0px $light-grey;
-      max-width: 528px;
-      min-width: 528px;
-      outline: none;
-
-      chef-button {
-        &.close {
-          border: none;
-          color: $chef-black;
-          margin-right: 22px;
-          margin-top: 16px;
-
-          &:hover, &:focus {
-            background: none;
-            outline: none;
-          }
-        }
-
-        button {
-          line-height: 20px;
-          letter-spacing: 0.5px;
-
-          &:focus {
-            outline: none;
-            border: 0.5px solid $chef-primary-bright;
-            border-radius: 4px;
-          }
-        }
-
-        .cancel-button.hydrated {
-          background: none;
-        }
-      }
-
-      chef-checkbox {
-        &[aria-checked=false] .check-wrap {
-          border-color: $chef-primary-bright;
-        }
-
-        &:focus {
-          outline: none;
-          border: 0.5px solid $chef-primary-bright;
-          border-radius: 4px;
-        }
-
-        .label-wrap {
-          margin-left: 8px;
-        }
-
-        .check-wrap {
-          width: 16px;
-          min-width: 16px;
-          height: 16px;
-        }
-      }
+  .id-margin {
+    .key-tab-body {
+      display: flex;
+      background: $chef-white;
+      border: 0.5px solid $chef-key-tab;
+      height: 208px;
+      padding: 1rem;
+      overflow-y: auto;
     }
+  }
 
-    .modal-overlay {
-      background-color: $chef-white;
-      opacity: 0.5;
-    }
+  ::ng-deep .id-margin .key-tab-body::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+    background-color: $chef-modal-scrollbar;
+  }
 
-    chef-snippet pre {
-      font-size: 12px;
-      height: 297px;
-      width: 100%;
-      line-height: 20px;
-      letter-spacing: 0.05px;
-      padding: 1.5em;
-    }
+  ::ng-deep .id-margin .key-tab-body::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: $chef-modal;
   }
 }

@@ -9,7 +9,19 @@ chef-modal.create-client-modal {
     line-height: 24px;
     letter-spacing: 0.15px;
     padding-bottom: 30px;
+    overflow-x: hidden;
   }
+
+  ::ng-deep .modal::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background-color: $chef-modal;
+}
+
+  ::ng-deep .modal-overlay {
+    background-color: $chef-white;
+    mix-blend-mode: normal;
+    opacity: 0.7;
+}
 
   .flex-container {
     display: flex;
@@ -37,18 +49,6 @@ chef-modal.create-client-modal {
 
       label .label {
         font-weight: normal;
-      }
-
-      .key-tab-body {
-        display: flex;
-        background: $chef-white;
-        border: 0.5px solid $chef-key-tab;
-        height: 300px;
-
-        chef-snippet {
-          height: 298px;
-          width: 100%;
-        }
       }
 
       chef-checkbox {
@@ -177,14 +177,31 @@ chef-modal.create-client-modal {
       background-color: $chef-white;
       opacity: 0.5;
     }
+  }
 
-    chef-snippet pre {
-      font-size: 12px;
-      height: 297px;
-      width: 100%;
-      line-height: 20px;
-      letter-spacing: 0.05px;
-      padding: 1.5em;
+  chef-snippet {
+    display: inline-block;
+  }
+
+  .id-margin {
+    .key-tab-body {
+      display: flex;
+      background: $chef-white;
+      border: 0.5px solid $chef-key-tab;
+      height: 208px;
+      padding: 1rem;
+      overflow-y: auto;
     }
+  }
+
+  ::ng-deep .id-margin .key-tab-body::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+    background-color: $chef-modal-scrollbar;
+  }
+
+  ::ng-deep .id-margin .key-tab-body::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background-color: $chef-modal;
   }
 }

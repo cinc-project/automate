@@ -23,8 +23,8 @@
           <p>Client successfully created. Copy the private key below and keep it somewhere safe. It is NOT stored on
             the server.</p>
         </div>
-        <div *ngIf="created" class="key-tab-body">
-          <chef-snippet [code]="privateKey" lang="json"></chef-snippet>
+        <div *ngIf="created" class="key-tab-body description-scroll">
+          <chef-snippet id="override" [code]="privateKey" lang="json"></chef-snippet>
         </div>
       </div>
       <div id="button-bar">
