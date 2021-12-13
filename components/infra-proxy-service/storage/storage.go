@@ -36,13 +36,15 @@ type Resetter interface {
 
 // Server is the struct ingested and returned by our backend implementations.
 type Server struct {
-	ID        string
-	Name      string
-	Fqdn      string
-	IPAddress string
-	OrgsCount int32
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID           string
+	Name         string
+	Fqdn         string
+	IPAddress    string
+	OrgsCount    int32
+	Projects     []string
+	CredentialID string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // Org is the struct ingested and returned by our backend implementations.
