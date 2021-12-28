@@ -1,5 +1,5 @@
 # shellcheck disable=SC2148
-UPSTREAM_PKG_IDENT="chef/kibana-odfe/0.10.0.4"
+UPSTREAM_PKG_IDENT="ff/kibana-odfe/0.10.1.1/20211227151152"
 pkg_name="automate-ha-kibana"
 pkg_description="Wrapper package for chef/kibana"
 pkg_origin="chef"

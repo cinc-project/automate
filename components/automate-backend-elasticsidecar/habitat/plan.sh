@@ -10,7 +10,7 @@ pkg_upstream_url="http://github.com/chef/a2-ha-backend/components/automate-backe
 pkg_deps=(
   core/bash
   core/ruby30
-  chef/elasticsearch-odfe
+  ff/elasticsearch-odfe/0.10.22.0/20211227141902
 )
 pkg_build_deps=(
   core/make

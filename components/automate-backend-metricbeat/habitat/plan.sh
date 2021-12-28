@@ -1,5 +1,5 @@
 # shellcheck disable=SC2148
-UPSTREAM_PKG_IDENT="chef/metricbeat/6.8.6"
+UPSTREAM_PKG_IDENT="ff/metricbeat/6.8.22/20211227153559"
 pkg_name="automate-ha-metricbeat"
 pkg_description="Wrapper package for chef/metricbeat"
 pkg_origin="chef"
