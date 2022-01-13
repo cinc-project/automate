@@ -132,18 +132,7 @@ func runAutomateHAFlow(args []string, offlineMode bool) error {
 	if !strings.Contains(response, "y") {
 		return errors.New("canceled upgrade")
 	}
-	if upgradeRunCmdFlags.upgradefrontends {
-		args = append(args, "--upgrade-frontends", "-y")
-	}
-	if upgradeRunCmdFlags.upgradebackends {
-		args = append(args, "--upgrade-backends", "-y")
-	}
-	if upgradeRunCmdFlags.upgradeairgapbundles {
-		args = append(args, "--upgrade-airgap-bundles", "-y")
-	}
-	if upgradeRunCmdFlags.skipDeploy {
-		args = append(args, "--skip-deploy")
-	}
+	
 	if offlineMode {
 		writer.Title("Installing airgap install bundle")
 		airgapMetaData, err := airgap.Unpack(upgradeRunCmdFlags.airgap)
@@ -165,6 +154,24 @@ func runAutomateHAFlow(args []string, offlineMode bool) error {
 			if err != nil {
 				return err
 			}
+		}
+		args = append(args,"-y")
+		if upgradeRunCmdFlags.skipDeploy {
+			return 
+		}
+
+	} else {
+		if upgradeRunCmdFlags.upgradefrontends {
+			args = append(args, "--upgrade-frontends", "-y")
+		}
+		if upgradeRunCmdFlags.upgradebackends {
+			args = append(args, "--upgrade-backends", "-y")
+		}
+		if upgradeRunCmdFlags.upgradeairgapbundles {
+			args = append(args, "--upgrade-airgap-bundles", "-y")
+		}
+		if upgradeRunCmdFlags.skipDeploy {
+			args = append(args, "--skip-deploy")
 		}
 	}
 	return executeAutomateClusterCtlCommandAsync("deploy", args, upgradeHaHelpDoc)
