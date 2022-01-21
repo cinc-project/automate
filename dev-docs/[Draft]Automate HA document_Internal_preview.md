@@ -529,9 +529,9 @@ bucket name (bucket = "bucket-name" and name = "bucket-name")
         secret_key = "s3kQ4Idyf9WjAgRXyv9tLYCQgYNJ39+PCumHYV/5"
 
 After putting contents in automate.toml file, we need to eceute below command. This command will also trigger the deployment. 
-
-**./chef-automate patch configs/automate.toml** 
-
+```
+./chef-automate patch configs/automate.toml
+```
 Back-up configurations to be done after deploying cluster
 
 IAM Role: Assign the IAM Role to the all the elastic search instances in the cluster that we create above step.
