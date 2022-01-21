@@ -394,9 +394,9 @@ Export the current Elasticsearch config from the Habitat supervisor. You will ne
 Edit es\_config.toml and add the following settings to the end of the file.
 Note: If credentials have never been rotated this file may be empty.
 
-*[es\_yaml.path]*      
+	*[es\_yaml.path]*      
 
-`  `*repo = "/mnt/automate\_backups/elasticsearch"*
+	`  `*repo = "/mnt/automate\_backups/elasticsearch"*
 
 Apply updated es\_config.toml config to Elasticsearch, this only needs to be done once. This will trigger a restart of the Elasticsearch services on each server.
 
@@ -406,7 +406,7 @@ Apply updated es\_config.toml config to Elasticsearch, this only needs to be don
 
 ` `curl -k -X GET "<https://localhost:9200/_cat/indices/*?v=true&s=index&pretty>" -u admin:admin (Another way to check es. Check that all the indices is green or not)
 
-# Watch for a message about Elasticsearch going from RED to GREEN
+ Watch for a message about Elasticsearch going from RED to GREEN
 ` `journalctl -u hab-sup -f | grep 'automate-ha-elasticsearch'
 
 Configure Automate to handle external Elasticsearch backups	
@@ -443,11 +443,11 @@ Permissions to be provided:
 
 We need to check if the IAM user has all the required permissions or not. Listed below are the must have permission policies:
 
-AdministratorAccess
+	AdministratorAccess
 
-APIGatewayAdministrator (In case of aws select AmazonAPIGatewayAdministrator)
+	APIGatewayAdministrator (In case of aws select AmazonAPIGatewayAdministrator)
 
-S3FullAccess (In case of aws select AmazonS3FullAccess)
+	S3FullAccess (In case of aws select AmazonS3FullAccess)
 
 We also have to create IAM role to give access of s3 to elasticsearch instances. This is required because ES instance will try to access s3 to store backup.
 
