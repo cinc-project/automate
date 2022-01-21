@@ -561,12 +561,6 @@ vi configs/automate.toml
 
 [global.v1.backups.s3.credentials]
 
-`    `# Optionally, AWS credentials may be provided. If these are not provided, IAM instance
-
-`    `# credentials will be used. It's also possible for these to be read through the standard
-
-`    `# AWS environment variables or through the shared AWS config files.
-
 `    `access\_key = "AKIARUQHMSKHGYTUJ&UI"
 
 `    `secret\_key = "s3kQ4Idyf9WjAgRXyv9tLYCQgYTRESDFRFV"
