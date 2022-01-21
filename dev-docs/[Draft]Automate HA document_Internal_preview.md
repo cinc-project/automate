@@ -368,7 +368,7 @@ This will give the status of frontend and backend node. 
 # Backup and restore
 Back-up configurations to be done before deploying cluster. 
 ## Pre-back-up configuration:
-### ES configuration and setup
+### Pre-back-up for ES configuration and setup
 A shared file system is needed to create Elasticsearch snapshots. In order to register the snapshot repository with Elasticsearch it is necessary to mount the same shared filesystem to the same location on all master and data nodes. This location (or one of its parent directories) must be registered in the path.repo setting on all master and data nodes.
 
 Assuming that the shared filesystem is mounted to /mnt/automate\_backups, we can configure Automate to register the snapshot locations with Elasticsearch.
@@ -436,7 +436,7 @@ path = "/mnt/automate\_backups/backups"
 After that patch the config. This will trigger also the deployment.
 
 ./chef-automate config patch automate.toml
-### S3 Configuration for backup 
+### Pre-back-up Configuration for S3
 In order to run the terraform scripts, we need an IAM user with proper permissions. All the required permissions are mentioned in the next section. We need to make sure that we have the access key id and secret access key for the user. If not, then regenerate a new access key and keep it handy.
 
 Permissions to be provided:
@@ -445,11 +445,11 @@ We need to check if the IAM user has all the required permissions or not. Listed
 
 AdministratorAccess
 
-AmazonAPIGatewayAdministrator
+APIGatewayAdministrator (In case of aws select AmazonAPIGatewayAdministrator)
 
-AmazonS3FullAccess
+S3FullAccess (In case of aws select AmazonS3FullAccess)
 
-We also have to create IAM role to give access of s3 to elasticsearch iinstances.
+We also have to create IAM role to give access of s3 to elasticsearch instances. This is required because ES instance will try to access s3 to store backup.
 
 These permissions can either be directly added to the user or can be added via IAM Group.
 
@@ -567,8 +567,6 @@ vi configs/automate.toml
 
 `    `# AWS environment variables or through the shared AWS config files.
 
-`    `# Use the credentials obtained from here [AWS-Credential](https://github.com/chef/automate-as-saas/wiki/Bastion-Setup#aws-credentials)
-
 `    `access\_key = "AKIARUQHMSKHGYTUJ&UI"
 
 `    `secret\_key = "s3kQ4Idyf9WjAgRXyv9tLYCQgYTRESDFRFV"
@@ -617,7 +615,7 @@ sudo systemctl start chef-automate
 
 **In case of S3 back-up:**
 
-Login to same instance of Chef Automate front-end node from which backup is taken run the restore 	command
+Login to same instance of Chef Automate front-end node from which backup is taken run the restore command
 
 chef-automate backup restore s3://bucket\_name/path/to/backups/BACKUP\_ID --skip-preflight --s3-access-key "Access\_Key"  --s3-secret-key "Secret\_Key"
 
