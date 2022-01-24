@@ -13,6 +13,8 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -1839,22 +1841,21 @@ func (s *server) Upgrade(ctx context.Context, req *api.UpgradeRequest) (*api.Upg
 			return nil, status.Errorf(codes.InvalidArgument, "specifying a version is not allowed in airgap mode, please use `chef-automate upgrade run --airgap-bundle`")
 		}
 
-		if currentRelease != "" && req.Version < currentRelease {
-			return nil, status.Errorf(codes.OutOfRange, "the version specified %q is older than the current version %q", req.Version, currentRelease)
+		if !isCompatible(currentRelease, req.Version, nextManifestVersion) {
+			return nil, status.Errorf(codes.OutOfRange, "the version specified %q is not compatible for the current version %q", req.Version, currentRelease)
 		}
 
-		// Todo(milestone) Add the condition to check if the required version is incompatible
+		nextManifestVersion = req.Version
 
 		// TODO(ssd) 2018-09-13: We are not currently
 		// requiring that the version passed is actually in
 		// the channel they have configured. Should we?
-		m, err = s.releaseManifestProvider.GetManifest(ctx, req.Version)
-	} else {
-		// Todo(milestone) get the next compatable manifest if it is not airgap
-		//m, err = s.releaseManifestProvider.RefreshManifest(ctx, channel)
-		m, err = s.releaseManifestProvider.GetManifest(ctx, nextManifestVersion)
-		//Todo(milestone) in airgap, get the manifest and perform the compatibility check.
 	}
+	m, err = s.releaseManifestProvider.GetManifest(ctx, nextManifestVersion)
+	/*} else {
+		//m, err = s.releaseManifestProvider.RefreshManifest(ctx, channel)
+		//Todo(milestone) in airgap, get the manifest and perform the compatibility check.
+	}*/
 
 	//Todo(milestone) incase of airgap find out the upgrade is major or minor
 
@@ -1892,6 +1893,114 @@ func (s *server) Upgrade(ctx context.Context, req *api.UpgradeRequest) (*api.Upg
 		NextVersion:     m.Version(),
 		TaskId:          task.ID.String(),
 	}, nil
+}
+
+func isCompatible(current, givenVersion, maxPossibleVersion string) bool {
+	_, isCurrentSem := manifest.IsSemVersionFmt(current)
+	givenMajor, isGivenVSem := manifest.IsSemVersionFmt(givenVersion)
+	maxPossibleMajor, isMaxPossibleSem := manifest.IsSemVersionFmt(maxPossibleVersion)
+
+	if !isCurrentSem { //current version is in timestamp version
+		if !isGivenVSem { //given version is in timestamp version
+			if !isMaxPossibleSem { //max possible version is in timestamp version
+				if current < givenVersion && givenVersion <= maxPossibleVersion {
+					return true
+				}
+				return false
+			} else { //max possible version is in semantic version
+				return current < givenVersion
+			}
+		} else { //given version is in semantic version
+			if !isMaxPossibleSem { //max possible version is in timestamp version
+				return false
+			} else { //max possible version is in semantic version
+				if givenMajor == maxPossibleMajor {
+					return isCompareSemVersions(givenVersion, maxPossibleVersion)
+				}
+			}
+		}
+	} else { //current version is in semantic version
+		if !isGivenVSem || !isMaxPossibleSem { // given version is in time stamp version or max possible version is in timestamp version
+			return false
+		}
+		if givenMajor == maxPossibleMajor {
+			return isCompareSemVersions(givenVersion, maxPossibleVersion)
+		}
+	}
+	return false
+}
+
+// isCompareSemVersions return true if v1 is less than or equal to v2
+func isCompareSemVersions(v1, v2 string) bool {
+	if v1 == v2 {
+		return true
+	}
+	v1Major, v1Minor, v1Patch := fetchVersions(v1)
+	v2Major, v2Minor, v2Patch := fetchVersions(v2)
+
+	v1MajorInt, err := strconv.Atoi(v1Major)
+	if err != nil {
+		logrus.WithError(err).Error("cannot convert major version to integer format")
+		return false
+	}
+
+	v2MajorInt, err := strconv.Atoi(v2Major)
+	if err != nil {
+		logrus.WithError(err).Error("cannot convert major version to integer format")
+		return false
+	}
+
+	if v1MajorInt < v2MajorInt {
+		return true
+	}
+	if v1MajorInt == v2MajorInt {
+		v1MinorInt, err := strconv.Atoi(v1Minor)
+		if err != nil {
+			logrus.WithError(err).Error("cannot convert minor version to integer format")
+			return false
+		}
+
+		v2MinorInt, err := strconv.Atoi(v2Minor)
+		if err != nil {
+			logrus.WithError(err).Error("cannot convert minor version to integer format")
+			return false
+		}
+
+		if v1MinorInt < v2MinorInt {
+			return true
+		}
+		if v1MinorInt == v2MinorInt {
+			v1PatchInt, err := strconv.Atoi(v1Patch)
+			if err != nil {
+				logrus.WithError(err).Error("cannot convert minor version to integer format")
+				return false
+			}
+
+			v2PatchInt, err := strconv.Atoi(v2Patch)
+			if err != nil {
+				logrus.WithError(err).Error("cannot convert minor version to integer format")
+				return false
+			}
+
+			if v1PatchInt < v2PatchInt {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// fetch versions returns the major, minor, and patch versions of a release if it is in semantic versioned.
+// return empty values, if the release is in timestamp mode
+func fetchVersions(release string) (major, minor, patch string) {
+	if release == "" {
+		return "", "", ""
+	}
+	splitStrings := strings.Split(release, ".")
+	if len(splitStrings) == 1 {
+		return "", "", ""
+	}
+	return splitStrings[0], splitStrings[1], splitStrings[2]
 }
 
 func (s *server) getPackageCleanupMode() string {

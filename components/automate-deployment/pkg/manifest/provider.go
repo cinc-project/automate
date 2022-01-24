@@ -245,7 +245,7 @@ func getCompatibleManifestVersion(ctx context.Context, version, url string) (isM
 
 	//get the minor/patch versions are available or not.
 	//check the current version is timestamp or semantic version
-	currentMajor, isSemVersion := isSemVersionFmt(version)
+	currentMajor, isSemVersion := IsSemVersionFmt(version)
 
 	if !isSemVersion {
 		//check for any minor
@@ -266,7 +266,7 @@ func getCompatibleManifestVersion(ctx context.Context, version, url string) (isM
 }
 
 //isSemVersionFmt checks the provided version is in semantic version format, if yes, will return the major version
-func isSemVersionFmt(version string) (string, bool) {
+func IsSemVersionFmt(version string) (string, bool) {
 	splitStrings := strings.Split(version, ".")
 	if len(splitStrings) > 1 {
 		return splitStrings[0], true
@@ -276,7 +276,7 @@ func isSemVersionFmt(version string) (string, bool) {
 
 func findLatestTimeStampVersion(list []string) (index int, version string) {
 	for index, item := range list {
-		if _, isSem := isSemVersionFmt(item); isSem {
+		if _, isSem := IsSemVersionFmt(item); isSem {
 			return index - 1, list[index-1]
 		} else if index == len(list)-1 { //reached to end
 			return index, list[index]
@@ -289,7 +289,7 @@ func findLatestTimeStampVersion(list []string) (index int, version string) {
 func findNextMajorVersionForTimeStamp(list []string) (int, string) {
 	majorVersion := ""
 	for index, item := range list {
-		if major, isSem := isSemVersionFmt(item); isSem {
+		if major, isSem := IsSemVersionFmt(item); isSem {
 			if majorVersion == "" {
 				majorVersion = major
 			} else if majorVersion != major {
@@ -305,7 +305,7 @@ func findNextMajorVersionForTimeStamp(list []string) (int, string) {
 
 func findPatchVersionForSemantic(currentMajor string, list []string) (int, string) {
 	for index, item := range list {
-		if major, _ := isSemVersionFmt(item); currentMajor != major {
+		if major, _ := IsSemVersionFmt(item); currentMajor != major {
 			return index - 1, list[index-1]
 		} else if index == len(list)-1 { //reached to end
 			return index, list[index]
@@ -318,7 +318,7 @@ func findPatchVersionForSemantic(currentMajor string, list []string) (int, strin
 func findNextMajorVersionForSemantic(currentMajor string, list []string) (int, string) {
 	nextMajorVersion := ""
 	for index, item := range list {
-		if major, _ := isSemVersionFmt(item); currentMajor != major {
+		if major, _ := IsSemVersionFmt(item); currentMajor != major {
 			if nextMajorVersion == "" {
 				nextMajorVersion = major
 			} else if nextMajorVersion != major {
