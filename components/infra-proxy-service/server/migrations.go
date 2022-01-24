@@ -1,6 +1,6 @@
 package server
 
-import (
+/*import (
 	"bytes"
 	"github.com/chef/automate/api/interservice/infra_proxy/migrations/response"
 	"github.com/chef/automate/api/interservice/infra_proxy/migrations/service"
@@ -85,3 +85,4 @@ func createMigrationId() (string, error) {
 	}
 	return uuid.String(), nil
 }
+*/

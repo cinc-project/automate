@@ -1,6 +1,6 @@
 package migrations
 
-/*import (
+import (
 	"bytes"
 	uuid "github.com/chef/automate/lib/uuid4"
 	log "github.com/sirupsen/logrus"
@@ -13,9 +13,7 @@ package migrations
 	"github.com/chef/automate/components/infra-proxy-service/server"
 )
 
-type Server struct {
-	s *server.Server
-}
+type Server server.Server
 
 // Takes up file name from service.MigrationDataService_UploadFileServer.MigrationId and creates the file in the same directory
 func saveFile(migrationId string, filename string, fileData bytes.Buffer) error {
@@ -70,9 +68,9 @@ func (s Server) UploadFile(stream service.MigrationDataService_UploadFileServer)
 		return err
 	}
 
-	res := &response.UploadFileResponse{
+	res := &response.UploadZipFileResponse{
 		MigrationId: migrationId,
-		Status:      "Completed",
+		Success:     true,
 	}
 
 	err = stream.SendAndClose(res)
@@ -92,4 +90,3 @@ func createMigrationId() (string, error) {
 	}
 	return uuid.String(), nil
 }
-*/
