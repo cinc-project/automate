@@ -1,6 +1,6 @@
 package migrations
 
-import (
+/*import (
 	"bytes"
 	uuid "github.com/chef/automate/lib/uuid4"
 	log "github.com/sirupsen/logrus"
@@ -92,3 +92,4 @@ func createMigrationId() (string, error) {
 	}
 	return uuid.String(), nil
 }
+*/

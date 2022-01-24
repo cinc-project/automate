@@ -1,9 +1,12 @@
 package server
 
-/*import (
+import (
 	"bytes"
+	"github.com/chef/automate/api/interservice/infra_proxy/migrations/response"
+	"github.com/chef/automate/api/interservice/infra_proxy/migrations/service"
 	uuid "github.com/chef/automate/lib/uuid4"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"os"
 	"path"
 )
@@ -28,9 +31,9 @@ func saveFile(migrationId string, filename string, fileData bytes.Buffer) error 
 	return nil
 
 }
-*/
+
 // UploadFile Takes the stream of data to upload a file
-/*func (s *Server) UploadFile(stream service.MigrationDataService_UploadFileServer) error {
+func (s *Server) UploadFile(stream service.MigrationDataService_UploadFileServer) error {
 	in, err := stream.Recv()
 	if err != io.EOF && err != nil {
 		return err
@@ -61,9 +64,9 @@ func saveFile(migrationId string, filename string, fileData bytes.Buffer) error 
 		return err
 	}
 
-	res := &response.UploadFileResponse{
+	res := &response.UploadZipFileResponse{
 		MigrationId: migrationId,
-		Status:      "Completed",
+		Success:     true,
 	}
 
 	err = stream.SendAndClose(res)
@@ -72,13 +75,13 @@ func saveFile(migrationId string, filename string, fileData bytes.Buffer) error 
 	}
 
 	return nil
-}*/
+}
 
-/*func createMigrationId() (string, error) {
+func createMigrationId() (string, error) {
 	uuid, err := uuid.NewV4()
 	if err != nil {
 		log.WithError(err).Error("Failed to make a V4 UUID")
 		return "", err
 	}
 	return uuid.String(), nil
-}*/
+}
