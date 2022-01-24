@@ -53,6 +53,7 @@ type MigrationStorage interface {
 	CompletePermissionMigration(ctx context.Context, migrationId, serverId string, totalSucceeded, totalSkipped, totalFailed int64) (Migration, error)
 	FailedPermissionMigration(ctx context.Context, migrationId, serverId, message string, totalSucceeded, totalSkipped, totalFailed int64) (Migration, error)
 	CompleteMigration(ctx context.Context, migrationId, serverId string, totalSucceeded, totalSkipped, totalFailed int64) (Migration, error)
+	GetActiveMigration(ctx context.Context, serverId string) (ActiveMigration, error)
 }
 
 // Resetter is, if exposed, used for tests to reset the storage backend to a
@@ -110,6 +111,11 @@ type Migration struct {
 	TotalFailed      int64     `json:"total_failed"`
 	Message          string    `json:"message"`
 	UpdatedTimestamp time.Time `json:"updated_timestamp"`
+}
+
+type ActiveMigration struct {
+	MigrationId   string
+	MigrationType string
 }
 
 // Errors returned from the backend
