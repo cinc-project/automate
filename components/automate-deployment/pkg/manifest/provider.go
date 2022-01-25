@@ -243,6 +243,53 @@ func getCompatibleManifestVersion(ctx context.Context, version, channel string, 
 	}
 }
 
+func GetMinCurrentVersion(ctx context.Context, channel,
+	version string) (compVersion string, err error) {
+	return getMinimumCurrentManifestVersion(ctx, version, channel)
+}
+
+func getMinimumCurrentManifestVersion(ctx context.Context, version, channel string, optionalURL ...string) (compVersion string, err error) {
+	//get the list of all versions on ascending order
+	allVersions, err := GetAllVersions(ctx, channel, optionalURL[0])
+	if err != nil {
+		return "", errors.Wrap(err, fmt.Sprintf("error in getting the versions from %s channel", channel))
+	}
+
+	currentVersionIndex := len(allVersions)
+	for i := len(allVersions) - 1; i >= 0; i-- {
+		if allVersions[i] == version {
+			currentVersionIndex = i
+			break
+		}
+	}
+
+	if currentVersionIndex == len(allVersions) {
+		return "", fmt.Errorf("invalid version, given version %s is not available in valid list of versions from %s channel", version, channel)
+	}
+
+	//reached the end, no further updates are available
+	if currentVersionIndex == len(allVersions)-1 {
+		return version, nil
+	}
+
+	//trim the slice, as we don't require next releases
+	allVersions = allVersions[:currentVersionIndex]
+
+	//get the minor/patch versions are available or not.
+	//check the current version is timestamp or semantic version
+	currentMajor, isSemVersion := IsSemVersionFmt(version)
+
+	if !isSemVersion {
+		//just get the earliest
+		//todo (rick) make sure the first item is in the timestamp format and that it's less than passed in version
+		timeStampVersion := findEarliestTimeStampVersion(allVersions)
+		return timeStampVersion, nil
+	} else {
+		minPrevVersion := findMinPreviousForSemantic(currentMajor, allVersions)
+		return minPrevVersion, nil
+	}
+}
+
 //isSemVersionFmt checks the provided version is in semantic version format, if yes, will return the major version
 func IsSemVersionFmt(version string) (string, bool) {
 	splitStrings := strings.Split(version, ".")
@@ -250,6 +297,26 @@ func IsSemVersionFmt(version string) (string, bool) {
 		return splitStrings[0], true
 	}
 	return "", false
+}
+
+func findEarliestTimeStampVersion(list []string) (version string) {
+	//the list is sorted alphabetically and the first item in it is the earliest
+	return list[0]
+}
+
+func findMinPreviousForSemantic(currentMajor string, list []string) string {
+	//set start out as the current version
+	item := list[len(list)]
+	for i := len(list) - 1; i >= 0; i-- {
+		if major, _ := IsSemVersionFmt(item); currentMajor != major {
+			//as soon as we find a version that doesn't match the current major, it's either the
+			//previous major or the final timestamp version
+			return item
+		} else if i == len(list)-1 { //reached the beginning of the list
+			item = list[i]
+		}
+	}
+	return item
 }
 
 func findLatestTimeStampVersion(list []string) (index int, version string) {
