@@ -166,7 +166,7 @@ func (c *HTTP) GetCurrentManifest(ctx context.Context, channel string) (*manifes
 // channel.
 func (c *HTTP) GetManifest(ctx context.Context, release string) (*manifest.A2, error) {
 	url := fmt.Sprintf(c.manifestURLFmt, release)
-	return c.manifestFromURL(ctx, url, release)
+	return c.manifestFromURL(ctx, url, "current")
 }
 
 func (c *HTTP) manifestFromURL(ctx context.Context, url string, channel string) (*manifest.A2, error) {

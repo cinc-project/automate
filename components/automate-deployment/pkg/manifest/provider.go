@@ -267,13 +267,13 @@ func getMinimumCurrentManifestVersion(ctx context.Context, version, channel stri
 		return "", fmt.Errorf("invalid version, given version %s is not available in valid list of versions from %s channel", version, channel)
 	}
 
-	//reached the end, no further updates are available
-	if currentVersionIndex == len(allVersions)-1 {
+	//your version is the first in the list, nothing may update to this version
+	if currentVersionIndex == 0 {
 		return version, nil
 	}
 
 	//trim the slice, as we don't require next releases
-	allVersions = allVersions[:currentVersionIndex]
+	allVersions = allVersions[:currentVersionIndex+1]
 
 	//get the minor/patch versions are available or not.
 	//check the current version is timestamp or semantic version
@@ -306,13 +306,14 @@ func findEarliestTimeStampVersion(list []string) (version string) {
 
 func findMinPreviousForSemantic(currentMajor string, list []string) string {
 	//set start out as the current version
-	item := list[len(list)]
+	item := list[len(list)-1]
 	for i := len(list) - 1; i >= 0; i-- {
+		item = list[i]
 		if major, _ := IsSemVersionFmt(item); currentMajor != major {
 			//as soon as we find a version that doesn't match the current major, it's either the
 			//previous major or the final timestamp version
 			return item
-		} else if i == len(list)-1 { //reached the beginning of the list
+		} else if i == 0 { //reached the beginning of the list
 			item = list[i]
 		}
 	}
