@@ -250,7 +250,7 @@ func GetMinCurrentVersion(ctx context.Context, channel,
 
 func getMinimumCurrentManifestVersion(ctx context.Context, version, channel string, optionalURL ...string) (compVersion string, err error) {
 	//get the list of all versions on ascending order
-	allVersions, err := GetAllVersions(ctx, channel, optionalURL[0])
+	allVersions, err := GetAllVersions(ctx, channel, optionalURL...)
 	if err != nil {
 		return "", errors.Wrap(err, fmt.Sprintf("error in getting the versions from %s channel", channel))
 	}
