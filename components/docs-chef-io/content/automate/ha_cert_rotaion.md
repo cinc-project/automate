@@ -46,15 +46,15 @@ When you run this command first time, a series of certificates are created and s
 
 <!-- 4. Copy your *x.509 SSL certs* into the appropriate files in `certs/` folder. -->
 
-    <!-- - Place your root certificate into `ca_root.pem file`. -->
+<!-- - Place your root certificate into `ca_root.pem file`. -->
 
-    <!-- - Place your intermediate CA into the `pem` file. -->
+<!-- - Place your intermediate CA into the `pem` file. -->
 
 1. If your organization issues certificate from an intermediate CA, then place the respective certificate after the server certificate as per order listed. For example, in `certs/pg_ssl_public.pem`, paste it as them as listed:
 
-   - Server Certificate
-   - Intermediate CA Certificate 1
-   - Intermediate CA Certificate n
+- Server Certificate
+- Intermediate CA Certificate 1
+- Intermediate CA Certificate n
 
 1. Type the command, `./scripts/credentials set ssl` (with the appropriate options) and press **Enter**. This command deploys the nodes.
 
