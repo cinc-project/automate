@@ -28,3 +28,8 @@ message CancelMigrationResponce {
   // Error message
   repeated string errors = 2; 
 }
+
+message ConfirmPreview {
+  // Migration ID
+  string migration_id = 1; 
+}

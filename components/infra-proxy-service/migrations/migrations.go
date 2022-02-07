@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/chef/automate/components/infra-proxy-service/migrations/pipeline"
 	"io"
 	"os"
 	"path"
+
+	"github.com/chef/automate/components/infra-proxy-service/migrations/pipeline"
 
 	"github.com/chef/automate/api/interservice/infra_proxy/migrations/request"
 	"github.com/chef/automate/api/interservice/infra_proxy/migrations/response"
@@ -212,5 +213,27 @@ func (s *MigrationServer) CancelMigration(ctx context.Context, req *request.Canc
 	return &response.CancelMigrationResponce{
 		Success: true,
 		Errors:  errors,
+	}, nil
+}
+
+// ConfirmPreview trigger the preview pipline
+func (s *MigrationServer) ConfirmPreview(ctx context.Context, req *request.ConfirmPreview) (*response.ConfirmPreview, error) {
+	// Validate all request fields are required
+	err := validation.New(validation.Options{
+		Target:          "server",
+		Request:         *req,
+		RequiredDefault: true,
+	}).Validate()
+
+	if err != nil {
+		return nil, err
+	}
+
+	// call pipeline function to trigger the phase 2 pipeline
+	pipelineResult := pipeline.Result{}
+	s.phaseTwoPipeline.Run(pipelineResult)
+
+	return &response.ConfirmPreview{
+		MigrationId: req.MigrationId,
 	}, nil
 }

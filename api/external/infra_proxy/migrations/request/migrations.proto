@@ -37,3 +37,10 @@ message CancelMigrationRequest {
   // Migration ID
   string migration_id = 2; 
 }
+
+message ConfirmPreview {
+  // Chef Server ID
+  string server_id = 1;
+  // Migration ID
+  string migration_id = 2; 
+}
