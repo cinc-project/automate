@@ -1,5 +1,5 @@
 +++
-title = "ha_backup_S3"
+title = "Taking Backup with Amazon S3 Bucket"
 
 draft = false
 
@@ -13,7 +13,7 @@ gh_repo = "automate"
     weight = 390
 +++
 
-This page explains how to take backup for External ES and Postgres-Sql to the Amazon S3 bucket.
+This page explains how to take backup for External Elastic Search (ES) and Postgres-Sql to the Amazon S3 bucket.
 
 {{< note >}}
 
