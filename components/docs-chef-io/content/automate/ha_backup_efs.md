@@ -9,7 +9,7 @@ gh_repo = "automate"
   [menu.automate]
     title = "Taking Backup with EFS System"
     identifier = "automate/install/ha_backup_efs.md Taking Backup with EFS System"
-    parent = "automate/install/ha_backup_restore"
+    parent = "automate/install"
     weight = 400
 +++
 
