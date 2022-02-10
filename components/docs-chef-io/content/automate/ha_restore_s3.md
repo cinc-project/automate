@@ -9,7 +9,7 @@ gh_repo = "automate"
   [menu.automate]
     title = "Restoring the S3 Backed-up Data"
     identifier = "automate/install/ha_restore_efs.md Restoring the S3 Backed-up Data"
-    parent = "automate/install/Backups and Restore"
+    parent = "automate/install/ha_backup_restore"
     weight = 410
 +++
 
