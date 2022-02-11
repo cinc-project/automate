@@ -547,8 +547,7 @@ export class ChefServerDetailsComponent implements OnInit, OnDestroy {
   // get migraion preview function
   public getPreviewData() {
     const payload = {
-      // migration_id: this.migration_id
-      migration_id: '1234'
+      migration_id: this.migration_id
     };
     this.store.dispatch(new GetPreviewData(payload));
   }
