@@ -10,7 +10,7 @@ gh_repo = "automate"
     title = "Self Sign Certificates"
     parent = "automate/install"
     identifier = "automate/install/ha_cert_selfsign.md Self Sign Certificates"
-    weight = 330
+    weight = 335
 +++
 
 ## What are Certificates?
