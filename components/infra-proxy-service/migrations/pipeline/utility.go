@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/chef/automate/api/interservice/authz"
+	"github.com/chef/automate/api/interservice/local_user"
 	"github.com/chef/automate/components/infra-proxy-service/pipeline"
 	"github.com/chef/automate/components/infra-proxy-service/storage"
 	log "github.com/sirupsen/logrus"
@@ -340,4 +341,21 @@ func Unzip(ctx context.Context, mst storage.MigrationStorage, result pipeline.Re
 		log.Errorf("Failed to update status in DB: %s :%s", result.Meta.MigrationID, err)
 	}
 	return result, nil
+}
+
+func checkUsersExists(ctx context.Context, localUserClient local_user.UsersMgmtServiceClient, result pipeline.Result) (pipeline.Result, error) {
+	for _, user := range result.ParsedResult.Users {
+		userExists, _ := checkUserExist(ctx, localUserClient, user)
+		user.IsConflicting = userExists
+	}
+	return result, nil
+}
+
+func checkUserExist(ctx context.Context, localUserClient local_user.UsersMgmtServiceClient, user pipeline.User) (bool, error) {
+	_, err := localUserClient.GetUser(ctx, &local_user.Email{Email: user.AutomateUsername})
+	if err != nil {
+		log.Errorf("Unable to fetch user")
+		return false, nil
+	}
+	return true, nil
 }
