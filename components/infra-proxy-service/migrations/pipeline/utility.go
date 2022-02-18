@@ -5,14 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
+
 	"github.com/chef/automate/api/interservice/authz"
 	"github.com/chef/automate/components/infra-proxy-service/pipeline"
 	"github.com/chef/automate/components/infra-proxy-service/storage"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"os"
-	"path"
-	"path/filepath"
 )
 
 // StoreOrgs reads the Result struct and populate the orgs table
@@ -340,4 +342,101 @@ func Unzip(ctx context.Context, mst storage.MigrationStorage, result pipeline.Re
 		log.Errorf("Failed to update status in DB: %s :%s", result.Meta.MigrationID, err)
 	}
 	return result, nil
+}
+
+func GetUsersForBackup(ctx context.Context, st storage.Storage, mst storage.MigrationStorage, result pipeline.Result) (pipeline.Result, error) {
+	log.Info("starting with user parseing phase for migration id: ", result.Meta.MigrationID)
+
+	_, err := mst.StartUsersParsing(ctx, result.Meta.MigrationID, result.Meta.ServerID)
+	if err != nil {
+		log.Error("failed to update the status for user parsing for the migration id: %s, error : %s", result.Meta.MigrationID, err.Error())
+		return result, err
+	}
+	file := path.Join(result.Meta.UnzipFolder, "key_dump.json")
+
+	keyDumpByte, err := ioutil.ReadFile(file)
+	if err != nil {
+		log.Error("failed to read keydump file for user parsing for the migration id: %s, error : %s", result.Meta.MigrationID, err.Error())
+		mst.FailedUsersParsing(ctx, result.Meta.MigrationID, result.Meta.ServerID, err.Error(), 0, 0, 0)
+		return result, err
+	}
+
+	var keyDumps []pipeline.KeyDump
+	if err := json.Unmarshal(keyDumpByte, &keyDumps); err != nil {
+		log.Error("failed to unmarshal for user parsing for the migration id: %s, error : %s", result.Meta.MigrationID, err.Error())
+		mst.FailedUsersParsing(ctx, result.Meta.MigrationID, result.Meta.ServerID, err.Error(), 0, 0, 0)
+		return result, err
+	}
+
+	serverUsers := keyDumpTOUser(keyDumps)
+	automateUsers, err := st.GetUsers(ctx, result.Meta.ServerID)
+	if err != nil {
+		log.Error("failed to read keydump file for user parsing for the migration id: %s, error : %s", result.Meta.MigrationID, err.Error())
+		mst.FailedUsersParsing(ctx, result.Meta.MigrationID, result.Meta.ServerID, err.Error(), 0, 0, 0)
+		return result, err
+	}
+
+	mappedUsers := MapUsers(serverUsers, automateUsers)
+	result.ParsedResult.Users = mappedUsers
+	return result, nil
+}
+
+// Clean serialized_object and Polulate Users struct
+func keyDumpTOUser(keyDump []pipeline.KeyDump) []pipeline.User {
+	var users []pipeline.User
+	for _, kd := range keyDump {
+		sec := map[string]string{}
+		if err := json.Unmarshal([]byte(kd.SerializedObject), &sec); err != nil {
+			panic(err)
+		}
+		user := pipeline.User{
+			Username:    kd.Username,
+			Email:       kd.Email,
+			DisplayName: sec["display_name"],
+			FirstName:   sec["first_name"],
+			LastName:    sec["last_name"],
+			MiddleName:  sec["middle_name"],
+		}
+		users = append(users, user)
+	}
+	return users
+}
+
+func MapUsers(serverUser []pipeline.User, automateUser []storage.User) []pipeline.User {
+	var serverCleanUser []pipeline.User
+	for _, aUser := range automateUser {
+		if !IsExisting(serverUser, aUser.InfraServerUsername) {
+			serverCleanUser = append(serverCleanUser, pipeline.User{
+				Username:  aUser.InfraServerUsername,
+				ActionOps: 3,
+			})
+		} else {
+			for _, sUser := range serverUser {
+				if sUser.Username == aUser.InfraServerUsername {
+					if sUser.FirstName == aUser.FirstName && sUser.Email == aUser.Email {
+						sUser.ActionOps = 2
+						serverCleanUser = append(serverCleanUser, sUser)
+
+					} else {
+						sUser.ActionOps = 4
+						serverCleanUser = append(serverCleanUser, sUser)
+					}
+
+				} else {
+					sUser.ActionOps = 1
+					serverCleanUser = append(serverCleanUser, sUser)
+				}
+			}
+		}
+	}
+	return serverCleanUser
+}
+
+func IsExisting(users []pipeline.User, user string) bool {
+	for _, v := range users {
+		if user == v.Username {
+			return true
+		}
+	}
+	return false
 }
