@@ -13,6 +13,7 @@ import (
 	"github.com/chef/automate/components/infra-proxy-service/storage/testDB"
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/require"
 )
 
 func TestStoreOrg(t *testing.T) {
@@ -130,6 +131,27 @@ func TestCreatePreview(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetUsersForBackup(t *testing.T) {
+	type args struct {
+		ctx    context.Context
+		st     storage.Storage
+		mst    storage.MigrationStorage
+		result pipeline.Result
+	}
+
+	arg := args{
+		ctx:    context.Background(),
+		st:     &testDB.TestDB{},
+		mst:    &testDB.MigrationDB{},
+		result: pipeline.Result{Meta: pipeline.Meta{UnzipFolder: "/Users/pappuk/Downloads/backup", ServerID: "server1", MigrationID: "mig1"}},
+	}
+
+	res, err := GetUsersForBackup(arg.ctx, arg.st, arg.mst, arg.result)
+	require.NoError(t, err)
+	require.NotNil(t, res)
+
 }
 
 func TestUserExists(t *testing.T) {
