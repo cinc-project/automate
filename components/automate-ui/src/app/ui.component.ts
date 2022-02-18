@@ -88,6 +88,7 @@ export class UIComponent implements OnInit, AfterViewChecked {
       this.showBanner = true;
     } else {
       this.showBanner = this.stringToBoolean(bannerStorage);
+      this.showBanner = false //comment this line if want to show banner
     }
     this.store.dispatch(new CreateNotification({
       type: Type.error,
