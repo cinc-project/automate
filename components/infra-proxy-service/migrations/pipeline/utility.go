@@ -430,8 +430,6 @@ func SkipUpdateUser(serverUser []pipeline.User, automateUser []storage.User, che
 }
 
 func SkipUpdateUserCheck(sUser pipeline.User, aUser storage.User, checked map[string]bool) pipeline.User {
-	// parsedUsers := pipeline.User{}
-
 	if checked[sUser.Username] {
 		return pipeline.User{}
 	}
@@ -441,15 +439,14 @@ func SkipUpdateUserCheck(sUser pipeline.User, aUser storage.User, checked map[st
 		return sUser
 
 	} else if aUser.InfraServerUsername == sUser.Username {
-		if aUser.InfraServerUsername == sUser.Username && aUser.Email == sUser.Email {
+		if aUser.InfraServerUsername == sUser.Username && aUser.Email == sUser.Email && aUser.DisplayName == sUser.DisplayName &&
+			aUser.FirstName == sUser.FirstName && aUser.MiddleName == sUser.MiddleName && aUser.LastName == sUser.LastName {
 			sUser.ActionOps = pipeline.Skip
-			// parsedUsers = append(parsedUsers, sUser)
 			checked[sUser.Username] = true
 			return sUser
 
 		} else {
 			sUser.ActionOps = pipeline.Update
-			// parsedUsers = append(parsedUsers, sUser)
 			checked[sUser.Username] = true
 			return sUser
 		}
