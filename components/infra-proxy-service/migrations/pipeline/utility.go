@@ -18,6 +18,7 @@ import (
 	"github.com/chef/automate/components/infra-proxy-service/pipeline"
 	"github.com/chef/automate/components/infra-proxy-service/storage"
 	log "github.com/sirupsen/logrus"
+
 )
 
 // StoreOrgs reads the Result struct and populate the orgs table
@@ -341,6 +342,7 @@ func Unzip(ctx context.Context, mst storage.MigrationStorage, result pipeline.Re
 
 	result.Meta.UnzipFolder = filepath.Dir(fpath)
 	_ = reader.Close()
+
 	_, err = mst.CompleteUnzip(ctx, result.Meta.MigrationID, result.Meta.ServerID, 0, 0, 0)
 	if err != nil {
 		log.Errorf("Failed to update status in DB: %s :%s", result.Meta.MigrationID, err)
@@ -349,7 +351,7 @@ func Unzip(ctx context.Context, mst storage.MigrationStorage, result pipeline.Re
 }
 
 func GetUsersForBackup(ctx context.Context, st storage.Storage, localUserClient local_user.UsersMgmtServiceClient, result pipeline.Result) (pipeline.Result, error) {
-	log.Info("starting with user parseing phase for migration id: ", result.Meta.MigrationID)
+	log.Info("starting with user parsing phase for migration id: ", result.Meta.MigrationID)
 
 	file := path.Join(result.Meta.UnzipFolder, "key_dump.json")
 
