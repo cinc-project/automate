@@ -323,6 +323,10 @@ do_dump_logs_default() {
     :
 }
 
+do_durga_stuff() {
+    hab license accept
+    hab svc status
+}
 
 # if we encounter an error we should dump the logs
 dump_logs() {
@@ -428,6 +432,10 @@ __run_test() {
     log_section_start "Step do_test_deploy"
     do_test_deploy
     break_log "test_deploy"
+
+    log_section_start "****************************************************************  Step extra changes ****************************************************************"
+    do_durga_stuff
+    break_log "extra_changes"
 
     if [ $test_upgrades = true ]; then
         log_section_start "Step do_prepare_upgrade"
