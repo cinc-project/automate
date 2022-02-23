@@ -21,8 +21,8 @@ pkg_deps=(
   core/curl/7.68.0/20200601114640
   core/ruby27/2.7.0/20200404045319
   # WARNING: Version pin managed by .expeditor/update_chef_server.sh
-  "${vendor_origin}/chef-server-nginx/14.11.36/20211227114734"
-  "${vendor_origin}/chef-server-ctl/14.11.36/20211227114241"
+  "${vendor_origin}/chef-server-nginx/14.13.27/20220222095221"
+  "${vendor_origin}/chef-server-ctl/14.13.27/20220222094727"
 )
 
 pkg_bin_dirs=(bin)
