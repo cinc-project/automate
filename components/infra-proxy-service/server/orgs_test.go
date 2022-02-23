@@ -1126,7 +1126,7 @@ func TestOrgs(t *testing.T) {
 	t.Run("ResetOrgAdminKey", func(t *testing.T) {
 		test.ResetState(context.Background(), t, serviceRef)
 		serverRes, err := cl.CreateServer(ctx, &request.CreateServer{
-			Id:        "chef-infra-server",
+			Id:        constants.TestServerId,
 			Name:      "Chef Infra Server",
 			Fqdn:      "domain.com",
 			IpAddress: "",
@@ -1195,7 +1195,7 @@ func TestOrgs(t *testing.T) {
 	t.Run("GetInfraServerOrgs", func(t *testing.T) {
 		test.ResetState(context.Background(), t, serviceRef)
 		serverRes, err := cl.CreateServer(ctx, &request.CreateServer{
-			Id:        "chef-infra-server",
+			Id:        constants.TestServerId,
 			Name:      "Chef Infra Server",
 			Fqdn:      "domain.com",
 			IpAddress: "",
@@ -1208,7 +1208,7 @@ func TestOrgs(t *testing.T) {
 		// 	secretsMock.EXPECT().Create(gomock.Any(), &newSecret, gomock.Any()).Return(secretID, nil)
 
 		// 	resp, err := cl.GetInfraServerOrgs(ctx, &request.GetInfraServerOrgs{
-		// 		ServerId: "chef-infra-server",
+		// 		ServerId: constants.TestServerId,
 		// 	})
 		// 	secretsMock.EXPECT().Read(gomock.Any(), secretID, gomock.Any()).Return(&secretWithID, nil)
 		// 	secretsMock.EXPECT().Delete(gomock.Any(), secretID, gomock.Any())
@@ -1225,7 +1225,7 @@ func TestOrgs(t *testing.T) {
 			ctx := context.Background()
 
 			resp, err := cl.GetInfraServerOrgs(ctx, &request.GetInfraServerOrgs{
-				ServerId: "chef-infra-server",
+				ServerId: constants.TestServerId,
 			})
 			require.Nil(t, resp)
 
