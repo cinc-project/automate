@@ -2,8 +2,8 @@ package server_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"io/ioutil"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -12,8 +12,6 @@ import (
 	"google.golang.org/grpc/codes"
 
 	"github.com/chef/automate/api/external/common/query"
-	infra "github.com/chef/automate/api/external/infra_proxy"
-	"github.com/chef/automate/api/external/infra_proxy/response"
 	secrets "github.com/chef/automate/api/external/secrets"
 	request "github.com/chef/automate/api/interservice/infra_proxy/request"
 	infra_proxy "github.com/chef/automate/api/interservice/infra_proxy/service"
@@ -26,36 +24,40 @@ func TestServers(t *testing.T) {
 	ctx := context.Background()
 	_, serviceRef, conn, close, _, secretsMock := test.SetupInfraProxyService(ctx, t)
 	cl := infra_proxy.NewInfraProxyServiceClient(conn)
-	infraMockClient := infra.NewMockInfraProxyClient(gomock.NewController(t))
 
 	defer close()
+	webuiKeyPath := "/hab/svc/automate-cs-oc-erchef/data/webui_priv.pem"
 
+	key, err := ioutil.ReadFile(webuiKeyPath)
+	require.NoError(t, err)
+
+	webuiKey := string(key)
 	secretID := &secrets.Id{
 		Id: "fake id",
 	}
 	newSecret := secrets.Secret{
-		Name: "infra-proxy-service-admin-key",
+		Name: "infra-proxy-service-webui-key",
 		Type: "chef-server",
 		Data: []*query.Kv{
-			{Key: "key", Value: "--KEY--"},
+			{Key: "key", Value: webuiKey},
 		},
 	}
 	secretWithID := newSecret
 	secretWithID.Id = "fake id"
+	fqdn := "a2-dev.test"
 
 	t.Run("CreateServer", func(t *testing.T) {
 		test.ResetState(ctx, t, serviceRef)
-		secretsMock.EXPECT().Create(gomock.Any(), &newSecret, gomock.Any()).Return(secretID, nil)
-		secretsMock.EXPECT().Read(gomock.Any(), secretID, gomock.Any()).Return(&secretWithID, nil)
-		secretsMock.EXPECT().Delete(gomock.Any(), secretID, gomock.Any())
-
+		secretsMock.EXPECT().Create(gomock.Any(), &newSecret, gomock.Any()).Return(secretID, nil).AnyTimes()
+		secretsMock.EXPECT().Read(gomock.Any(), secretID, gomock.Any()).Return(&secretWithID, nil).AnyTimes()
+		secretsMock.EXPECT().Delete(gomock.Any(), secretID, gomock.Any()).AnyTimes()
 		t.Run("when a valid server is submitted, creates the new server successfully", func(t *testing.T) {
 			req := &request.CreateServer{
 				Id:        "chef-infra-server",
 				Name:      "Chef infra server",
 				Fqdn:      constants.ExampleTestFQDN,
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			}
 			resp, err := cl.CreateServer(ctx, req)
 			require.NoError(t, err)
@@ -74,7 +76,9 @@ func TestServers(t *testing.T) {
 				req := &request.CreateServer{
 					Id:        "chef-infra-server",
 					Name:      "Chef infra server",
+
 					Fqdn:      constants.TestFQDN,
+
 					IpAddress: "0.0.0.0",
 				}
 				resp, err := cl.CreateServer(ctx, req)
@@ -89,7 +93,7 @@ func TestServers(t *testing.T) {
 				Name:      "Chef infra server",
 				Fqdn:      constants.ExampleTestFQDN,
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			assert.Nil(t, resp)
 			assert.Error(t, err, "must supply server ID")
@@ -104,7 +108,7 @@ func TestServers(t *testing.T) {
 				Name:      "Chef infra server",
 				Fqdn:      constants.ExampleTestFQDN,
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			}
 			resp1, err := cl.CreateServer(ctx, req1)
 			require.NoError(t, err)
@@ -115,8 +119,9 @@ func TestServers(t *testing.T) {
 				Id:        "chef-infra-server",
 				Name:      constants.TestServerName,
 				Fqdn:      constants.ExampleTestFQDN,
+				Name:      "New chef infra server",
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			}
 			resp2, err := cl.CreateServer(ctx, req2)
 			assert.Nil(t, resp2)
@@ -129,7 +134,7 @@ func TestServers(t *testing.T) {
 				Id:        "chef-infra-server",
 				Fqdn:      constants.ExampleTestFQDN,
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			assert.Nil(t, resp)
 			assert.Error(t, err, "must supply server name")
@@ -158,7 +163,6 @@ func TestServers(t *testing.T) {
 			})
 			assert.Nil(t, resp)
 			assert.Error(t, err, "webui key is not valid.")
-			grpctest.AssertCode(t, codes.InvalidArgument, err)
 		})
 	})
 
@@ -178,7 +182,7 @@ func TestServers(t *testing.T) {
 				Name:      "Chef infra server",
 				Fqdn:      constants.ExampleTestFQDN,
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			require.NoError(t, err)
 			require.NotNil(t, resp1)
@@ -188,7 +192,7 @@ func TestServers(t *testing.T) {
 				Name:      "Chef infra server",
 				Fqdn:      constants.APIChefIOTestFQDN,
 				IpAddress: "",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			require.NoError(t, err)
 			require.NotNil(t, resp2)
@@ -205,27 +209,22 @@ func TestServers(t *testing.T) {
 		})
 
 		t.Run("when the server exists with orgs, return servers list with org count", func(t *testing.T) {
-			secretsMock.EXPECT().Create(gomock.Any(), &newSecret, gomock.Any()).Return(secretID, nil)
-			secretsMock.EXPECT().Read(gomock.Any(), secretID, gomock.Any()).Return(&secretWithID, nil)
-			secretsMock.EXPECT().Delete(gomock.Any(), secretID, gomock.Any())
 
 			resp1, err := cl.CreateServer(ctx, &request.CreateServer{
 				Id:        "chef-infra-server1",
 				Name:      "Chef infra server",
 				Fqdn:      constants.ExampleTestFQDN,
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			require.NoError(t, err)
 			require.NotNil(t, resp1)
 
 			respOrg, err := cl.CreateOrg(ctx, &request.CreateOrg{
-				Id:        "infra-org-id",
-				Name:      "infra-org",
-				AdminUser: "admin",
-				AdminKey:  "--KEY--",
-				ServerId:  resp1.Server.Id,
-				Projects:  []string{},
+				Id:       "infra-org-id",
+				Name:     "infra-org",
+				ServerId: resp1.Server.Id,
+				Projects: []string{},
 			})
 			require.NoError(t, err)
 			require.NotNil(t, respOrg)
@@ -270,7 +269,7 @@ func TestServers(t *testing.T) {
 				Name:      "Chef infra server",
 				Fqdn:      constants.ExampleTestFQDN,
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			require.NoError(t, err)
 			require.NotNil(t, resp1)
@@ -296,21 +295,19 @@ func TestServers(t *testing.T) {
 
 			resp1, err := cl.CreateServer(ctx, &request.CreateServer{
 				Id:        "chef-infra-server1",
-				Name:      "Chef infra server",
+				Name:      "Chef infra server",3
 				Fqdn:      constants.ExampleTestFQDN,
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			require.NoError(t, err)
 			require.NotNil(t, resp1)
 
 			respOrg, err := cl.CreateOrg(ctx, &request.CreateOrg{
-				Id:        "infra-org-id",
-				Name:      "infra-org",
-				AdminUser: "admin",
-				AdminKey:  "--KEY--",
-				ServerId:  resp1.Server.Id,
-				Projects:  []string{},
+				Id:       "infra-org-id",
+				Name:     "infra-org",
+				ServerId: resp1.Server.Id,
+				Projects: []string{},
 			})
 			require.NoError(t, err)
 			require.NotNil(t, respOrg)
@@ -338,9 +335,10 @@ func TestServers(t *testing.T) {
 			resp1, err := cl.CreateServer(ctx, &request.CreateServer{
 				Id:        "chef-infra-server1",
 				Name:      "Chef infra server",
+
 				Fqdn:      constants.APIChefIOTestFQDN,
 				IpAddress: "",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			require.NoError(t, err)
 			require.NotNil(t, resp1)
@@ -369,18 +367,16 @@ func TestServers(t *testing.T) {
 				Name:      "Chef infra server",
 				Fqdn:      constants.APIChefIOTestFQDN,
 				IpAddress: "",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			require.NoError(t, err)
 			require.NotNil(t, resp1)
 
 			respOrg, err := cl.CreateOrg(ctx, &request.CreateOrg{
-				Id:        "infra-org-id",
-				Name:      "infra-org",
-				AdminUser: "admin",
-				AdminKey:  "--KEY--",
-				ServerId:  resp1.Server.Id,
-				Projects:  []string{},
+				Id:       "infra-org-id",
+				Name:     "infra-org",
+				ServerId: resp1.Server.Id,
+				Projects: []string{},
 			})
 			require.NoError(t, err)
 			require.NotNil(t, respOrg)
@@ -431,7 +427,7 @@ func TestServers(t *testing.T) {
 				Name:      "Chef infra server",
 				Fqdn:      constants.ExampleTestFQDN,
 				IpAddress: "0.0.0.0",
-				WebuiKey:  "--KEY--",
+				WebuiKey:  webuiKey,
 			})
 			require.NoError(t, err)
 			require.NotNil(t, resp)
@@ -500,10 +496,6 @@ func TestServers(t *testing.T) {
 	t.Run("ValidateWebuiKey", func(t *testing.T) {
 		test.ResetState(context.Background(), t, serviceRef)
 
-		secretsMock.EXPECT().Create(gomock.Any(), &newSecret, gomock.Any()).Return(secretID, nil)
-		secretsMock.EXPECT().Read(gomock.Any(), secretID, gomock.Any()).Return(&secretWithID, nil)
-		secretsMock.EXPECT().Delete(gomock.Any(), secretID, gomock.Any())
-
 		t.Run("when a valid webui key, return valid true", func(t *testing.T) {
 			resp, err := cl.ValidateWebuiKey(ctx, &request.ValidateWebuiKey{
 				Id:       "",
@@ -525,8 +517,9 @@ func TestServers(t *testing.T) {
 
 		secretsMock.EXPECT().Create(gomock.Any(), &newSecret, gomock.Any()).Return(secretID, nil)
 		secretsMock.EXPECT().Read(gomock.Any(), secretID, gomock.Any()).Return(&secretWithID, nil)
+		secretsMock.EXPECT().Update(gomock.Any(), &secretWithID, gomock.Any())
 		secretsMock.EXPECT().Delete(gomock.Any(), secretID, gomock.Any())
-		req := request.CreateServer{
+		resp, err := cl.CreateServer(ctx, &request.CreateServer{
 			Id:        "chef-infra-server",
 			Name:      "Chef infra server",
 			Fqdn:      constants.ExampleTestFQDN,
@@ -546,22 +539,24 @@ func TestServers(t *testing.T) {
 
 		t.Run("when a valid webui key, update web ui key successfully", func(t *testing.T) {
 
-			updateReq := &request.UpdateWebuiKey{
-				Id:       req.Id,
-				WebuiKey: "--KEY--",
-			}
-			res := &response.UpdateWebuiKey{}
-			infraMockClient.EXPECT().UpdateWebuiKey(gomock.Any(), &updateReq, gomock.Any()).Return(res, nil)
+			resp, err := cl.UpdateWebuiKey(ctx, &request.UpdateWebuiKey{
+				Id:       "chef-infra-server",
+				WebuiKey: webuiKey,
+			})
+			require.NoError(t, err)
+			require.NotNil(t, resp)
 		})
 
 		t.Run("when a webui key is not valid, do not update web ui key & return an error", func(t *testing.T) {
 
-			updateReq := &request.UpdateWebuiKey{
-				Id:       req.Id,
+			resp, err := cl.UpdateWebuiKey(ctx, &request.UpdateWebuiKey{
+				Id:       "chef-infra-server",
 				WebuiKey: "--KEY--",
-			}
-			infraMockClient.EXPECT().UpdateWebuiKey(gomock.Any(), &updateReq, gomock.Any()).Return(nil, errors.New("The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request."))
+			})
+			assert.Nil(t, resp)
+			assert.Error(t, err, "The user or client who made the request could not be authenticated. Verify the user/client name, and that the correct key was used to sign the request.")
 		})
+		cleanupServer(ctx, t, cl, resp.Server.Id)
 
 	})
 }
