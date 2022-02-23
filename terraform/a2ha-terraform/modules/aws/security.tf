@@ -30,14 +30,6 @@ resource "aws_security_group" "chef_automate" {
   tags = merge(var.tags, map("Name", "${var.tag_name}_${random_id.random.hex}_automate_security_group"))
 }
 
-resource "aws_security_group" "efs_mount" {
-  name        = "efs_${random_id.random.hex}"
-  description = "NFS for EFS"
-  vpc_id      = data.aws_vpc.default.id
-
-  tags = merge(var.tags, map("Name", "${var.tag_name}_${random_id.random.hex}_efs_security_group"))
-}
-
 //////////////////////////
 // Base Linux Rules
 resource "aws_security_group_rule" "ingress_allow_22_tcp_all" {
@@ -191,13 +183,3 @@ resource "aws_security_group_rule" "linux_egress_allow_443" {
   security_group_id = aws_security_group.base_linux.id
 }
 
-//////////////////////////
-// EFS rules
-resource "aws_security_group_rule" "ingress_efs_nfs_2049" {
-  type                     = "ingress"
-  from_port                = 2049
-  to_port                  = 2049
-  protocol                 = "tcp"
-  security_group_id        = aws_security_group.efs_mount.id
-  source_security_group_id = aws_security_group.base_linux.id
-}
