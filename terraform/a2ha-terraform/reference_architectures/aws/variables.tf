@@ -115,12 +115,12 @@ variable "postgresql_server_instance_type" {
 
 variable "private_custom_subnets" {
   default = []
-  type = list
+  type = list(string)
 }
 
 variable "public_custom_subnets" {
   default = []
-  type = list
+  type = list(string)
 }
 
 variable "ssh_key_file" {
