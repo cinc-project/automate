@@ -73,19 +73,24 @@ func createProject(result <-chan PipelineData) <-chan PipelineData {
 }
 
 // PopulateUsers returns PhaseTwoPipelineProcessor
-func PopulateUsers() PhaseTwoPipelineProcessor {
+func PopulateUsers(service *service.Service) PhaseTwoPipelineProcessor {
 	return func(result <-chan PipelineData) <-chan PipelineData {
-		return populateUsers(result)
+		return populateUsers(result, service)
 	}
 }
 
-func populateUsers(result <-chan PipelineData) <-chan PipelineData {
+func populateUsers(result <-chan PipelineData, service *service.Service) <-chan PipelineData {
 	log.Info("Starting PopulateUsers routine")
 	out := make(chan PipelineData, 100)
 
 	go func() {
 		for res := range result {
 			log.Info("Processing to populateUsers...")
+			result, err := StoreUsers(res.Ctx, service.Storage, res.Result)
+			if err != nil {
+				return
+			}
+			res.Result = result
 			select {
 			case out <- res:
 			case <-res.Ctx.Done():
@@ -170,8 +175,7 @@ func SetupPhaseTwoPipeline(service *service.Service) PhaseTwoPipeline {
 	c := make(chan PipelineData, 100)
 	migrationTwoPipeline(c,
 		PopulateOrgs(service),
-		// CreateProject(),
-		// PopulateUsers(),
+		PopulateUsers(service),
 		// PopulateORGUser(),
 		// PopulateMembersPolicy(),
 	)
