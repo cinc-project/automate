@@ -3,7 +3,7 @@ package majorupgradechecklist
 import (
 	"bytes"
 	"encoding/json"
-	"os"
+	"io/ioutil"
 
 	"github.com/chef/automate/components/automate-deployment/pkg/cli"
 	"github.com/chef/automate/components/automate-deployment/pkg/manifest"
@@ -20,7 +20,7 @@ type ChecklistHelper struct {
 }
 
 func ReadJsonFile(path string) (*PostChecklist, error) {
-	byteValue, err := os.ReadFile(path)
+	byteValue, err := ioutil.ReadFile(path) // nosemgrep
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func CreateJsonFile(params *PostChecklist, path string) error {
 	}
 	buffer.Write(data)
 	buffer.WriteString("\n")
-	err = os.WriteFile(path, buffer.Bytes(), 0644)
+	err = ioutil.WriteFile(path, buffer.Bytes(), 0644) // nosemgrep
 	if err != nil {
 		return err
 	}
