@@ -10,7 +10,7 @@ import (
 
 func TestCreatePostChecklistFile(t *testing.T) {
 	// remove json file
-	removeFile()
+	// removeFile()
 	// Create json file
 	cl, _ := NewPostChecklistManager("3")
 
