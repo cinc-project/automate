@@ -89,6 +89,7 @@ func populateUsers(result <-chan PipelineData, service *service.Service) <-chan 
 			_, err := service.Migration.StartUserMigration(res.Ctx, res.Result.Meta.MigrationID, res.Result.Meta.ServerID)
 			if err != nil {
 				log.Errorf("Failed to update `StartUserMigration` status in DB: %s :%s", res.Result.Meta.MigrationID, err)
+				res.Done <- err
 				return
 			}
 
@@ -99,12 +100,14 @@ func populateUsers(result <-chan PipelineData, service *service.Service) <-chan 
 					int64(result.ParsedResult.UsersCount.Succeeded), int64(result.ParsedResult.UsersCount.Skipped), int64(result.ParsedResult.UsersCount.Failed))
 				if err != nil {
 					log.Errorf("Failed to update `FailedUserMigration` status in DB: %s :%s", res.Result.Meta.MigrationID, err)
+					res.Done <- err
 					return
 				}
 			}
 			// Successful user migration
 			_, err = service.Migration.CompleteUserMigration(res.Ctx, res.Result.Meta.MigrationID, res.Result.Meta.ServerID, 0, 0, 0)
 			if err != nil {
+				res.Done <- err
 				log.Errorf("Failed to update `CompleteUserMigration` status in DB: %s :%s", res.Result.Meta.MigrationID, err)
 				return
 			}
@@ -212,8 +215,7 @@ func (p *PhaseTwoPipeline) Run(result pipeline.Result, service *service.Service)
 	if err != nil {
 		MigrationError(err, service.Migration, ctx, result.Meta.MigrationID, result.Meta.ServerID)
 		log.Errorf("Phase two pipeline received error for migration %s: %s", result.Meta.MigrationID, err)
+		return
 	}
 	MigrationSuccess(service.Migration, ctx, result.Meta.MigrationID, result.Meta.ServerID)
-	log.Info("received done")
-
 }
