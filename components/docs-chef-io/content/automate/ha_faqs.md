@@ -7,8 +7,8 @@ gh_repo = "automate"
 [menu]
   [menu.automate]
     title = "FAQs"
-    parent = "automate/install/high_availability/faqs"
-    identifier = "automate/install/high_availability/faqs/ha_faq.md FAQs"
+    parent = "automate/install_high_availability"
+    identifier = "automate/install_high_availability/FAQs"
     weight = 200
 +++
 

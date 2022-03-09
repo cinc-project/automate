@@ -8,14 +8,14 @@ gh_repo = "automate"
 [menu]
   [menu.automate]
     title = "AWS Certificate Manager"
-    parent = "automate/install/high_availability/certificates"
-    identifier = "automate/install/high_availability/certificates/ha_aws_cert_mngr.md AWS Certificate Manager"
+    parent = "automate/install_high_availability/certificates"
+    identifier = "automate/install_high_availability/certificates/ha_aws_cert_mngr.md AWS Certificate Manager"
     weight = 200
 +++
 
 title = "Chef Automate High Availability"
     parent = "automate/install"
-    identifier = "automate/install/high_availability/introduction/ha.md Chef Automate High Availability"
+    identifier = "automate/install_high_availability/introduction/ha.md Chef Automate High Availability"
     weight = 200
 
 This page explains how to use the **AWS Certificate Manager (ACM)** console to generate a public ACM certificate to create a Load Balancer (LB).

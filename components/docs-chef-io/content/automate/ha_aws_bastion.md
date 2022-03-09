@@ -8,8 +8,8 @@ gh_repo = "automate"
 [menu]
   [menu.automate]
     title = "Configuring Bastion for AWS Deployment Type"
-    parent = "automate/install/high_availability/aws_deployment"
-    identifier = "automate/install/high_availability/aws_deployment/ha_aws_bastion.md Configuring Bastion for AWS Deployment Type"
+    parent = "automate/install_high_availability/aws_deployment"
+    identifier = "automate/install_high_availability/aws_deployment/ha_aws_bastion.md Configuring Bastion for AWS Deployment Type"
     weight = 230
 +++
 

@@ -7,8 +7,8 @@ gh_repo = "automate"
 [menu]
   [menu.automate]
     title = "Chef Automate High Availability"
-    parent = "automate/install/high_availability/introduction"
-    identifier = "automate/install/high_availability/introduction/ha.md Chef Automate High Availability"
+    parent = "automate/install_high_availability/introduction"
+    identifier = "automate/install_high_availability/introduction/ha.md Chef Automate High Availability"
     weight = 200
 +++
 

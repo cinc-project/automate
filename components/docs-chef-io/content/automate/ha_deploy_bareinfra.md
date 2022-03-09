@@ -8,9 +8,9 @@ gh_repo = "automate"
 [menu]
   [menu.automate]
     title = "On-Premises Deployment Model"
-    parent = "automate/install"
-    identifier = "automate/install/install/high_availability/on_premises_deployment/ha_deploy_bareinfra.md On-Premises Deployment Model"
-    weight = 200
+    parent = "automate/install_high_availability"
+    identifier = "automate/install_high_availability/On-Premises Deployment Model"
+    weight = 60
 +++
 
 This section explains the Bare Metal Infrastructure Deployment (existing_node) to support Chef Automate High Availability (HA) in your network premises/ infrastructure.
