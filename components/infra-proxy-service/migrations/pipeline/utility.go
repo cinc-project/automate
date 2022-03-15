@@ -357,7 +357,7 @@ func getActionForOrgUsers(ctx context.Context, st storage.Storage, result pipeli
 			orgUserAssociations = append(orgUserAssociations, pipeline.OrgsUsersAssociations{OrgName: org, Users: userAssociations})
 			continue
 		}
-		orgUsersInDb, err := st.GetAutomateOrgUsers(ctx, org.Name)
+		orgUsersInDb, err := st.GetAutomateInfraOrgUsers(ctx, result.Meta.ServerID, org.Name)
 		if err != nil {
 			log.Errorf("Unable to fetch automate Users for org %s : %s", org.Name, err.Error())
 			return nil, err
