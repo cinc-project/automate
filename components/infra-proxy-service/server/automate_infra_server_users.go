@@ -96,22 +96,23 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 		return nil, err
 	}
 
-	key := req.Key
+	// key := req.Key
 
-	if key == "" {
-		key = "default"
-	}
+	// if key == "" {
+	// 	key = "default"
+	// }
+	// key := c.client.Users.GetKey()
 
 	// Deletes the existing key
-	_, err = c.client.Users.DeleteKey(req.UserName, key)
-	chefError, _ := chef.ChefError(err)
-	if err != nil && chefError.StatusCode() != 404 {
-		return nil, ParseAPIError(err)
-	}
+	// _, err = c.client.Users.DeleteKey(req.UserName, c.)
+	// chefError, _ := chef.ChefError(err)
+	// if err != nil && chefError.StatusCode() != 404 {
+	// 	return nil, ParseAPIError(err)
+	// }
 
 	// Add new key to existing client
 	body, err := chef.JSONReader(AccessKeyReq{
-		Name:           key,
+		// Name:           key,
 		ExpirationDate: "infinity",
 		CreateKey:      true,
 	})
@@ -136,14 +137,12 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 	}
 
 	return &response.ResetInfraServerUserKeyRes{
-		Name: req.Name,
-		ClientKey: &response.ClientKey{
-			Name:           key,
-			PublicKey:      chefKey.PublicKey,
-			ExpirationDate: chefKey.ExpirationDate,
-			PrivateKey:     chefKey.PrivateKey,
-		},
+		// Name: req.Name,
+		// ClientKey: &response.ClientKey{
+		// 	Name:           key,
+		// 	PublicKey:      chefKey.PublicKey,
+		// 	ExpirationDate: chefKey.ExpirationDate,
+		// 	PrivateKey:     chefKey.PrivateKey,
+		// },
 	}, nil
-	// Either Cll Reset Key and get the private key or grnerate the key and and send public key to chef and privste to automate
-	return &response.ResetInfraServerUserKeyRes{}, nil
 }
