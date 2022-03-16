@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	secrets "github.com/chef/automate/api/external/secrets"
 	"github.com/chef/automate/api/interservice/infra_proxy/request"
 	"github.com/chef/automate/api/interservice/infra_proxy/response"
 	"github.com/chef/automate/components/infra-proxy-service/service"
 	"github.com/chef/automate/components/infra-proxy-service/storage"
 	"github.com/chef/automate/components/infra-proxy-service/validation"
 	chef "github.com/go-chef/chef"
+	"github.com/pkg/errors"
 )
 
 //GetAutomateInfraServerUsersList: Fetches the list of automate infra server users from the DB
@@ -67,7 +69,6 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 		Target:  "client",
 		Request: *req,
 		Rules: validation.Rules{
-			"OrgId":    []string{"required"},
 			"ServerId": []string{"required"},
 			"Name":     []string{"required"},
 		},
@@ -76,8 +77,21 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 	if err != nil {
 		return nil, err
 	}
+	// Get the credential ID from servers table
+	server, err := s.service.Storage.GetServer(ctx, req.ServerId)
+	if err != nil {
+		return nil, err
+	}
+	if server.CredentialID == "" {
+		return nil, errors.New("webui key is not available with server")
+	}
+	// Get web ui key from secrets service
+	secret, err := s.service.Secrets.Read(ctx, &secrets.Id{Id: server.CredentialID})
+	if err != nil {
+		return nil, err
+	}
 
-	c, err := s.createClient(ctx, req.OrgId, req.ServerId)
+	c, err := s.createChefServerClient(ctx, req.ServerId, GetAdminKeyFrom(secret), "pivotal", true)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +103,7 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 	}
 
 	// Deletes the existing key
-	_, err = c.client.Clients.DeleteKey(req.Name, key)
+	_, err = c.client.Users.DeleteKey(req.UserName, key)
 	chefError, _ := chef.ChefError(err)
 	if err != nil && chefError.StatusCode() != 404 {
 		return nil, ParseAPIError(err)
@@ -106,7 +120,7 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 	}
 
 	var chefKey chef.ChefKey
-	addReq, err := c.client.NewRequest("POST", fmt.Sprintf("clients/%s/keys", req.Name), body)
+	addReq, err := c.client.NewRequest("POST", fmt.Sprintf("users/%s/keys", req.UserName), body)
 
 	if err != nil {
 		return nil, ParseAPIError(err)
@@ -121,7 +135,7 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 		return nil, ParseAPIError(err)
 	}
 
-	return &response.ResetClient{
+	return &response.ResetInfraServerUserKeyRes{
 		Name: req.Name,
 		ClientKey: &response.ClientKey{
 			Name:           key,
