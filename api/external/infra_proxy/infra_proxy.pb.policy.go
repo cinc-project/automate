@@ -1036,4 +1036,19 @@ func init() {
 		}
 		return ""
 	})
+	policy.MapMethodTo("/chef.automate.api.infra_proxy.InfraProxy/ResetInfraServerUserKey", "infra:infraServers", "infra:infraServers:create", "POST", "/api/v0/infra/servers/{server_id}/user/{user_name}/user", func(unexpandedResource string, input interface{}) string {
+		if m, ok := input.(*request.ResetInfraServerUserKeyReq); ok {
+			return policy.ExpandParameterizedResource(unexpandedResource, func(want string) string {
+				switch want {
+				case "user_name":
+					return m.UserName
+				case "server_id":
+					return m.ServerId
+				default:
+					return ""
+				}
+			})
+		}
+		return ""
+	})
 }

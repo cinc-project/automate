@@ -175,6 +175,69 @@ func (x *AutomateInfraServerUsersListItem) GetIsServerAdmin() bool {
 	return false
 }
 
+type ResetInfraServerUserKeyRes struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId     string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty" toml:"user_id,omitempty" mapstructure:"user_id,omitempty"`
+	UserName   string `protobuf:"bytes,2,opt,name=user_name,json=userName,proto3" json:"user_name,omitempty" toml:"user_name,omitempty" mapstructure:"user_name,omitempty"`
+	PrivateKey string `protobuf:"bytes,3,opt,name=private_key,json=privateKey,proto3" json:"private_key,omitempty" toml:"private_key,omitempty" mapstructure:"private_key,omitempty"`
+}
+
+func (x *ResetInfraServerUserKeyRes) Reset() {
+	*x = ResetInfraServerUserKeyRes{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_interservice_infra_proxy_response_automate_infra_server_users_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ResetInfraServerUserKeyRes) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResetInfraServerUserKeyRes) ProtoMessage() {}
+
+func (x *ResetInfraServerUserKeyRes) ProtoReflect() protoreflect.Message {
+	mi := &file_interservice_infra_proxy_response_automate_infra_server_users_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResetInfraServerUserKeyRes.ProtoReflect.Descriptor instead.
+func (*ResetInfraServerUserKeyRes) Descriptor() ([]byte, []int) {
+	return file_interservice_infra_proxy_response_automate_infra_server_users_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ResetInfraServerUserKeyRes) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ResetInfraServerUserKeyRes) GetUserName() string {
+	if x != nil {
+		return x.UserName
+	}
+	return ""
+}
+
+func (x *ResetInfraServerUserKeyRes) GetPrivateKey() string {
+	if x != nil {
+		return x.PrivateKey
+	}
+	return ""
+}
+
 var File_interservice_infra_proxy_response_automate_infra_server_users_proto protoreflect.FileDescriptor
 
 var file_interservice_infra_proxy_response_automate_infra_server_users_proto_rawDesc = []byte{
@@ -210,12 +273,19 @@ var file_interservice_infra_proxy_response_automate_infra_server_users_proto_raw
 	0x28, 0x09, 0x52, 0x0e, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72,
 	0x49, 0x64, 0x12, 0x26, 0x0a, 0x0f, 0x69, 0x73, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x5f,
 	0x61, 0x64, 0x6d, 0x69, 0x6e, 0x18, 0x07, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0d, 0x69, 0x73, 0x53,
-	0x65, 0x72, 0x76, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x42, 0x40, 0x5a, 0x3e, 0x67, 0x69,
-	0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x68, 0x65, 0x66, 0x2f, 0x61, 0x75,
-	0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72,
-	0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2f, 0x69, 0x6e, 0x66, 0x72, 0x61, 0x5f, 0x70, 0x72,
-	0x6f, 0x78, 0x79, 0x2f, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x72, 0x76, 0x65, 0x72, 0x41, 0x64, 0x6d, 0x69, 0x6e, 0x22, 0x73, 0x0a, 0x1a, 0x52, 0x65,
+	0x73, 0x65, 0x74, 0x49, 0x6e, 0x66, 0x72, 0x61, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x55, 0x73,
+	0x65, 0x72, 0x4b, 0x65, 0x79, 0x52, 0x65, 0x73, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72,
+	0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49,
+	0x64, 0x12, 0x1b, 0x0a, 0x09, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x1f,
+	0x0a, 0x0b, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x5f, 0x6b, 0x65, 0x79, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x0a, 0x70, 0x72, 0x69, 0x76, 0x61, 0x74, 0x65, 0x4b, 0x65, 0x79, 0x42,
+	0x40, 0x5a, 0x3e, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x68,
+	0x65, 0x66, 0x2f, 0x61, 0x75, 0x74, 0x6f, 0x6d, 0x61, 0x74, 0x65, 0x2f, 0x61, 0x70, 0x69, 0x2f,
+	0x69, 0x6e, 0x74, 0x65, 0x72, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2f, 0x69, 0x6e, 0x66,
+	0x72, 0x61, 0x5f, 0x70, 0x72, 0x6f, 0x78, 0x79, 0x2f, 0x72, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -230,10 +300,11 @@ func file_interservice_infra_proxy_response_automate_infra_server_users_proto_ra
 	return file_interservice_infra_proxy_response_automate_infra_server_users_proto_rawDescData
 }
 
-var file_interservice_infra_proxy_response_automate_infra_server_users_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_interservice_infra_proxy_response_automate_infra_server_users_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_interservice_infra_proxy_response_automate_infra_server_users_proto_goTypes = []interface{}{
 	(*AutomateInfraServerUsers)(nil),         // 0: chef.automate.domain.infra_proxy.response.AutomateInfraServerUsers
 	(*AutomateInfraServerUsersListItem)(nil), // 1: chef.automate.domain.infra_proxy.response.AutomateInfraServerUsersListItem
+	(*ResetInfraServerUserKeyRes)(nil),       // 2: chef.automate.domain.infra_proxy.response.ResetInfraServerUserKeyRes
 }
 var file_interservice_infra_proxy_response_automate_infra_server_users_proto_depIdxs = []int32{
 	1, // 0: chef.automate.domain.infra_proxy.response.AutomateInfraServerUsers.users:type_name -> chef.automate.domain.infra_proxy.response.AutomateInfraServerUsersListItem
@@ -274,6 +345,18 @@ func file_interservice_infra_proxy_response_automate_infra_server_users_proto_in
 				return nil
 			}
 		}
+		file_interservice_infra_proxy_response_automate_infra_server_users_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ResetInfraServerUserKeyRes); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -281,7 +364,7 @@ func file_interservice_infra_proxy_response_automate_infra_server_users_proto_in
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_interservice_infra_proxy_response_automate_infra_server_users_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

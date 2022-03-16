@@ -46,3 +46,20 @@ func fromUpstreamAutomateInfraServerUser(u *infra_res.AutomateInfraServerUsersLi
 		IsServerAdmin:       u.IsServerAdmin,
 	}
 }
+
+//ResetInfraServerUserKey: Resets infra server user key
+func (c *InfraProxyServer) ResetInfraServerUserKey(ctx context.Context, r *gwreq.ResetInfraServerUserKeyReq) (*gwres.ResetInfraServerUserKeyRes, error) {
+	req := &infra_req.ResetInfraServerUserKeyReq{
+		UserName: r.UserName,
+		ServerId: r.ServerId,
+	}
+	res, err := c.client.ResetInfraServerUserKey(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &gwres.ResetInfraServerUserKeyRes{
+		UserId:     res.UserId,
+		PrivateKey: res.PrivateKey,
+	}, nil
+}

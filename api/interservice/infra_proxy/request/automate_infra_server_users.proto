@@ -7,3 +7,8 @@ message AutomateInfraServerUsers {
     // Automate Infra Server ID.
     string server_id = 1;
 }
+
+message ResetInfraServerUserKeyReq {
+    string user_name = 1;
+    string server_id = 2;
+}
