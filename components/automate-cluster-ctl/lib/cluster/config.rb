@@ -71,6 +71,7 @@ module AutomateCluster
 
     config_context :chef_server do
       default :instance_count, 1
+      default :chef_fqdn, ''
     end
 
     config_context :elasticsearch do
@@ -83,6 +84,7 @@ module AutomateCluster
 
     # Only applies to existing node architecture
     config_context :existing_nodes do
+      
       default :automate_private_ips, []
       default :chef_server_private_ips, []
       default :elasticsearch_ips, []

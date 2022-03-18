@@ -143,6 +143,7 @@ type ExistingInfraConfigToml struct {
 	ChefServer struct {
 		Config struct {
 			InstanceCount string `toml:"instance_count"`
+			chefFqdn      string `toml:"chef_fqdn"`
 		} `toml:"config"`
 	} `toml:"chef_server"`
 	Elasticsearch struct {
