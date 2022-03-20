@@ -2700,8 +2700,8 @@ func init() {
         ]
       }
     },
-    "/api/v0/infra/servers/{server_id}/user/{user_name}/user": {
-      "post": {
+    "/api/v0/infra/servers/{server_id}/user/{user_name}": {
+      "put": {
         "operationId": "InfraProxy_ResetInfraServerUserKey",
         "responses": {
           "200": {
@@ -4518,6 +4518,9 @@ func init() {
           "type": "string"
         },
         "user_name": {
+          "type": "string"
+        },
+        "server_id": {
           "type": "string"
         },
         "private_key": {
