@@ -4514,9 +4514,6 @@ func init() {
     "chef.automate.api.infra_proxy.response.ResetInfraServerUserKeyRes": {
       "type": "object",
       "properties": {
-        "user_id": {
-          "type": "string"
-        },
         "user_name": {
           "type": "string"
         },

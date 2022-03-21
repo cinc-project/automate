@@ -59,7 +59,8 @@ func (c *InfraProxyServer) ResetInfraServerUserKey(ctx context.Context, r *gwreq
 	}
 
 	return &gwres.ResetInfraServerUserKeyRes{
-		UserId:     res.UserId,
+		UserName:   res.UserName,
+		ServerId:   res.ServerId,
 		PrivateKey: res.PrivateKey,
 	}, nil
 }

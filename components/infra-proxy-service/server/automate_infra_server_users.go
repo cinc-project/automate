@@ -7,8 +7,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	secrets "github.com/chef/automate/api/external/secrets"
 	"github.com/chef/automate/api/interservice/infra_proxy/request"
 	"github.com/chef/automate/api/interservice/infra_proxy/response"
 	"github.com/chef/automate/components/infra-proxy-service/service"
@@ -81,32 +83,40 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 	if err != nil {
 		return nil, err
 	}
+
+	server, err := s.service.Storage.GetServer(ctx, req.ServerId)
+	if err != nil {
+		return nil, err
+	}
+	if server.CredentialID == "" {
+		return nil, errors.New("webui key is not available with server")
+	}
+	// Get web ui key from secrets service
+	secret, err := s.service.Secrets.Read(ctx, &secrets.Id{Id: server.CredentialID})
+	if err != nil {
+		return nil, err
+	}
+	client, err := s.createChefServerClient(ctx, req.ServerId, GetAdminKeyFrom(secret), "pivotal", true)
+	if err != nil {
+		return nil, err
+	}
+
 	pubKey, privKey, err := GenerateKeys()
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := s.createChefServerClient(ctx, req.ServerId, pubKey, "", false) // Admin name is empty string
-	if err != nil {
-		return nil, err
-	}
-
-	user, err := client.client.Users.Get(req.UserName)
 	if err != nil {
 		return nil, err
 	}
 
 	// Update the existing key
 	_, err = client.client.Users.UpdateKey(req.UserName, "", chef.AccessKey{
-		Name:      req.UserName,
-		PublicKey: pubKey,
+		Name:           req.UserName,
+		PublicKey:      pubKey,
+		ExpirationDate: "infinity",
 	})
 
 	return &response.ResetInfraServerUserKeyRes{
 		PrivateKey: privKey,
-		UserId:     user.UserName,
-		UserName:   req.GetUserName(),
-		ServerId:   req.GetServerId(),
+		UserName:   req.UserName,
+		ServerId:   req.ServerId,
 	}, nil
 }
 
