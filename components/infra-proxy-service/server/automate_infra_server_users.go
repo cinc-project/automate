@@ -102,17 +102,8 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 		return nil, err
 	}
 
-	userDetail, err := c.client.Users.Get(req.UserName)
-	if err != nil {
-		return nil, err
-	}
-
-	if userDetail.PublicKey == "" {
-		userDetail.PublicKey = "default"
-	}
-
 	// Deletes the existing key
-	_, err = c.client.Users.DeleteKey(req.UserName, userDetail.PublicKey)
+	_, err = c.client.Users.DeleteKey(req.UserName, "default")
 	chefError, _ := chef.ChefError(err)
 	if err != nil && chefError.StatusCode() != 404 {
 		return nil, ParseAPIError(err)
@@ -120,7 +111,7 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 
 	// Add new key to existing client
 	body, err := chef.JSONReader(AccessKeyReq{
-		Name:           userDetail.PublicKey,
+		Name:           "default",
 		ExpirationDate: "infinity",
 		CreateKey:      true,
 	})
@@ -129,7 +120,7 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 	}
 
 	var chefKey chef.ChefKey
-	addReq, err := c.client.NewRequest("POST", fmt.Sprintf("users/%s/keys", req.UserName), body)
+	addReq, err := c.client.NewRequest("PUT", fmt.Sprintf("users/%s/keys", req.UserName), body)
 
 	if err != nil {
 		return nil, ParseAPIError(err)
@@ -155,7 +146,7 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 	// 	PublicKey:      pubKey,
 	// 	ExpirationDate: "infinity",
 	// })
-
+	fmt.Println("###########chefKey##########", chefKey)
 	return &response.ResetInfraServerUserKeyRes{
 		PrivateKey: chefKey.PrivateKey,
 		UserName:   req.UserName,
