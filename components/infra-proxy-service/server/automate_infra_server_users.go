@@ -2,15 +2,10 @@ package server
 
 import (
 	"context"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
 
 	chef "github.com/go-chef/chef"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 
 	secrets "github.com/chef/automate/api/external/secrets"
 	"github.com/chef/automate/api/interservice/infra_proxy/request"
@@ -120,7 +115,7 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 	}
 
 	var chefKey chef.ChefKey
-	addReq, err := c.client.NewRequest("PUT", fmt.Sprintf("users/%s/keys", req.UserName), body)
+	addReq, err := c.client.NewRequest("POST", fmt.Sprintf("users/%s/keys", req.UserName), body)
 
 	if err != nil {
 		return nil, ParseAPIError(err)
@@ -135,61 +130,9 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 		return nil, ParseAPIError(err)
 	}
 
-	// pubKey, privKey, err := GenerateKeys()
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// // Update the existing key
-	// _, err = client.client.Users.UpdateKey(req.UserName, "", chef.AccessKey{
-	// 	Name:           req.UserName,
-	// 	PublicKey:      pubKey,
-	// 	ExpirationDate: "infinity",
-	// })
-	fmt.Println("###########chefKey##########", chefKey)
 	return &response.ResetInfraServerUserKeyRes{
 		PrivateKey: chefKey.PrivateKey,
 		UserName:   req.UserName,
 		ServerId:   req.ServerId,
 	}, nil
-}
-
-func GenerateKeys() (string, string, error) {
-	// generate key
-	privatekey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		log.Errorf("Cannot generate RSA key\n")
-		return "", "", err
-	}
-	publicKey := &privatekey.PublicKey
-
-	// Encode Private Key into a string variable
-	var privateKeyBytes []byte = x509.MarshalPKCS1PrivateKey(privatekey)
-	privateKeyBlock := &pem.Block{
-		Type:  "RSA PRIVATE KEY",
-		Bytes: privateKeyBytes,
-	}
-	privateKeyByteSlice := pem.EncodeToMemory(privateKeyBlock)
-	if err != nil {
-		log.Errorf("error when encode private key: %s \n", err)
-		return "", "", err
-	}
-
-	// Encode Public Key into a string variable
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
-	if err != nil {
-		log.Errorf("error when dumping publickey: %s \n", err)
-		return "", "", err
-	}
-	publicKeyBlock := &pem.Block{
-		Type:  "PUBLIC KEY",
-		Bytes: publicKeyBytes,
-	}
-
-	publicKeyByteSlice := pem.EncodeToMemory(publicKeyBlock)
-	if err != nil {
-		log.Errorf("error when encode public key: %s \n", err)
-		return "", "", err
-	}
-	return string(publicKeyByteSlice), string(privateKeyByteSlice), nil
 }
