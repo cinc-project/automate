@@ -6,7 +6,9 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"fmt"
 
+	chef "github.com/go-chef/chef"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
@@ -16,7 +18,6 @@ import (
 	"github.com/chef/automate/components/infra-proxy-service/service"
 	"github.com/chef/automate/components/infra-proxy-service/storage"
 	"github.com/chef/automate/components/infra-proxy-service/validation"
-	chef "github.com/go-chef/chef"
 )
 
 //GetAutomateInfraServerUsersList: Fetches the list of automate infra server users from the DB
@@ -96,25 +97,60 @@ func (s *Server) ResetInfraServerUserKey(ctx context.Context, req *request.Reset
 	if err != nil {
 		return nil, err
 	}
-	client, err := s.createChefServerClient(ctx, req.ServerId, GetAdminKeyFrom(secret), "pivotal", true)
+	c, err := s.createChefServerClient(ctx, req.ServerId, GetAdminKeyFrom(secret), "pivotal", true)
 	if err != nil {
 		return nil, err
 	}
 
-	pubKey, privKey, err := GenerateKeys()
-	if err != nil {
-		return nil, err
+	key := "default"
+
+	// Deletes the existing key
+	_, err = c.client.Users.DeleteKey(req.UserName, key)
+	chefError, _ := chef.ChefError(err)
+	if err != nil && chefError.StatusCode() != 404 {
+		return nil, ParseAPIError(err)
 	}
 
-	// Update the existing key
-	_, err = client.client.Users.UpdateKey(req.UserName, "", chef.AccessKey{
-		Name:           req.UserName,
-		PublicKey:      pubKey,
+	// Add new key to existing client
+	body, err := chef.JSONReader(AccessKeyReq{
+		Name:           key,
 		ExpirationDate: "infinity",
+		CreateKey:      true,
 	})
+	if err != nil {
+		return nil, ParseAPIError(err)
+	}
+
+	var chefKey chef.ChefKey
+	addReq, err := c.client.NewRequest("POST", fmt.Sprintf("users/%s/keys", req.UserName), body)
+
+	if err != nil {
+		return nil, ParseAPIError(err)
+	}
+
+	res, err := c.client.Do(addReq, &chefKey)
+	if res != nil {
+		defer res.Body.Close() //nolint:errcheck
+	}
+
+	if err != nil {
+		return nil, ParseAPIError(err)
+	}
+
+	// pubKey, privKey, err := GenerateKeys()
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// // Update the existing key
+	// _, err = client.client.Users.UpdateKey(req.UserName, "", chef.AccessKey{
+	// 	Name:           req.UserName,
+	// 	PublicKey:      pubKey,
+	// 	ExpirationDate: "infinity",
+	// })
 
 	return &response.ResetInfraServerUserKeyRes{
-		PrivateKey: privKey,
+		PrivateKey: chefKey.PrivateKey,
 		UserName:   req.UserName,
 		ServerId:   req.ServerId,
 	}, nil
