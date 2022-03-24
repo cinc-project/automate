@@ -45,7 +45,7 @@ const (
 	PGSSLCERT                   = "/hab/svc/automate-postgresql/config/server.crt"
 	PGSSLKEY                    = "/hab/svc/automate-postgresql/config/server.key"
 	PGSSLROOTCERT               = "/hab/svc/automate-postgresql/config/root.crt"
-	OLD_BIN_DIR                 = "/hab/pkgs/core/postgresql/9.6.21/20211016180117/bin"
+	OLD_BIN_DIR                 = "/hab/pkgs/core/postgresql/9.6.24/20220218015755/bin"
 )
 
 func init() {
@@ -104,11 +104,12 @@ func runCleanup(cmd *cobra.Command, args []string) error {
 		} else {
 			return errors.New("please provide valid input for data flag")
 		}
+		//nolint
 		cleanUp()
 
 	} else {
 		return errors.New(
-			"pg migration will only support 9.6 pg version for now, your pg version is: " + string(oldPgVersion),
+			"pg migration will only support 9.6 pg version for now, your pg version is: " + oldPgVersion,
 		)
 	}
 
@@ -144,7 +145,7 @@ func runMigratePgCmd(cmd *cobra.Command, args []string) error {
 
 		} else {
 			return errors.New(
-				"pg migration will only support 9.6 pg version for now, your pg version is: " + string(oldPgVersion),
+				"pg migration will only support 9.6 pg version for now, your pg version is: " + oldPgVersion,
 			)
 		}
 
@@ -506,7 +507,7 @@ func dirExists(path string) (bool, error) {
 	if err == nil {
 		return true, nil
 	}
-	if os.IsNotExist(err) {
+	if os.IsNotExist(err) { // nosemgrep
 		return false, nil
 	}
 	return false, err
@@ -526,7 +527,7 @@ func promptCheckList(message string) error {
 
 // check pg version
 func pgVersion(path string) (string, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := ioutil.ReadFile(path) // nosemgrep
 	if err != nil {
 		return "", errors.New("could not find pg_version file")
 	}
