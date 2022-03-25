@@ -89,7 +89,7 @@ export class UIComponent implements OnInit, AfterViewChecked {
     } else {
       this.showBanner = this.stringToBoolean(bannerStorage);
     }
-    this.showBanner = this.stringToBoolean('false');
+    //this.showBanner = this.stringToBoolean('false'); // uncomment this line to hide static Banner
     this.store.dispatch(new CreateNotification({
       type: Type.error,
       message: 'License Update: your current license is expiring soon.'
