@@ -18,17 +18,18 @@ func NewConfigRequest() *ConfigRequest {
 	return &ConfigRequest{
 		V1: &ConfigRequest_V1{
 			Sys: &ConfigRequest_V1_System{
-				Mlsa:       &shared.Mlsa{},
-				Log:        &ConfigRequest_V1_Log{},
-				Service:    &ConfigRequest_V1_System_Service{},
-				Grpc:       &ConfigRequest_V1_Grpc{},
-				Storage:    &ConfigRequest_V1_Storage{},
-				Expiry:     &ConfigRequest_V1_Expiry{},
-				Bootstrap:  &ConfigRequest_V1_Bootstrap{},
-				Connectors: &ConfigRequest_V1_Connectors{},
-				Tls:        &shared.TLSCredentials{},
-				Disclosure: &ConfigRequest_V1_Disclosure{},
-				Banner:     &ConfigRequest_V1_Banner{},
+				Mlsa:                 &shared.Mlsa{},
+				Log:                  &ConfigRequest_V1_Log{},
+				Service:              &ConfigRequest_V1_System_Service{},
+				Grpc:                 &ConfigRequest_V1_Grpc{},
+				Storage:              &ConfigRequest_V1_Storage{},
+				Expiry:               &ConfigRequest_V1_Expiry{},
+				Bootstrap:            &ConfigRequest_V1_Bootstrap{},
+				Connectors:           &ConfigRequest_V1_Connectors{},
+				Tls:                  &shared.TLSCredentials{},
+				Disclosure:           &ConfigRequest_V1_Disclosure{},
+				Banner:               &ConfigRequest_V1_Banner{},
+				InvalidLoginAttempts: &ConfigRequest_V1_InvalidLoginAttempts{},
 			},
 			Svc: &ConfigRequest_V1_Service{},
 		},
@@ -56,6 +57,10 @@ func DefaultConfigRequest() *ConfigRequest {
 	c.V1.Sys.Banner.Message = w.String("")
 	c.V1.Sys.Banner.BackgroundColor = w.String("3864f2") // Chef Success blue
 	c.V1.Sys.Banner.TextColor = w.String("FFFFFF")       // White
+
+	c.V1.Sys.InvalidLoginAttempts.EnableInvalidLoginAttempts = w.Bool(false)
+	c.V1.Sys.InvalidLoginAttempts.BlockedDuration = w.Int32(30)
+	c.V1.Sys.InvalidLoginAttempts.MaxInvalidLoginAttemptsAllowed = w.Int32(5)
 
 	return c
 }
@@ -203,6 +208,13 @@ func (c *ConfigRequest) PrepareSystemConfig(creds *shared.TLSCredentials) (share
 			// so that we learn about the users continuing existence in LDAP, and
 			// eventual group membership changes.
 			c.V1.Sys.Expiry.IdTokens = w.String("3m")
+		}
+	}
+
+	if c.V1.Sys.InvalidLoginAttempts.EnableInvalidLoginAttempts.Value {
+		if c.V1.Sys.InvalidLoginAttempts.GetEnableInvalidLoginAttempts().GetValue() {
+			c.V1.Sys.InvalidLoginAttempts.BlockedDuration.Value = c.V1.Sys.InvalidLoginAttempts.GetBlockedDuration().GetValue()
+			c.V1.Sys.InvalidLoginAttempts.MaxInvalidLoginAttemptsAllowed.Value = c.V1.Sys.InvalidLoginAttempts.GetMaxInvalidLoginAttemptsAllowed().GetValue()
 		}
 	}
 
