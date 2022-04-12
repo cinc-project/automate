@@ -49,7 +49,7 @@ require (
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/golang/mock v1.4.4
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.6
 	github.com/gorilla/handlers v1.3.0 // indirect
 	github.com/gorilla/mux v1.7.4
@@ -124,11 +124,11 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/api v0.29.0
 	google.golang.org/genproto v0.0.0-20200901141002-b3bf27a9dbd1
-	google.golang.org/grpc v1.33.2
-	google.golang.org/protobuf v1.25.0
+	google.golang.org/grpc v1.36.0
+	google.golang.org/grpc/examples v0.0.0-20220408224156-ebd098392a8b
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/cheggaaa/pb.v1 v1.0.20
 	gopkg.in/ldap.v2 v2.5.1 // indirect
-	gopkg.in/olivere/elastic.v6 v6.2.35
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5
 	gopkg.in/segmentio/analytics-go.v3 v3.0.1
 	gopkg.in/square/go-jose.v2 v2.5.1
