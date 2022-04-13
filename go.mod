@@ -26,7 +26,6 @@ require (
 	github.com/bufbuild/buf v0.20.5
 	github.com/buger/goterm v0.0.0-20180307092342-c9def0117b24
 	github.com/buger/jsonparser v0.0.0-20180808090653-f4dd9f5a6b44
-	github.com/chef/automate/api/external v0.0.0-00010101000000-000000000000
 	github.com/chef/toml v0.3.1-0.20200730001027-920c30b33b5d
 	github.com/ckaznocha/protoc-gen-lint v0.2.1
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
@@ -38,6 +37,7 @@ require (
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
+	github.com/envoyproxy/go-control-plane v0.9.9-0.20201210154907-fd9021fe5dad // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.4.0
 	github.com/fatih/color v1.9.0
 	github.com/felixge/httpsnoop v1.0.0 // indirect
@@ -48,9 +48,11 @@ require (
 	github.com/gocarina/gocsv v0.0.0-20170928100509-7099e67763c2
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/golang-migrate/migrate v3.5.4+incompatible
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/mock v1.4.4
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-cmp v0.5.7
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/gorilla/handlers v1.3.0 // indirect
 	github.com/gorilla/mux v1.7.4
 	github.com/grpc-ecosystem/go-grpc-middleware v1.0.0
@@ -69,6 +71,7 @@ require (
 	github.com/leanovate/gopter v0.2.4
 	github.com/lib/pq v1.8.0
 	github.com/lyft/protoc-gen-star v0.4.16-0.20200805193024-077ca8f98fb2
+	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mattn/go-sqlite3 v1.11.0 // indirect
@@ -81,7 +84,7 @@ require (
 	github.com/nats-io/nats.go v1.9.1
 	github.com/nats-io/stan.go v0.6.0
 	github.com/olivere/elastic v6.2.35+incompatible
-	github.com/olivere/elastic/v7 v7.0.32
+	github.com/olivere/elastic/v7 v7.0.22
 	github.com/open-policy-agent/opa v0.19.1
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opentracing/opentracing-go v1.2.0
@@ -112,6 +115,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20170218160415-a3153f7040e9 // indirect
 	github.com/xtgo/uuid v0.0.0-20140804021211-a0b114877d4c // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
+	go.opentelemetry.io/otel v1.5.0 // indirect
 	go.uber.org/atomic v1.6.0
 	go.uber.org/multierr v1.5.0
 	go.uber.org/zap v1.15.0
@@ -124,8 +128,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/api v0.29.0
 	google.golang.org/genproto v0.0.0-20200901141002-b3bf27a9dbd1
-	google.golang.org/grpc v1.36.1
-	google.golang.org/grpc/examples v0.0.0-20220408224156-ebd098392a8b
+	google.golang.org/grpc v1.29.1
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/cheggaaa/pb.v1 v1.0.20
 	gopkg.in/ldap.v2 v2.5.1 // indirect
