@@ -58,7 +58,7 @@ func DefaultConfigRequest() *ConfigRequest {
 	c.V1.Sys.Banner.BackgroundColor = w.String("3864f2") // Chef Success blue
 	c.V1.Sys.Banner.TextColor = w.String("FFFFFF")       // White
 
-	c.V1.Sys.InvalidLoginAttempts.EnableInvalidLoginAttempts = w.Bool(false)
+	c.V1.Sys.InvalidLoginAttempts.EnableInvalidLoginAttempts = w.Bool(true)
 	c.V1.Sys.InvalidLoginAttempts.BlockedDuration = w.Int32(30)
 	c.V1.Sys.InvalidLoginAttempts.MaxInvalidLoginAttemptsAllowed = w.Int32(5)
 
@@ -211,12 +211,9 @@ func (c *ConfigRequest) PrepareSystemConfig(creds *shared.TLSCredentials) (share
 		}
 	}
 
-	if c.V1.Sys.InvalidLoginAttempts.EnableInvalidLoginAttempts.Value {
-		if c.V1.Sys.InvalidLoginAttempts.GetEnableInvalidLoginAttempts().GetValue() {
-			c.V1.Sys.InvalidLoginAttempts.BlockedDuration.Value = c.V1.Sys.InvalidLoginAttempts.GetBlockedDuration().GetValue()
-			c.V1.Sys.InvalidLoginAttempts.MaxInvalidLoginAttemptsAllowed.Value = c.V1.Sys.InvalidLoginAttempts.GetMaxInvalidLoginAttemptsAllowed().GetValue()
-		}
-	}
+	c.V1.Sys.InvalidLoginAttempts.EnableInvalidLoginAttempts = c.V1.Sys.InvalidLoginAttempts.GetEnableInvalidLoginAttempts()
+	c.V1.Sys.InvalidLoginAttempts.BlockedDuration = c.V1.Sys.InvalidLoginAttempts.GetBlockedDuration()
+	c.V1.Sys.InvalidLoginAttempts.MaxInvalidLoginAttemptsAllowed = c.V1.Sys.InvalidLoginAttempts.GetMaxInvalidLoginAttemptsAllowed()
 
 	return c.V1.Sys, nil
 }
