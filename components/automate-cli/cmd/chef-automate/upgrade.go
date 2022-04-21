@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -116,6 +117,9 @@ func runUpgradeCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("upgradeRunCmdFlags.version:", upgradeRunCmdFlags.version)
+	fmt.Println("upgradeRunCmdFlags.isMajorUpgrade:", upgradeRunCmdFlags.isMajorUpgrade)
+	fmt.Println("upgradeRunCmdFlags.versionsPath:", upgradeRunCmdFlags.versionsPath)
 
 	validatedResp, err := connection.IsValidUpgrade(context.Background(), &api.UpgradeRequest{
 		Version:        upgradeRunCmdFlags.version,
@@ -144,6 +148,7 @@ func runUpgradeCmd(cmd *cobra.Command, args []string) error {
 		}
 
 		if upgradeRunCmdFlags.isMajorUpgrade && len(pendingPostChecklist) == 0 {
+			fmt.Println("validatedResp.TargetVersion:", validatedResp.TargetVersion)
 			ci, err := majorupgradechecklist.NewChecklistManager(writer, validatedResp.TargetVersion)
 			if err != nil {
 				return status.Wrap(

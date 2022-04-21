@@ -1,6 +1,8 @@
 package majorupgradechecklist
 
 import (
+	"fmt"
+
 	"github.com/chef/automate/components/automate-cli/pkg/status"
 	"github.com/chef/automate/components/automate-deployment/pkg/cli"
 )
@@ -13,6 +15,8 @@ type ChecklistManager interface {
 func NewChecklistManager(writer cli.FormatWriter, version string) (ChecklistManager, error) {
 
 	major, _ := GetMajorVersion(version)
+	fmt.Println("major:", major)
+	fmt.Println("version:", version)
 
 	switch major {
 	case "3":
