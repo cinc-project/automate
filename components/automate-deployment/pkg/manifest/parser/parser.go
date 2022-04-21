@@ -2,6 +2,7 @@ package parser
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/chef/automate/components/automate-deployment/pkg/habpkg"
 	"github.com/chef/automate/components/automate-deployment/pkg/manifest"
@@ -48,6 +49,7 @@ func ManifestFromBytes(body []byte) (*manifest.A2, error) {
 	case "1", "2":
 		return parseV1Manifest(body)
 	default:
+		fmt.Println("default ")
 		return nil, manifest.NewInvalidSchemaError(errors.Errorf("schema version unknown: %s", ver))
 	}
 }
@@ -56,6 +58,7 @@ func parseV1Manifest(body []byte) (*manifest.A2, error) {
 	v1 := &v1Manifest{}
 	err := json.Unmarshal(body, v1)
 	if err != nil {
+		fmt.Println("parseV1Manifest ")
 		return nil, manifest.NewCannotParseError(err)
 	}
 
@@ -73,6 +76,7 @@ func parseA2Manifest(body []byte) (*manifest.A2, error) {
 	a2 := &manifest.A2{}
 	err := json.Unmarshal(body, a2)
 	if err != nil {
+		fmt.Println("parseA2Manifest ")
 		return nil, manifest.NewCannotParseError(err)
 	}
 

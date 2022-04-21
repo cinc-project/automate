@@ -3,6 +3,7 @@ package majorupgradechecklist
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/chef/automate/components/automate-deployment/pkg/cli"
@@ -58,10 +59,23 @@ func GetMajorVersion(version string) (string, bool) {
 }
 
 func IsExternalElasticSearch(writer cli.FormatWriter) bool {
+	fmt.Println("..................entry.........................")
 	res, err := client.GetAutomateConfig(int64(client.DefaultClientTimeout))
+	fmt.Println("...........................................")
+	fmt.Println("***********************")
+
 	if err != nil {
-		writer.Printf("failed to get elastic search configuration: %s\n", err.Error())
+		fmt.Println("...err:", err)
+		//fmt.Println(err.Error())
+		//writer.Printf("failed to get elastic search configuration: %s\n", err.Error())
 		return false
 	}
-	return res.Config.GetGlobal().GetV1().GetExternal().GetElasticsearch().GetEnable().GetValue()
+	if res != nil {
+		fmt.Println("$$$$$$$$$$$$$$$")
+		fmt.Println("res.Config.GetGlobal().GetV1() :", res.Config.GetGlobal().GetV1())
+		fmt.Println("res.Config.GetGlobal().GetV1().GetExternal() :", res.Config.GetGlobal().GetV1().GetExternal())
+		fmt.Println("res.Config.GetGlobal().GetV1().GetExternal().GetElasticsearch() :", res.Config.GetGlobal().GetV1().GetExternal().GetElasticsearch())
+		return res.Config.GetGlobal().GetV1().GetExternal().GetElasticsearch().GetEnable().GetValue()
+	}
+	return false
 }

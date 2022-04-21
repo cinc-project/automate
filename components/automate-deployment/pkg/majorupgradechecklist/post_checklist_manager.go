@@ -1,6 +1,8 @@
 package majorupgradechecklist
 
 import (
+	"fmt"
+
 	"github.com/chef/automate/components/automate-cli/pkg/status"
 )
 
@@ -30,6 +32,9 @@ type PostChecklist struct {
 
 func NewPostChecklistManager(version string) (*PostChecklistManager, error) {
 	majorVersion, _ := GetMajorVersion(version)
+	fmt.Println(".....major version......", majorVersion)
+	fmt.Println("..... version......", version)
+
 	ci, err := NewChecklistManager(nil, version)
 	if err != nil {
 		return &PostChecklistManager{

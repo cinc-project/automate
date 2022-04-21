@@ -20,7 +20,8 @@ import (
 )
 
 const (
-	automateVersionsURLFmt = "https://packages.chef.io/manifests/%s/automate/versions.json"
+	// automateVersionsURLFmt = "https://packages.chef.io/manifests/%s/automate/versions.json"
+	automateVersionsURLFmt = "http://localhost:2222/manifests/%s/automate/versions.json"
 )
 
 // A ReleaseManifestProvider is something that can return a manifest

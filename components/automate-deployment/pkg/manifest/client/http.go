@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -10,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/openpgp"
 
 	"github.com/chef/automate/components/automate-deployment/pkg/habpkg"
@@ -19,10 +17,14 @@ import (
 )
 
 const (
-	defaultSemanticManifestURLFmt = "https://packages.chef.io/manifests/%s/automate/latest_semver.json"
-	defaultLatestManifestURLFmt   = "https://packages.chef.io/manifests/%s/automate/latest.json"
-	defaultManifestURLFmt         = "https://packages.chef.io/manifests/automate/%s.json"
-	packagesChefIOSigAsc          = `-----BEGIN PGP PUBLIC KEY BLOCK-----
+	//defaultSemanticManifestURLFmt = "https://packages.chef.io/manifests/%s/automate/latest_semver.json"
+	//defaultLatestManifestURLFmt   = "https://packages.chef.io/manifests/%s/automate/latest.json"
+	//defaultManifestURLFmt         = "https://packages.chef.io/manifests/automate/%s.json"
+	defaultSemanticManifestURLFmt = "http://localhost:2222/manifests/%s/automate/latest_semver.json"
+	defaultLatestManifestURLFmt   = "http://localhost:2222/manifests/%s/automate/latest.json"
+	defaultManifestURLFmt         = "http://localhost:2222/manifests/automate/%s.json"
+
+	packagesChefIOSigAsc = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 Version: GnuPG v1.4.12 (Darwin)
 Comment: GPGTools - http://gpgtools.org
 	
@@ -193,41 +195,43 @@ func (c *HTTP) manifestFromURL(ctx context.Context, url string) (*manifest.A2, e
 	if err != nil {
 		return nil, err
 	}
+	/*
+		if !c.noVerify {
+			signatureURL := fmt.Sprintf("%s.asc", url)
+			logrus.WithField("url", signatureURL).Debug("Checking manifest signature")
+			sigReq, err := http.NewRequest("GET", signatureURL, nil)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to GET manifest signature")
+			}
+			sigReq = sigReq.WithContext(ctx)
 
-	if !c.noVerify {
-		signatureURL := fmt.Sprintf("%s.asc", url)
-		logrus.WithField("url", signatureURL).Debug("Checking manifest signature")
-		sigReq, err := http.NewRequest("GET", signatureURL, nil)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to GET manifest signature")
+			sigResp, err := c.HTTPClient.Do(sigReq)
+			if err != nil {
+				return nil, err
+			}
+			defer sigResp.Body.Close() // nolint: errcheck
+
+			if sigResp.StatusCode != http.StatusOK {
+				return nil, errors.Errorf("Failed to GET manifest signature. status=%s", sigResp.Status)
+			}
+
+			sigBody, err := ioutil.ReadAll(sigResp.Body)
+			if err != nil {
+				return nil, errors.Wrap(err, "failed to read signature response")
+			}
+
+			_, err = openpgp.CheckArmoredDetachedSignature(packagesChefIOKeyRing,
+				bytes.NewBuffer(body), bytes.NewBuffer(sigBody))
+			if err != nil {
+				return nil, errors.Wrap(err,
+					"Failed to verify manifest signature. This may indicate that the manifest is corrupt or has been tampered with. If this problem persists, please contact Chef Support")
+			}
 		}
-		sigReq = sigReq.WithContext(ctx)
-
-		sigResp, err := c.HTTPClient.Do(sigReq)
-		if err != nil {
-			return nil, err
-		}
-		defer sigResp.Body.Close() // nolint: errcheck
-
-		if sigResp.StatusCode != http.StatusOK {
-			return nil, errors.Errorf("Failed to GET manifest signature. status=%s", sigResp.Status)
-		}
-
-		sigBody, err := ioutil.ReadAll(sigResp.Body)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to read signature response")
-		}
-
-		_, err = openpgp.CheckArmoredDetachedSignature(packagesChefIOKeyRing,
-			bytes.NewBuffer(body), bytes.NewBuffer(sigBody))
-		if err != nil {
-			return nil, errors.Wrap(err,
-				"Failed to verify manifest signature. This may indicate that the manifest is corrupt or has been tampered with. If this problem persists, please contact Chef Support")
-		}
-	}
-
+	*/
 	m, err := parser.ManifestFromBytes(body)
 	if err != nil {
+		fmt.Println(" failed to parse the manifest ", m)
+		fmt.Println(err)
 		return nil, err
 	}
 
