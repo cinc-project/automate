@@ -229,3 +229,10 @@ func (t *TestDB) DeleteOrgUserAssociation(ctx context.Context, serverID, orgID, 
 	}
 	return storage.OrgUser{ID: 2, OrgID: orgID, UserID: 2, IsAdmin: isAdmin, InfraServerUsername: username}, nil
 }
+
+func (t *TestDB) DeleteUserAssciation(ctx context.Context, username string) (string, error) {
+	if t.NeedError {
+		return "", errors.New("failed to delete user association with server and org")
+	}
+	return "user_1", nil
+}
