@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/chef/automate/components/automate-cli/pkg/status"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -32,8 +33,8 @@ type PostChecklist struct {
 
 func NewPostChecklistManager(version string) (*PostChecklistManager, error) {
 	majorVersion, _ := GetMajorVersion(version)
-	fmt.Println(".....major version......", majorVersion)
-	fmt.Println("..... version......", version)
+	fmt.Println("PROGRESS.....major version......", majorVersion)
+	fmt.Println("PROGRESS..... version......", version)
 
 	ci, err := NewChecklistManager(nil, version)
 	if err != nil {
@@ -48,10 +49,17 @@ func NewPostChecklistManager(version string) (*PostChecklistManager, error) {
 }
 
 func (pcm *PostChecklistManager) CreatePostChecklistFile(path string, isExecuted bool) error {
+	logrus.Info("PROGRESS path:", path)
+
 	params := PostChecklist{}
 	params.PostChecklist = append(params.PostChecklist, pcm.ci.GetPostChecklist(isExecuted)...)
+
 	params.Version = pcm.version
+
 	err := CreateJsonFile(&params, path)
+	logrus.Info("PROGRESS", err.Error())
+	logrus.Info("PROGRESS params:", params)
+
 	if err != nil {
 		return err
 	}
@@ -114,8 +122,9 @@ func (pcm *PostChecklistManager) ReadPendingPostChecklistFile(path string, isExt
 	return postCmdList, nil
 }
 
-func (pcm *PostChecklistManager) UpdatePostChecklistFile(id string, path string) error {
+func (pcm *PostChecklistManager) NewPostChecklistManager(id string, path string) error {
 	res, err := ReadJsonFile(path)
+	fmt.Println("PROGRESS NewPostChecklistManager")
 	if err != nil {
 		return err
 	}

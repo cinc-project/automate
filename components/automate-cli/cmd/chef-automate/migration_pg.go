@@ -441,13 +441,13 @@ func executeMigrate(check bool) error {
 	if !check && err == nil {
 		ci, err := majorupgradechecklist.NewPostChecklistManager(NEXT_AUTOMATE_VERSION)
 		if err != nil {
-			fmt.Println("............-------.....................")
+			fmt.Println("............NewPostChecklistManager.....................")
 			fmt.Println(err.Error())
 			return err
 		}
 		err = ci.UpdatePostChecklistFile(MIGRATE_ES_ID, majorupgradechecklist.UPGRADE_METADATA)
 		if err != nil {
-			fmt.Println(".................................")
+			fmt.Println("PROGRESS UpdatePostChecklistFile.................................")
 			fmt.Println(err.Error())
 			return nil
 		}

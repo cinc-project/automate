@@ -1406,19 +1406,24 @@ func (s *server) doConverge(
 
 	sender.Deploy(api.Running)
 	eDeploy.startConverge(task, sink)
+	logrus.Info("PROGRESS doConverge")
 	go func() {
 		defer sender.TaskComplete()
 		defer os.Setenv(isUpgradeMajorEnv, "false")
 
 		eDeploy.waitForConverge(task)
-
+		fmt.Println("PROGRESS isUpgradeMajorEnv:", os.Getenv(isUpgradeMajorEnv))
 		if os.Getenv(isUpgradeMajorEnv) == "true" {
 			var err error
+			logrus.Info("PROGRESS version:", s.deployment.CurrentReleaseManifest.Version())
 			ci, err := majorupgradechecklist.NewPostChecklistManager(s.deployment.CurrentReleaseManifest.Version())
 			if err != nil {
 				errHandler(err)
 			}
 			err = ci.CreatePostChecklistFile(majorupgradechecklist.UPGRADE_METADATA, majorupgradechecklist.IsExternalPG())
+			logrus.Info("PROGRESS............")
+			logrus.Info("PROGRESS ", err.Error())
+
 			if err != nil {
 				errHandler(err)
 			}

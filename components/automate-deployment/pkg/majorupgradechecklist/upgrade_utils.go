@@ -9,6 +9,7 @@ import (
 	"github.com/chef/automate/components/automate-deployment/pkg/cli"
 	"github.com/chef/automate/components/automate-deployment/pkg/client"
 	"github.com/chef/automate/components/automate-deployment/pkg/manifest"
+	"github.com/sirupsen/logrus"
 )
 
 type Checklist struct {
@@ -38,6 +39,8 @@ func ReadJsonFile(path string) (*PostChecklist, error) {
 func CreateJsonFile(params *PostChecklist, path string) error {
 	var buffer bytes.Buffer
 	data, err := json.Marshal(*params)
+	logrus.Info("PROGRESS CreateJsonFile")
+	logrus.Info("PROGRESS", data)
 	if err != nil {
 		return err
 	}
@@ -59,7 +62,7 @@ func GetMajorVersion(version string) (string, bool) {
 }
 
 func IsExternalElasticSearch(writer cli.FormatWriter) bool {
-	fmt.Println("..................entry.........................")
+	logrus.Info("..................entry.........................")
 	res, err := client.GetAutomateConfig(int64(client.DefaultClientTimeout))
 	fmt.Println("...........................................")
 	fmt.Println("***********************")
