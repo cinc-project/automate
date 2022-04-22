@@ -23,6 +23,7 @@ type ChecklistHelper struct {
 }
 
 func ReadJsonFile(path string) (*PostChecklist, error) {
+	logrus.Info("PROGRESS ReadJsonFile")
 	byteValue, err := ioutil.ReadFile(path) // nosemgrep
 	if err != nil {
 		return nil, err
@@ -33,6 +34,7 @@ func ReadJsonFile(path string) (*PostChecklist, error) {
 	if err != nil {
 		return nil, err
 	}
+	logrus.Info("PROGRESS ReadJsonFile: EXIT")
 	return &params, nil
 }
 
@@ -75,9 +77,9 @@ func IsExternalElasticSearch(writer cli.FormatWriter) bool {
 	}
 	if res != nil {
 		fmt.Println("$$$$$$$$$$$$$$$")
-		fmt.Println("res.Config.GetGlobal().GetV1() :", res.Config.GetGlobal().GetV1())
-		fmt.Println("res.Config.GetGlobal().GetV1().GetExternal() :", res.Config.GetGlobal().GetV1().GetExternal())
-		fmt.Println("res.Config.GetGlobal().GetV1().GetExternal().GetElasticsearch() :", res.Config.GetGlobal().GetV1().GetExternal().GetElasticsearch())
+		//fmt.Println("res.Config.GetGlobal().GetV1() :", res.Config.GetGlobal().GetV1())
+		//fmt.Println("res.Config.GetGlobal().GetV1().GetExternal() :", res.Config.GetGlobal().GetV1().GetExternal())
+		//fmt.Println("res.Config.GetGlobal().GetV1().GetExternal().GetElasticsearch() :", res.Config.GetGlobal().GetV1().GetExternal().GetElasticsearch())
 		return res.Config.GetGlobal().GetV1().GetExternal().GetElasticsearch().GetEnable().GetValue()
 	}
 	return false

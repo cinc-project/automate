@@ -15,8 +15,8 @@ type ChecklistManager interface {
 func NewChecklistManager(writer cli.FormatWriter, version string) (ChecklistManager, error) {
 
 	major, _ := GetMajorVersion(version)
-	fmt.Println("major:", major)
-	fmt.Println("version:", version)
+	fmt.Println("PROGRESS NewChecklistManager major:", major)
+	fmt.Println("PROGRESS NewChecklistManager version:", version)
 
 	switch major {
 	case "3":

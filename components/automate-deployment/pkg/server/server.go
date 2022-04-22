@@ -1407,6 +1407,8 @@ func (s *server) doConverge(
 	sender.Deploy(api.Running)
 	eDeploy.startConverge(task, sink)
 	logrus.Info("PROGRESS doConverge")
+	fmt.Println("PROGRESS doConverge")
+
 	go func() {
 		defer sender.TaskComplete()
 		defer os.Setenv(isUpgradeMajorEnv, "false")

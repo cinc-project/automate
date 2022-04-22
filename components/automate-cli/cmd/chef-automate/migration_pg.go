@@ -429,36 +429,6 @@ func esMigrateExecutor() error {
 
 func executeMigrate(check bool) error {
 	var err error
-
-	writer.Title(
-		"----------------------------------------------\n" +
-			"migration from es to os \n" +
-			"----------------------------------------------",
-	)
-
-	writer.Title("Checking for es_upgrade")
-
-	if !check && err == nil {
-		ci, err := majorupgradechecklist.NewPostChecklistManager(NEXT_AUTOMATE_VERSION)
-		if err != nil {
-			fmt.Println("............NewPostChecklistManager.....................")
-			fmt.Println(err.Error())
-			return err
-		}
-		err = ci.UpdatePostChecklistFile(MIGRATE_ES_ID, majorupgradechecklist.UPGRADE_METADATA)
-		if err != nil {
-			fmt.Println("PROGRESS UpdatePostChecklistFile.................................")
-			fmt.Println(err.Error())
-			return nil
-		}
-	}
-
-	command := exec.Command("/bin/sh", "-c", script)
-	err = command.Run()
-	if err != nil {
-		fmt.Println(err)
-		return err
-	}
 	defer func() {
 		err = chefAutomateStart()
 		if err != nil {
@@ -469,6 +439,38 @@ func executeMigrate(check bool) error {
 			fmt.Println(err)
 		}
 	}()
+	writer.Title(
+		"----------------------------------------------\n" +
+			"migration from es to os \n" +
+			"----------------------------------------------",
+	)
+	fmt.Println("PROGRESS Start")
+	command := exec.Command("/bin/sh", "-c", script)
+	err = command.Run()
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	fmt.Println("PROGRESS STOP END ")
+
+	writer.Title("Checking for es_upgrade")
+	fmt.Println("check:", check)
+	if !check {
+		fmt.Println("PROGRESS : executeMigrate")
+		ci, err := majorupgradechecklist.NewPostChecklistManager(NEXT_AUTOMATE_VERSION)
+		if err != nil {
+			fmt.Println("PROGRESS............NewPostChecklistManager.....................")
+			fmt.Println(err.Error())
+			return err
+		}
+		fmt.Println("PROGRESS : executeMigrate2")
+		err = ci.UpdatePostChecklistFile(MIGRATE_ES_ID, majorupgradechecklist.UPGRADE_METADATA)
+		if err != nil {
+			fmt.Println("PROGRESS UpdatePostChecklistFile.................................")
+			fmt.Println(err.Error())
+			return nil
+		}
+	}
 	return nil
 }
 

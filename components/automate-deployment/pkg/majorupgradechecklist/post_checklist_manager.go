@@ -68,20 +68,23 @@ func (pcm *PostChecklistManager) CreatePostChecklistFile(path string, isExecuted
 }
 
 func (pcm *PostChecklistManager) ReadPostChecklistById(id string, path string) (bool, error) {
+	fmt.Println("PROGRESS : ReadPostChecklistById")
 	checklistIDIsExecuted := true
 	res, err := ReadJsonFile(path)
 	if err != nil {
 		// overriding error to nil, in the case of file not found
+		fmt.Println("PROGRESS : ReadPostChecklistById", checklistIDIsExecuted)
 		return checklistIDIsExecuted, nil
 	}
 
 	for i := 0; i < len(res.PostChecklist); i++ {
+		fmt.Println("PROGRESS : ReadPostChecklistById :PostChecklist")
 		if res.PostChecklist[i].Id == id {
 			checklistIDIsExecuted = res.PostChecklist[i].IsExecuted
 			break
 		}
 	}
-
+	fmt.Println("PROGRESS : ReadPostChecklistById: return", checklistIDIsExecuted)
 	return checklistIDIsExecuted, nil
 }
 
@@ -89,6 +92,7 @@ func (pcm *PostChecklistManager) ReadPendingPostChecklistFile(path string, isExt
 	var postCmdList []string
 	var showPostChecklist = false
 	res, err := ReadJsonFile(path)
+	fmt.Println("PROGRESS ReadPendingPostChecklistFile: ENTRY")
 	if err != nil {
 		return postCmdList, err
 	}
@@ -119,12 +123,14 @@ func (pcm *PostChecklistManager) ReadPendingPostChecklistFile(path string, isExt
 	} else {
 		return postCmdList, status.Errorf(status.UpgradeError, "Failed to read checklist since version didn't match")
 	}
+	fmt.Println("PROGRESS ReadPendingPostChecklistFile: EXIT")
 	return postCmdList, nil
 }
 
-func (pcm *PostChecklistManager) NewPostChecklistManager(id string, path string) error {
+func (pcm *PostChecklistManager) UpdatePostChecklistFile(id string, path string) error {
+	fmt.Println("PROGRESS UpdatePostChecklistFile")
+
 	res, err := ReadJsonFile(path)
-	fmt.Println("PROGRESS NewPostChecklistManager")
 	if err != nil {
 		return err
 	}
@@ -138,5 +144,6 @@ func (pcm *PostChecklistManager) NewPostChecklistManager(id string, path string)
 	if err != nil {
 		return err
 	}
+	fmt.Println("PROGRESS UpdatePostChecklistFile : RETURN ")
 	return nil
 }
