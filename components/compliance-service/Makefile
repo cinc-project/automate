@@ -244,8 +244,8 @@ start-es6: create-es-data-dir
 	@$(MAKE) wait-for-es
 
 start-os124: create-es-data-dir
-	@printf "\n===> ${yellow}Recreating the ElasticSearch 6 container...${reset}\n"
-	docker rm -f cc_os124 2> /dev/null; sleep 1; docker-compose -f $(PWD)/opensearch/docker-compose.yml up
+	@printf "\n===> ${yellow}Recreating the ElasticSearch 6 container Durga...${reset}\n"
+	docker rm -f cc_os124 2> /dev/null; sleep 1; docker run -p 9200:9200 -p 9600:9600 -v "$(PWD)/opensearch/elasticsearch.yml:/usr/share/opensearch/config/opensearch.yml" -e "discovery.type=single-node" -e "DISABLE_SECURITY_PLUGIN=true" -e "DISABLE_INSTALL_DEMO_CONFIG=true" -e "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" --name cc_os124 opensearchproject/opensearch:1.2.4
 	@$(MAKE) wait-for-es
 
 create-es-data-dir:

@@ -1,0 +1,3 @@
+cluster.name: opensearch
+node.name: chef-insights
+bootstrap.memory_lock: true

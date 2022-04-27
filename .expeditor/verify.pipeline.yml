@@ -51,20 +51,20 @@ steps:
   # Repo Health - These are tests that apply to the repository as a
   # whole.
   #
-  - label: repo health
-    command:
-      - hab studio run "source .studiorc && scripts/repo_health.sh && run_studio_repo_health_checks"
-    timeout_in_minutes: 10
-    retry:
-      automatic:
-        limit: 1
-    expeditor:
-      executor:
-        docker:
-          privileged: true
-          environment:
-            - HAB_STUDIO_SUP=false
-            - HAB_NONINTERACTIVE=true
+  # - label: repo health
+  #   command:
+  #     - hab studio run "source .studiorc && scripts/repo_health.sh && run_studio_repo_health_checks"
+  #   timeout_in_minutes: 10
+  #   retry:
+  #     automatic:
+  #       limit: 1
+  #   expeditor:
+  #     executor:
+  #       docker:
+  #         privileged: true
+  #         environment:
+  #           - HAB_STUDIO_SUP=false
+  #           - HAB_NONINTERACTIVE=true
 
   #A2ha pipeline
   - label: ":terraform: :buildkite: a2-ha-backend/terraform"
@@ -313,17 +313,17 @@ steps:
       executor:
         docker:
 
-  - label: "[unit] automate-ui"
-    command:
-      - cd components/automate-ui
-      - make install lint unit
-    timeout_in_minutes: 20
-    retry:
-      automatic:
-        limit: 1
-    expeditor:
-      executor:
-        docker:
+  # - label: "[unit] automate-ui"
+  #   command:
+  #     - cd components/automate-ui
+  #     - make install lint unit
+  #   timeout_in_minutes: 20
+  #   retry:
+  #     automatic:
+  #       limit: 1
+  #   expeditor:
+  #     executor:
+  #       docker:
 
   - label: "[unit] chef-ui-library"
     command:
