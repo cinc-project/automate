@@ -585,14 +585,14 @@ func (backend *ES2Backend) GetNodeInfoFromReportID(reportId string, filters map[
 // populateNodeReport generates the report from the search result of report id
 func populateNodeReport(searchResult *elastic.SearchResult, backend *ES2Backend, queryInfo *QueryInfo) (*reportingapi.NodeHeaderInfo, error) {
 	var report *reportingapi.NodeHeaderInfo
-	if searchResult.TotalHits() > 0 && searchResult.Hits.TotalHits > 0 {
+	if searchResult.TotalHits() > 0 && searchResult.Hits.TotalHits.Value > 0 {
 		for _, hit := range searchResult.Hits.Hits {
 			esInSpecReport := ESInSpecReport{}
 			if hit.Source == nil {
 				logrus.Debugf("no source found for search hit %s", hit.Id)
 				continue
 			}
-			err := json.Unmarshal(*hit.Source, &esInSpecReport)
+			err := json.Unmarshal(hit.Source, &esInSpecReport)
 			if err != nil {
 				logrus.Errorf("GetNodeInfoFromReportID unmarshal error: %s", err.Error())
 				return report, errors.New("cannot unmarshal the search hits")
@@ -1056,7 +1056,7 @@ func (backend *ES2Backend) GetNodeControlListItems(ctx context.Context, filters 
 		return controlNodeList, err
 	}
 
-	if searchResult.TotalHits() > 0 && searchResult.Hits.TotalHits > 0 {
+	if searchResult.TotalHits() > 0 && searchResult.Hits.TotalHits.Value > 0 {
 		numProfiles := make(map[int]struct {
 			Name   string
 			Sha256 string
@@ -1064,7 +1064,7 @@ func (backend *ES2Backend) GetNodeControlListItems(ctx context.Context, filters 
 		// Extract the profile name for adding the root profile name to the return response.
 		for _, hit := range searchResult.Hits.Hits {
 			esInSpecReport := ESInSpecReport{}
-			err = json.Unmarshal(*hit.Source, &esInSpecReport)
+			err = json.Unmarshal(hit.Source, &esInSpecReport)
 			if err != nil {
 				logrus.Errorf("error unmarshalling the search response: %+v", err)
 				return nil, err
@@ -1600,12 +1600,9 @@ func getFiltersQueryForDeepReport(reportId string,
 func (backend ES2Backend) getFilterQueryWithPagination(reportId string,
 	filters map[string][]string) (*elastic.BoolQuery, error) {
 	utils.DeDupFilters(filters)
-	typeQuery := elastic.NewTypeQuery(mappings.DocType)
-
 	boolQuery := elastic.NewBoolQuery()
-	boolQuery = boolQuery.Must(typeQuery)
 
-	idsQuery := elastic.NewIdsQuery(mappings.DocType)
+	idsQuery := elastic.NewIdsQuery()
 	idsQuery.Ids(reportId)
 	boolQuery = boolQuery.Must(idsQuery)
 
@@ -1774,7 +1771,7 @@ func populateControlElements(searchHits *elastic.SearchHit, profiles map[int]str
 	}
 	for _, innerhit := range searchHits.InnerHits["profiles.controls"].Hits.Hits {
 		control := &reportingapi.ControlElement{}
-		err = json.Unmarshal(*innerhit.Source, &tempControl)
+		err = json.Unmarshal(innerhit.Source, &tempControl)
 		if err != nil {
 			logrus.Errorf("error unmarshalling the search control response: %+v", err)
 			return listControls, err
@@ -1833,11 +1830,11 @@ func (backend *ES2Backend) GetReportManagerRequest(reportId string, filters map[
 		return mgrRequest, err
 	}
 	// we should only receive one searchResult value
-	if searchResult.TotalHits() > 0 && searchResult.Hits.TotalHits > 0 {
+	if searchResult.TotalHits() > 0 && searchResult.Hits.TotalHits.Value > 0 {
 		for _, hit := range searchResult.Hits.Hits {
 			esInSpecReport := ESInSpecReport{}
 			if hit.Source != nil {
-				err := json.Unmarshal(*hit.Source, &esInSpecReport)
+				err := json.Unmarshal(hit.Source, &esInSpecReport)
 				if err != nil {
 					logrus.Errorf("error unmarshalling the search response: %+v", err)
 					return mgrRequest, err
