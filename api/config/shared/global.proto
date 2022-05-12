@@ -88,7 +88,7 @@ message External {
     SSL ssl = 5;
   }
 
-message Opensearch {
+  message Opensearch {
     message Backup {
       message FsSettings {
         message OptionalSettings {
