@@ -30,7 +30,18 @@ func newProvisionInfraCmd() *cobra.Command {
 		"y",
 		false,
 		"Do not prompt for confirmation; accept defaults and continue")
-
+	provisionInfraCmd.PersistentFlags().BoolVarP(
+		&deployCmdFlags.saas,
+		"saas",
+		"",
+		false,
+		"Flag for saas setup")
+	provisionInfraCmd.SetHelpFunc(func(command *cobra.Command, strings []string) {
+		// Hide flag for this command
+		command.Flags().MarkHidden("saas")
+		// Call parent help func
+		command.Parent().HelpFunc()(command, strings)
+	})
 	return provisionInfraCmd
 }
 
