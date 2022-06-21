@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/chef/automate/lib/cereal"
 
 	"github.com/blang/semver"
 	"github.com/gofrs/uuid"
@@ -34,10 +35,10 @@ var MinimumSupportedInspecVersion = semver.MustParse("2.0.0")
 
 func NewComplianceIngestServer(esClient *ingestic.ESClient, mgrClient manager.NodeManagerServiceClient,
 	automateURL string, notifierClient notifier.Notifier, authzProjectsClient authz.ProjectsServiceClient,
-	messageBufferSize int) *ComplianceIngestServer {
+	messageBufferSize int, cerealManager *cereal.Manager) *ComplianceIngestServer {
 
 	compliancePipeline := pipeline.NewCompliancePipeline(esClient,
-		authzProjectsClient, mgrClient, messageBufferSize, notifierClient, automateURL)
+		authzProjectsClient, mgrClient, messageBufferSize, notifierClient, cerealManager, automateURL)
 
 	return &ComplianceIngestServer{
 		compliancePipeline: compliancePipeline,

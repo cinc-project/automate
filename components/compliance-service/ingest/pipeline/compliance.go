@@ -3,6 +3,7 @@ package pipeline
 import (
 	"context"
 	"errors"
+	"github.com/chef/automate/lib/cereal"
 
 	"github.com/sirupsen/logrus"
 
@@ -25,7 +26,7 @@ type Compliance struct {
 }
 
 func NewCompliancePipeline(client *ingestic.ESClient, authzClient authz.ProjectsServiceClient,
-	nodeMgrClient manager.NodeManagerServiceClient, messageBufferSize int, notifierClient notifier.Notifier, automateURL string) Compliance {
+	nodeMgrClient manager.NodeManagerServiceClient, messageBufferSize int, notifierClient notifier.Notifier, cerealService *cereal.Manager, automateURL string) Compliance {
 	in := make(chan message.Compliance, messageBufferSize)
 	compliancePipeline(in,
 		processor.ComplianceProfile(client),
@@ -34,7 +35,7 @@ func NewCompliancePipeline(client *ingestic.ESClient, authzClient authz.Projects
 		processor.ComplianceReport(notifierClient, automateURL),
 		processor.BundleReportProjectTagger(authzClient),
 		publisher.BuildNodeManagerPublisher(nodeMgrClient),
-		publisher.StoreCompliance(client, 100))
+		publisher.StoreCompliance(cerealService, client, 100))
 	return Compliance{in: in}
 }
 
