@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/chef/automate/components/compliance-service/ingest/pipeline/processor"
+	"github.com/chef/automate/lib/cereal"
+	"github.com/chef/automate/lib/cereal/postgres"
 	"os"
 	"testing"
 	"time"
@@ -41,6 +44,7 @@ type Suite struct {
 	NodeManagerMock        *NodeManagerMock
 	NotifierMock           *NotifierMock
 	EventServiceClientMock *event.MockEventServiceClient
+	CerealManagerMock      *cereal.Manager
 }
 
 // Initialize the test suite
@@ -73,9 +77,17 @@ func NewGlobalSuite() *Suite {
 	s.EventServiceClientMock.EXPECT().Publish(gomock.Any(), gomock.Any()).AnyTimes().Return(
 		&event.PublishResponse{}, nil)
 
+	cereal, err := cereal.NewManager(postgres.NewPostgresBackend(postgresUrl))
+	if err != nil {
+		fmt.Printf("could not create job manager %v", err)
+	}
+
+	err = processor.InitCerealManager(cereal, 2, s.ingesticESClient)
+	cereal.Start(context.TODO())
+	s.CerealManagerMock = cereal
 	s.ComplianceIngestServer = server.NewComplianceIngestServer(s.ingesticESClient,
 		s.NodeManagerMock, "", s.NotifierMock,
-		s.ProjectsClientMock, 100)
+		s.ProjectsClientMock, 100, s.CerealManagerMock)
 
 	return s
 }
@@ -102,9 +114,16 @@ func NewLocalSuite(t *testing.T) *Suite {
 	s.NotifierMock = &NotifierMock{}
 	s.EventServiceClientMock = event.NewMockEventServiceClient(gomock.NewController(t))
 
+	cereal, err := cereal.NewManager(postgres.NewPostgresBackend(postgresUrl))
+	if err != nil {
+		fmt.Printf("could not create job manager %v", err)
+	}
+	err = processor.InitCerealManager(cereal, 2, s.ingesticESClient)
+	cereal.Start(context.TODO())
+	s.CerealManagerMock = cereal
 	s.ComplianceIngestServer = server.NewComplianceIngestServer(s.ingesticESClient,
 		s.NodeManagerMock, "", s.NotifierMock,
-		s.ProjectsClientMock, 100)
+		s.ProjectsClientMock, 100, s.CerealManagerMock)
 
 	return s
 }

@@ -131,4 +131,5 @@ type EventConfig struct {
 
 type CerealConfig struct {
 	Endpoint string
+	Workers  int
 }

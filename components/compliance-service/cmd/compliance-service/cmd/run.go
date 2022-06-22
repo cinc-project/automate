@@ -60,6 +60,9 @@ var conf = config.Compliance{
 	DataRetention: config.DataRetention{
 		ComplianceReportDays: 60,
 	},
+	CerealConfig: config.CerealConfig{
+		Workers: 2,
+	},
 }
 
 // runCmd represents the run command
