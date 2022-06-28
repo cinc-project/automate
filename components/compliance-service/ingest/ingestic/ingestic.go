@@ -925,6 +925,7 @@ func (backend *ESClient) SetDayLatestToFalse(ctx context.Context, controlId stri
 		logrus.Debug("setYesterdayLatestToFalse: day_latest not required when the report end_time is on yesterday's UTC day")
 		return nil
 	}
+
 	for i := 0; i < 90; i++ {
 		oneDay := oneDayAgo.Add(-24 * time.Hour)
 		indexOneDay := mapping.IndexTimeseriesFmt(oneDay)
