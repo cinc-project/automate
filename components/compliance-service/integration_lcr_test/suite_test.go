@@ -19,6 +19,7 @@ import (
 	"github.com/chef/automate/components/compliance-service/ingest/server"
 	"github.com/chef/automate/components/compliance-service/reporting/relaxting"
 	notifications "github.com/chef/automate/components/notifications-client/api"
+	"github.com/chef/automate/lib/cereal"
 	"github.com/chef/automate/lib/grpc/auth_context"
 
 	"github.com/golang/mock/gomock"
@@ -43,6 +44,7 @@ type Suite struct {
 	NotifierMock            *NotifierMock
 	EventServiceClientMock  *event.MockEventServiceClient
 	ReportServiceClientMock *report_manager.MockReportManagerServiceClient
+	CerealManagerMock       *cereal.Manager
 }
 
 // Initialize the test suite
@@ -77,7 +79,7 @@ func NewGlobalSuite() *Suite {
 
 	s.ComplianceIngestServer = server.NewComplianceIngestServer(s.ingesticESClient,
 		s.NodeManagerMock, nil, "", s.NotifierMock,
-		s.ProjectsClientMock, 100, false)
+		s.ProjectsClientMock, 100, false, s.CerealManagerMock)
 
 	return s
 }
@@ -107,7 +109,7 @@ func NewLocalSuite(t *testing.T) *Suite {
 
 	s.ComplianceIngestServer = server.NewComplianceIngestServer(s.ingesticESClient,
 		s.NodeManagerMock, s.ReportServiceClientMock, "", s.NotifierMock,
-		s.ProjectsClientMock, 100, false)
+		s.ProjectsClientMock, 100, false, s.CerealManagerMock)
 
 	return s
 }

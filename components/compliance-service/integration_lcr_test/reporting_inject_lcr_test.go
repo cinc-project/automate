@@ -63,7 +63,7 @@ func ingestLCR(s *Suite) error {
 	fileName := "../ingest/examples/compliance-failure-big-report.json"
 	s.ComplianceIngestServer = server.NewComplianceIngestServer(s.ingesticESClient,
 		s.NodeManagerMock, s.ReportServiceClientMock, "", s.NotifierMock,
-		s.ProjectsClientMock, 100, true)
+		s.ProjectsClientMock, 100, true, s.CerealManagerMock)
 	body, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return err
