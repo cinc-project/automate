@@ -299,3 +299,22 @@ func FetchLatestDataOrNot(filters map[string][]string) bool {
 	}
 	return latestOnly
 }
+
+func ValidateTimeRangeForFilters(startTime string , endTime string) (bool , error) {
+	if len(startTime) <= 0 || len(endTime) <=0 {
+		return false , errors.Errorf("The startTime or endTime cannot be null")
+	} 
+	eTime, err := time.Parse(time.RFC3339, endTime)
+	sTime, err := time.Parse(time.RFC3339 , startTime)
+	diff := int(eTime.Sub(sTime).Hours()/24)
+	if err != nil {
+		return false , errors.Errorf("Error while getting time range")
+	}
+	if diff > 90 {
+		return false , errors.Errorf(" ")
+	} 
+	if diff == 0 {
+		return false , errors.Errorf("Starttime and End time cannot be equal")
+	}
+	return true , nil
+}
