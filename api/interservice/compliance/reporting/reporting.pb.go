@@ -4254,16 +4254,11 @@ type AssetListRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	//Gives the filter of asset list
-	Filters []*ListFilter `protobuf:"bytes,1,rep,name=filters,proto3" json:"filters,omitempty" toml:"filters,omitempty" mapstructure:"filters,omitempty"`
-	//Give the size of the asset
-	Size int32 `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty" toml:"size,omitempty" mapstructure:"size,omitempty"`
-	//Give the starting point of  the asset
-	From int32 `protobuf:"varint,3,opt,name=from,proto3" json:"from,omitempty" toml:"from,omitempty" mapstructure:"from,omitempty"`
-	//Give the sort starting point
-	Sort string `protobuf:"bytes,4,opt,name=sort,proto3" json:"sort,omitempty" toml:"sort,omitempty" mapstructure:"sort,omitempty"`
-	//Give the type of the asset
-	AssetsType string `protobuf:"bytes,5,opt,name=assets_type,json=assetsType,proto3" json:"assets_type,omitempty" toml:"assets_type,omitempty" mapstructure:"assets_type,omitempty"`
+	Filters    []*ListFilter `protobuf:"bytes,1,rep,name=filters,proto3" json:"filters,omitempty" toml:"filters,omitempty" mapstructure:"filters,omitempty"`
+	Size       int32         `protobuf:"varint,2,opt,name=size,proto3" json:"size,omitempty" toml:"size,omitempty" mapstructure:"size,omitempty"`
+	From       int32         `protobuf:"varint,3,opt,name=from,proto3" json:"from,omitempty" toml:"from,omitempty" mapstructure:"from,omitempty"`
+	Sort       string        `protobuf:"bytes,4,opt,name=sort,proto3" json:"sort,omitempty" toml:"sort,omitempty" mapstructure:"sort,omitempty"`
+	AssetsType string        `protobuf:"bytes,5,opt,name=assets_type,json=assetsType,proto3" json:"assets_type,omitempty" toml:"assets_type,omitempty" mapstructure:"assets_type,omitempty"`
 }
 
 func (x *AssetListRequest) Reset() {
