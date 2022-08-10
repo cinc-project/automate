@@ -944,11 +944,10 @@ func (srv *Server)ListAsset(ctx context.Context , in *reporting.AssetListRequest
 		logrus.Errorf("Unable to get filters by filterbyProject %v" , err)
 		return nil, err
 	}
-	asset , err = srv.es.GetAsset(ctx , formattedFilters , 100 , 0 , "collected") 
+	asset , err = srv.es.GetAsset(ctx , formattedFilters , in.Size , in.From , in.AssetsType) 
 	if err != nil {
 		logrus.Errorf("Unable to get the assets list %v" , err)
 		return nil , err
 	}
 	return &reporting.AssetList{Assets: asset} , nil
-	
 }
