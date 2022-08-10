@@ -937,7 +937,6 @@ func (srv *Server)AssetCount(ctx context.Context , in *reporting.ListFilters) (*
 	return assets, nil
 }
 func (srv *Server)ListAsset(ctx context.Context , in *reporting.AssetListRequest) (*reporting.AssetList , error) {
-	logrus.Info("I am getting into Server!!!!!!!!!!!!!!!!!" , in)
 	formattedFilters := formatFilters(in.Filters)
 	var asset []*reporting.Assets
 	formattedFilters, err := filterByProjects(ctx , formattedFilters)
@@ -945,13 +944,11 @@ func (srv *Server)ListAsset(ctx context.Context , in *reporting.AssetListRequest
 		logrus.Errorf("Unable to get filters by filterbyProject %v" , err)
 		return nil, err
 	}
-	logrus.Info("Before GetAssets")
 	asset , err = srv.es.GetAsset(ctx , formattedFilters , 100 , 0 , "collected") 
 	if err != nil {
 		logrus.Errorf("Unable to get the assets list %v" , err)
 		return nil , err
 	}
-	logrus.Info("Before returning")
 	return &reporting.AssetList{Assets: asset} , nil
 	
 }
