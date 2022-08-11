@@ -450,28 +450,28 @@ func (backend ES2Backend)GetAsset(ctx context.Context, filters map[string][]stri
             logrus.Errorf("Unable to get the unreachable assets %v" , err)
             return nil , err
         }
-        assets = unreachable
+        return unreachable , nil
     } else if asset_type == "collected" || len(asset_type)==0{
         collected, err := backend.getCollectedAssets(ctx , from , size , filters , boolquery) 
         if err != nil {
             logrus.Errorf("Unable to get the collected assets %v" , err)
             return nil , err
         }
-        assets = collected
+        return collected , nil
     } else if asset_type == "uncollected" {
         uncollected, err := backend.getUnCollectedAssets(ctx, from , size , filters , boolquery)
         if err != nil {
             logrus.Errorf("Unable to get the uncollected assets %v" , err)
             return nil , err
         }
-        assets = uncollected
+        return uncollected , nil
     } else if asset_type == "unreported" {
         unreported,err := backend.getUnReportedAssets(ctx , from , size , filters , boolquery , 10)
         if err != nil {
             logrus.Errorf("Unable to get the unreported assets %v" , err)
             return nil , err
         }
-        assets = unreported
+        return unreported,nil
     }
     return assets , nil
 }
