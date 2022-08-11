@@ -943,17 +943,17 @@ func (srv *Server)ListAsset(ctx context.Context , in *reporting.AssetListRequest
 	formattedFilters["end_time"] = []string{endTime}
 	err := relaxting.ValidateTimeRangeForFilters(formattedFilters["start_time"][0] , endTime)
 	if err != nil {
-		logrus.Errorf("The starttime and endtime validation error %v" , err)
+		logrus.Errorf("The starttime and endtime validation error: %v" , err)
 		return nil , err
 	}
 	formattedFilters, err = filterByProjects(ctx , formattedFilters)
 	if err != nil {
-		logrus.Errorf("Unable to get filters by filterbyProject %v" , err)
+		logrus.Errorf("Unable to get filters by filterbyProject: %v" , err)
 		return nil, err
 	}
 	asset , err = srv.es.GetAsset(ctx , formattedFilters , in.Size , in.From , in.AssetsType) 
 	if err != nil {
-		logrus.Errorf("Unable to get the assets list %v" , err)
+		logrus.Errorf("Unable to get the assets list: %v" , err)
 		return nil , err
 	}
 	return &reporting.AssetList{Assets: asset} , nil
