@@ -441,31 +441,31 @@ func (backend ES2Backend) getUnCollectedAssets(ctx context.Context, from int32, 
 	filtQuery.Must(getStartTimeAndEndTimeRangeForAsset(filters))
 	return backend.getAssetsList(ctx, from, size, filtQuery)
 }
-func (backend ES2Backend)GetAsset(ctx context.Context, filters map[string][]string , size int32 , from int32 , asset_type string) ([]*reportingapi.Assets, error) {
+func (backend ES2Backend)GetAsset(ctx context.Context, filters map[string][]string , size int32 , from int32 , assetType string) ([]*reportingapi.Assets, error) {
     boolquery := backend.getFiltersQueryForAssetFilters(filters)
     assets := make([]*reportingapi.Assets, 0)
-    if asset_type == "unreachable" {
+    if assetType == "unreachable" {
         unreachable,err := backend.getUnReachableAssets(ctx , from , size , boolquery , 10)
         if err != nil {
             logrus.Errorf("Unable to get the unreachable assets: %v" , err)
             return nil , err
         }
         return unreachable , nil
-    } else if asset_type == "collected" || len(asset_type)==0{
+    } else if assetType == "collected" || len(assetType)==0{
         collected, err := backend.getCollectedAssets(ctx , from , size , filters , boolquery) 
         if err != nil {
             logrus.Errorf("Unable to get the collected assets: %v" , err)
             return nil , err
         }
         return collected , nil
-    } else if asset_type == "uncollected" {
+    } else if assetType == "uncollected" {
         uncollected, err := backend.getUnCollectedAssets(ctx, from , size , filters , boolquery)
         if err != nil {
             logrus.Errorf("Unable to get the uncollected assets: %v" , err)
             return nil , err
         }
         return uncollected , nil
-    } else if asset_type == "unreported" {
+    } else if assetType == "unreported" {
         unreported,err := backend.getUnReportedAssets(ctx , from , size , filters , boolquery , 10)
         if err != nil {
             logrus.Errorf("Unable to get the unreported assets: %v" , err)
