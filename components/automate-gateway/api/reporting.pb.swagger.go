@@ -53,7 +53,7 @@ func init() {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/chef.automate.api.compliance.reporting.v1.AssetList"
+              "$ref": "#/definitions/chef.automate.api.compliance.reporting.v1.AssetListResponse"
             }
           },
           "default": {
@@ -522,17 +522,6 @@ func init() {
         }
       }
     },
-    "chef.automate.api.compliance.reporting.v1.AssetList": {
-      "type": "object",
-      "properties": {
-        "assets": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/chef.automate.api.compliance.reporting.v1.Assets"
-          }
-        }
-      }
-    },
     "chef.automate.api.compliance.reporting.v1.AssetListRequest": {
       "type": "object",
       "properties": {
@@ -560,6 +549,17 @@ func init() {
         "assets_type": {
           "type": "string",
           "title": "Give the type of the asset"
+        }
+      }
+    },
+    "chef.automate.api.compliance.reporting.v1.AssetListResponse": {
+      "type": "object",
+      "properties": {
+        "assets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/chef.automate.api.compliance.reporting.v1.Assets"
+          }
         }
       }
     },

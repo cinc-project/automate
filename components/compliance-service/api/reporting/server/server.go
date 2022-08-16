@@ -936,7 +936,7 @@ func (srv *Server)AssetCount(ctx context.Context , in *reporting.ListFilters) (*
 	}
 	return assets, nil
 }
-func (srv *Server)ListAsset(ctx context.Context , in *reporting.AssetListRequest) (*reporting.AssetList , error) {
+func (srv *Server)ListAsset(ctx context.Context , in *reporting.AssetListRequest) (*reporting.AssetListResponse , error) {
 	formattedFilters := formatFilters(in.Filters)
 	var asset []*reporting.Assets
 	endTime := time.Now().Format(time.RFC3339)
@@ -956,5 +956,5 @@ func (srv *Server)ListAsset(ctx context.Context , in *reporting.AssetListRequest
 		logrus.Errorf("Unable to get the assets list: %v" , err)
 		return nil , err
 	}
-	return &reporting.AssetList{Assets: asset} , nil
+	return &reporting.AssetListResponse{Assets: asset} , nil
 }
