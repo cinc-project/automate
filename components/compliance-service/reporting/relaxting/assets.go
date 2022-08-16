@@ -12,6 +12,8 @@ import (
 	"github.com/olivere/elastic/v7"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"time"
+	"strings"
 )
 
 //getAssets Get Total Number of documents from the comp-*-run-info
