@@ -5,14 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	reportingapi "github.com/chef/automate/api/interservice/compliance/reporting"
+	constant "github.com/chef/automate/components/compliance-service/reporting"
 	"github.com/chef/automate/components/compliance-service/ingest/ingestic/mappings"
 	"github.com/chef/automate/components/compliance-service/reporting"
 	"github.com/chef/automate/components/compliance-service/utils"
 	"github.com/olivere/elastic/v7"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"strings"
-	"time"
 )
 
 //getAssets Get Total Number of documents from the comp-*-run-info
@@ -444,28 +443,28 @@ func (backend ES2Backend) getUnCollectedAssets(ctx context.Context, from int32, 
 func (backend ES2Backend)GetAsset(ctx context.Context, filters map[string][]string , size int32 , from int32 , assetType string) ([]*reportingapi.Assets, error) {
     boolquery := backend.getFiltersQueryForAssetFilters(filters)
     assets := make([]*reportingapi.Assets, 0)
-    if assetType == "unreachable" {
+    if assetType == constant.COLLECTED|| len(assetType)==0 {
+        collected,err := backend.getCollectedAssets(ctx , from , size , filters , boolquery)
+        if err != nil {
+            logrus.Errorf("Unable to get the unreachable assets: %v" , err)
+            return nil , err
+        }
+        return collected , nil
+    } else if assetType == constant.UNREACHABLE{
         unreachable,err := backend.getUnReachableAssets(ctx , from , size , boolquery , 10)
         if err != nil {
             logrus.Errorf("Unable to get the unreachable assets: %v" , err)
             return nil , err
         }
         return unreachable , nil
-    } else if assetType == "collected" || len(assetType)==0{
-        collected, err := backend.getCollectedAssets(ctx , from , size , filters , boolquery) 
-        if err != nil {
-            logrus.Errorf("Unable to get the collected assets: %v" , err)
-            return nil , err
-        }
-        return collected , nil
-    } else if assetType == "uncollected" {
+    } else if assetType == constant.UNCOLLECTED {
         uncollected, err := backend.getUnCollectedAssets(ctx, from , size , filters , boolquery)
         if err != nil {
             logrus.Errorf("Unable to get the uncollected assets: %v" , err)
             return nil , err
         }
         return uncollected , nil
-    } else if assetType == "unreported" {
+    } else if assetType == constant.UNREPORTED {
         unreported,err := backend.getUnReportedAssets(ctx , from , size , filters , boolquery , 10)
         if err != nil {
             logrus.Errorf("Unable to get the unreported assets: %v" , err)
