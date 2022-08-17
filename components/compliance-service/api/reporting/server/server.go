@@ -15,6 +15,7 @@ import (
 	"github.com/chef/automate/api/interservice/compliance/ingest/events/inspec"
 	"github.com/chef/automate/api/interservice/compliance/reporting"
 	reportmanager "github.com/chef/automate/api/interservice/report_manager"
+	"github.com/chef/automate/components/compliance-service/dao/pgdb"
 	"github.com/chef/automate/components/compliance-service/reporting/relaxting"
 	"github.com/chef/automate/components/compliance-service/reporting/util"
 	"github.com/chef/automate/components/compliance-service/utils"
@@ -36,13 +37,15 @@ type Server struct {
 	es                       *relaxting.ES2Backend
 	reportMgr                reportmanager.ReportManagerServiceClient
 	lcr_open_search_requests int
+	db                       *pgdb.DB
 }
 
 // New creates a new server
-func New(es *relaxting.ES2Backend, rm reportmanager.ReportManagerServiceClient, lcr_open_search_requests int) *Server {
+func New(es *relaxting.ES2Backend, rm reportmanager.ReportManagerServiceClient, lcr_open_search_requests int, db *pgdb.DB) *Server {
 	server := Server{
 		es:                       es,
 		lcr_open_search_requests: lcr_open_search_requests,
+		db:                       db,
 	}
 	if rm != nil {
 		server.reportMgr = rm
@@ -914,27 +917,46 @@ func (srv *Server) GetReportContent(ctx context.Context, in *reporting.ReportCon
 	}
 	return nil*/
 }
-func (srv *Server)AssetCount(ctx context.Context , in *reporting.ListFilters) (*reporting.AssetSummary , error) {
+func (srv *Server) AssetCount(ctx context.Context, in *reporting.ListFilters) (*reporting.AssetSummary, error) {
 	formattedFilters := formatFilters(in.Filters)
 	var assets *reporting.AssetSummary
 	endTime := time.Now().Format(time.RFC3339)
 	formattedFilters["end_time"] = []string{endTime}
-	err := relaxting.ValidateTimeRangeForFilters(formattedFilters["start_time"][0] , endTime)
+	err := relaxting.ValidateTimeRangeForFilters(formattedFilters["start_time"][0], endTime)
 	if err != nil {
-		logrus.Errorf("The starttime and endtime validation error %v" , err)
-		return nil , err
+		logrus.Errorf("The starttime and endtime validation error %v", err)
+		return nil, err
 	}
 	formattedFilters, err = filterByProjects(ctx, formattedFilters)
 	if err != nil {
-		logrus.Errorf("Unable to get filters by filterbyProject %v" , err)
+		logrus.Errorf("Unable to get filters by filterbyProject %v", err)
 		return nil, err
 	}
 	assets, err = srv.es.GetAssetSummary(ctx, formattedFilters)
 	if err != nil {
-		logrus.Errorf("Unable to get the asset summary %v" , err)
-		return nil , err
+		logrus.Errorf("Unable to get the asset summary %v", err)
+		return nil, err
 	}
 	return assets, nil
-	
+
 }
 
+// TODO: Update based on the API call
+func (srv *Server) GetConfigs(ctx context.Context) error {
+
+	err := srv.db.GetConfigs(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// TODO: Update based on the API call
+func (srv *Server) UpdateConfigs(ctx context.Context) error {
+
+	err := srv.db.SetConfigs(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
