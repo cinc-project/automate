@@ -987,3 +987,11 @@ message Collected {
 	// Total collected and weived in the assets
 	int32 weived = 4;
 }
+
+message ComplianceConfig {
+    string policy_name = 1;
+    int32 older_than_days = 2;
+}
+
+message GetAssetConfigRequest {
+}
