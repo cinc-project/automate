@@ -145,6 +145,19 @@ var ComplianceRunInfo = Mapping{
                     }
                 }
             },
+            "policy_group": {
+                "type": "keyword",
+                "fields": {
+                    "engram": {
+                        "type": "text",
+                        "analyzer": "autocomplete"
+                    },
+                    "lower": {
+                        "type": "keyword",
+                        "normalizer": "case_insensitive"
+                    }
+                }
+            },
             "profiles": {
                 "type": "nested",
                 "properties": {
