@@ -150,7 +150,7 @@ func (ci *V4ChecklistManager) GetPostChecklist() []PostCheckListItem {
 	return postChecklist
 }
 
-func (ci *V4ChecklistManager) RunChecklist() error {
+func (ci *V4ChecklistManager) RunChecklist(flags ChecklistUpgradeFlags) error {
 	var dbType string
 	checklists := []Checklist{}
 	var postcheck []PostCheckListItem
@@ -163,7 +163,7 @@ func (ci *V4ChecklistManager) RunChecklist() error {
 	} else {
 		dbType = "Embedded"
 		postcheck = postChecklistV4Embedded
-		checklists = append(checklists, []Checklist{runIndexCheck(), downTimeCheckV4(), backupCheck(), diskSpaceCheck(),
+		checklists = append(checklists, []Checklist{runIndexCheck(), downTimeCheckV4(), backupCheck(), diskSpaceCheck(ci.version, flags.SkipDiskSpaceCheck, flags.OsDestDataDir),
 			disableSharding(), postChecklistIntimationCheckV4(!ci.isExternalES)}...)
 	}
 	checklists = append(checklists, showPostChecklist(&postcheck), promptUpgradeContinueV4(!ci.isExternalES))
@@ -173,7 +173,6 @@ func (ci *V4ChecklistManager) RunChecklist() error {
 	}
 
 	ci.writer.Println(fmt.Sprintf(initMsgV4, dbType, ci.version)) //display the init message
-
 	for _, item := range checklists {
 		if item.TestFunc == nil {
 			continue
