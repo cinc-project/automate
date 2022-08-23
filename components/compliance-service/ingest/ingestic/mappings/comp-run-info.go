@@ -106,6 +106,19 @@ var ComplianceRunInfo = Mapping{
                     }
                 }
             },
+            "environment": {
+                "fields": {
+                    "engram": {
+                        "analyzer": "autocomplete",
+                        "type": "text"
+                    },
+                    "lower": {
+                        "normalizer": "case_insensitive",
+                        "type": "keyword"
+                    }
+                },
+                "type": "keyword"
+            },
             "version": {
                 "type": "keyword",
                 "fields": {
