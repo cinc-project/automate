@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -136,6 +137,7 @@ func runUpgradeCmd(cmd *cobra.Command, args []string) error {
 			)
 		}
 	} else {
+		fmt.Println(validatedResp)
 		if validatedResp.CurrentVersion == validatedResp.TargetVersion {
 			writer.Println("Chef Automate up-to-date")
 			return nil
@@ -147,6 +149,10 @@ func runUpgradeCmd(cmd *cobra.Command, args []string) error {
 		}
 
 		if upgradeRunCmdFlags.isMajorUpgrade && len(pendingPostChecklist) == 0 {
+			/* err = majorupgradechecklist.StoreESSettings()
+			if err != nil {
+				writer.Println("Failed to read and store search settings")
+			} */
 			ci, err := majorupgradechecklist.NewChecklistManager(writer, validatedResp.TargetVersion)
 			if err != nil {
 				return status.Wrap(
@@ -154,6 +160,10 @@ func runUpgradeCmd(cmd *cobra.Command, args []string) error {
 					status.DeploymentServiceCallError,
 					"Request to start upgrade failed",
 				)
+			}
+			err = ci.StoreSearchEngineSettings()
+			if err != nil {
+				writer.Println("Failed to read or store search-engine settings")
 			}
 			err = ci.RunChecklist()
 			if err != nil {

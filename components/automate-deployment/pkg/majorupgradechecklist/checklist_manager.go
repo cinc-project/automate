@@ -8,6 +8,7 @@ import (
 type ChecklistManager interface {
 	RunChecklist() error
 	GetPostChecklist() []PostCheckListItem
+	StoreSearchEngineSettings() error
 }
 
 func NewChecklistManager(writer cli.FormatWriter, version string) (ChecklistManager, error) {
