@@ -109,7 +109,8 @@ func insertInspecReport(msg message.Compliance, client *ingestic.ESClient, cerea
 			out <- nil
 		}
 		logrus.WithFields(logrus.Fields{"report_id": msg.Report.ReportUuid, "took": time.Since(start).Truncate(time.Millisecond)}).Debug("InsertInspecReport")
-		//errWorkflow := cerealManager.EnqueueWorkflow(context.TODO(), processor.ReportWorkflowName,
+		//t1 := time.Now()
+		//errWorkflow := cerealManager.EnqueueWorkflow(context.Background(), processor.ReportWorkflowName,
 		//	fmt.Sprintf("%s-%s", "control-workflow", msg.Report.ReportUuid),
 		//	processor.ControlWorkflowParameters{
 		//		ReportUuid: msg.Report.ReportUuid,
@@ -120,6 +121,7 @@ func insertInspecReport(msg message.Compliance, client *ingestic.ESClient, cerea
 		//if errWorkflow != nil {
 		//	fmt.Errorf("error in enqueuing the  workflow for request id %s: %w", msg.Report.ReportUuid, err)
 		//}
+		//logrus.Info("Time to enqueue work is ", time.Since(t1).Seconds())
 		close(out)
 	}()
 	return out
