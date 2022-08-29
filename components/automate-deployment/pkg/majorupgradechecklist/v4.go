@@ -57,6 +57,7 @@ type indexData struct {
 	Name          string
 	MajorVersion  int64
 	CreatedString string
+	IsDeleted     bool
 }
 
 const (
@@ -593,6 +594,7 @@ func checkIndexVersion(timeout int64, h ChecklistHelper) error {
 			h.Writer.Error(err.Error())
 			return status.Errorf(status.UnknownError, fmt.Sprintf("The index %s is from an older version of elasticsearch version %s.\nPlease reindex in elasticsearch 6. %s\n%s", index.Name, index.CreatedString, msg, errMsg))
 		}
+		index.IsDeleted = true
 	}
 	return nil
 }
@@ -600,7 +602,9 @@ func checkIndexVersion(timeout int64, h ChecklistHelper) error {
 func formErrorMsg(IndexDetailsArray []indexData) error {
 	msg := "\nUnsupported index versions. To continue with the upgrade, please reindex the indices shown below to version 6.\n"
 	for _, index := range IndexDetailsArray {
-		msg += fmt.Sprintf("- Index Name: %s, Version: %s \n", index.Name, index.CreatedString)
+		if !index.IsDeleted {
+			msg += fmt.Sprintf("- Index Name: %s, Version: %s \n", index.Name, index.CreatedString)
+		}
 	}
 	msg += "\nFollow the guide below to learn more about reindexing:\nhttps://www.elastic.co/guide/en/elasticsearch/reference/6.8/docs-reindex.html"
 	return fmt.Errorf(msg)
@@ -615,7 +619,7 @@ func getOldIndexInfo(allIndexData []byte) ([]indexData, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse index version")
 		}
-		if i < 6 {
+		if i < 6 && key != ".watches" {
 			indexDataArray = append(indexDataArray, indexData{Name: key, MajorVersion: i, CreatedString: data.Settings.Index.Version.CreatedString})
 		}
 	}

@@ -87,12 +87,13 @@ func execRequest(url, methodType string, requestBody io.Reader) ([]byte, error) 
 		return nil, err
 	}
 	defer res.Body.Close()
-	if res.StatusCode != http.StatusOK {
-		return nil, errors.Errorf("Request failed with status %d", res.StatusCode)
-	}
 	body, err := ioutil.ReadAll(res.Body) // nosemgrep
 	if err != nil {
 		return nil, err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.Errorf("Request failed with status %d\n%s\n", res.StatusCode, string(body))
 	}
 	return body, nil
 }
