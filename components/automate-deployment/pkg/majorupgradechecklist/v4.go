@@ -577,7 +577,7 @@ func checkIndexVersion(timeout int64, h ChecklistHelper) error {
 
 	indexInfo, err := getOldIndexInfo(versionData)
 
-	for _, index := range indexInfo {
+	for i, index := range indexInfo {
 		h.Writer.Println(fmt.Sprintf("Automate is unable to upgrade because an index with name: %s is created using an older version of elasticsearch %s", index.Name, index.CreatedString))
 		resp, err := h.Writer.Confirm("Do you wish to delete the index to continue?")
 		if err != nil {
@@ -594,7 +594,7 @@ func checkIndexVersion(timeout int64, h ChecklistHelper) error {
 			h.Writer.Error(err.Error())
 			return status.Errorf(status.UnknownError, fmt.Sprintf("The index %s is from an older version of elasticsearch version %s.\nPlease reindex in elasticsearch 6. %s\n%s", index.Name, index.CreatedString, msg, errMsg))
 		}
-		index.IsDeleted = true
+		indexInfo[i].IsDeleted = true //mark the deleted indices, so that those wont show in the list to end user
 	}
 	return nil
 }
@@ -688,7 +688,7 @@ func deleteA1Indexes(timeout int64) Checklist {
 				return status.Errorf(status.InvalidCommandArgsError, err.Error())
 			}
 			if !resp {
-				return status.New(status.InvalidCommandArgsError, "The Automate 1 stale Indexes need to be deleted before upgrading")
+				return status.New(status.InvalidCommandArgsError, "The Automate 1 stale indices needs to be deleted before upgrading.")
 			}
 			err = deleteIndexFromA1(timeout, indexes)
 			if err != nil {
