@@ -42,13 +42,15 @@ type V4ChecklistManager struct {
 	isExternalES bool
 }
 
-type Settings struct {
-	Index struct {
-		Version struct {
-			CreatedString string `json:"created_string"`
-			Created       string `json:"created"`
-		} `json:"version"`
-	} `json:"index"`
+type IndexInfo struct {
+	Settings struct {
+		Index struct {
+			Version struct {
+				CreatedString string `json:"created_string"`
+				Created       string `json:"created"`
+			} `json:"version"`
+		} `json:"index"`
+	} `json:"settings"`
 }
 
 type indexData struct {
@@ -606,15 +608,15 @@ func formErrorMsg(IndexDetailsArray []indexData) error {
 
 func getOldIndexInfo(allIndexData []byte) ([]indexData, error) {
 	var indexDataArray []indexData
-	var parsed map[string]Settings
+	var parsed map[string]IndexInfo
 	json.Unmarshal(allIndexData, &parsed)
 	for key, data := range parsed {
-		i, err := strconv.ParseInt(data.Index.Version.CreatedString[0:1], 10, 64)
+		i, err := strconv.ParseInt(data.Settings.Index.Version.CreatedString[0:1], 10, 64)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse index version")
 		}
 		if i < 6 {
-			indexDataArray = append(indexDataArray, indexData{Name: key, MajorVersion: i, CreatedString: data.Index.Version.CreatedString})
+			indexDataArray = append(indexDataArray, indexData{Name: key, MajorVersion: i, CreatedString: data.Settings.Index.Version.CreatedString})
 		}
 	}
 	return indexDataArray, nil
@@ -651,14 +653,13 @@ func deleteA1Indexes(timeout int64) Checklist {
 			Name:        "delete A1 indexes",
 			Description: "confirmation check to delete A1 indexes",
 			TestFunc: func(h ChecklistHelper) error {
-				return err
+				return fmt.Errorf("Error while feteching the list of indices: %w", err)
 			},
-			//TestFunc: nil,
 		}
 	}
-	targetList := make(map[string]interface{})
+	targetList := []string{}
 	for _, index := range strings.Split(strings.TrimSuffix(string(allIndexList), "\n"), "\n") {
-		targetList[index] = ""
+		targetList = append(targetList, index)
 	}
 	sourceList := []string{".automate", ".locky", "saved-searches", ".tasks"}
 
@@ -701,12 +702,19 @@ func deleteIndexFromA1(timeout int64, indexes string) error {
 }
 
 //findMatch returns the list of items available in targetList from sourceList
-func findMatch(sourceList []string, targetList map[string]interface{}) []string {
-	list := []string{}
-	for _, item := range sourceList {
-		if _, ok := targetList[item]; ok {
-			list = append(list, item)
+func findMatch(sourceList, targetList []string) []string {
+	matchedList := make(map[string]interface{})
+	for _, item := range targetList {
+		for _, sourceItem := range sourceList {
+			if strings.Contains(item, sourceItem) {
+				matchedList[item] = ""
+				break
+			}
 		}
+	}
+	list := []string{}
+	for key := range matchedList {
+		list = append(list, key)
 	}
 	return list
 }
