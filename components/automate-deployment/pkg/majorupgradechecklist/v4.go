@@ -637,24 +637,69 @@ func (ci *V4ChecklistManager) StoreSearchEngineSettings() error {
 }
 
 func deleteA1Indexes(timeout int64) Checklist {
-	return Checklist{}
+	allIndexList, err := getAllIndices(timeout)
+	if err != nil {
+		return Checklist{
+			Name:        "delete A1 indexes",
+			Description: "confirmation check to delete A1 indexes",
+			TestFunc: func(h ChecklistHelper) error {
+				return err
+			},
+			//TestFunc: nil,
+		}
+	}
+	targetList := make(map[string]interface{})
+	for _, index := range strings.Split(strings.TrimSuffix(string(allIndexList), "\n"), "\n") {
+		targetList[index] = ""
+	}
+	sourceList := []string{".automate", ".locky", "saved-searches", ".tasks"}
 
-	// allIndexList, err := getAllIndices(timeout)
-	// if err != nil {
-	// 	return err
-	// }
+	existingIndexes := findMatch(sourceList, targetList)
 
-	// targetList := []string{}
+	if len(existingIndexes) == 0 {
+		return Checklist{
+			Name:        "delete A1 indexes",
+			Description: "confirmation check index version",
+			TestFunc:    nil,
+		}
+	}
 
-	// return Checklist{
-	// 	Name:        "check index version",
-	// 	Description: "confirmation check index version",
-	// 	TestFunc: func(h ChecklistHelper) error {
-	// 		err := checkIndexVersion(timeout)
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 		return nil
-	// 	},
-	// }
+	return Checklist{
+		Name:        "delete A1 indexes",
+		Description: "confirmation check to delete A1 indexes",
+		TestFunc: func(h ChecklistHelper) error {
+			indexes := strings.Join(existingIndexes, ",")
+			resp, err := h.Writer.Confirm(fmt.Sprintf("Following Indexes will be deleted:%s", indexes))
+			if err != nil {
+				h.Writer.Error(err.Error())
+				return status.Errorf(status.InvalidCommandArgsError, err.Error())
+			}
+			if !resp {
+				h.Writer.Error("The A1 Indexes need to be deleted")
+				return status.New(status.InvalidCommandArgsError, "The A1 Indexes need to be deleted")
+			}
+			err = deleteIndexFromA1(timeout, indexes)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+}
+
+func deleteIndexFromA1(timeout int64, indexes string) error {
+	basePath := getESBasePath(timeout)
+	_, err := execRequest(fmt.Sprintf("%s%s", basePath, indexes)+"?&human", "DELETE", nil)
+	return err
+}
+
+//findMatch returns the list of items available in targetList from sourceList
+func findMatch(sourceList []string, targetList map[string]interface{}) []string {
+	list := []string{}
+	for _, item := range sourceList {
+		if _, ok := targetList[item]; ok {
+			list = append(list, item)
+		}
+	}
+	return list
 }
