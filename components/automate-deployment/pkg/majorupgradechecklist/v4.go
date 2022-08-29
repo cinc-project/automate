@@ -643,14 +643,14 @@ func deleteA1Indexes(timeout int64) Checklist {
 			Name:        "delete A1 indexes",
 			Description: "confirmation check to delete A1 indexes",
 			TestFunc: func(h ChecklistHelper) error {
-				return err
+				return fmt.Errorf("Error while feteching the list of indices: %w", err)
 			},
-			//TestFunc: nil,
 		}
 	}
-	targetList := make(map[string]interface{})
+
+	targetList := []string{}
 	for _, index := range strings.Split(strings.TrimSuffix(string(allIndexList), "\n"), "\n") {
-		targetList[index] = ""
+		targetList = append(targetList, index)
 	}
 	sourceList := []string{".automate", ".locky", "saved-searches", ".tasks"}
 
@@ -669,7 +669,7 @@ func deleteA1Indexes(timeout int64) Checklist {
 		Description: "confirmation check to delete A1 indexes",
 		TestFunc: func(h ChecklistHelper) error {
 			indexes := strings.Join(existingIndexes, ",")
-			resp, err := h.Writer.Confirm(fmt.Sprintf("Following Indexes will be deleted:%s", indexes))
+			resp, err := h.Writer.Confirm(fmt.Sprintf("Following A1 Indexes will be deleted:%s", indexes))
 			if err != nil {
 				h.Writer.Error(err.Error())
 				return status.Errorf(status.InvalidCommandArgsError, err.Error())
@@ -694,12 +694,19 @@ func deleteIndexFromA1(timeout int64, indexes string) error {
 }
 
 //findMatch returns the list of items available in targetList from sourceList
-func findMatch(sourceList []string, targetList map[string]interface{}) []string {
-	list := []string{}
-	for _, item := range sourceList {
-		if _, ok := targetList[item]; ok {
-			list = append(list, item)
+func findMatch(sourceList, targetList []string) []string {
+	matchedList := make(map[string]interface{})
+	for _, item := range targetList {
+		for _, sourceItem := range sourceList {
+			if strings.Contains(item, sourceItem) {
+				matchedList[item] = ""
+				break
+			}
 		}
+	}
+	list := []string{}
+	for key := range matchedList {
+		list = append(list, key)
 	}
 	return list
 }
