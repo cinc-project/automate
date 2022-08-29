@@ -179,7 +179,7 @@ func (ci *V4ChecklistManager) RunChecklist(timeout int64, flags ChecklistUpgrade
 	} else {
 		dbType = "Embedded"
 		postcheck = postChecklistV4Embedded
-		checklists = append(checklists, []Checklist{deleteA1Indexes, runIndexCheck(timeout), downTimeCheckV4(), backupCheck(), diskSpaceCheck(ci.version, flags.SkipDiskSpaceCheck, flags.OsDestDataDir),
+		checklists = append(checklists, []Checklist{deleteA1Indexes(timeout), runIndexCheck(timeout), downTimeCheckV4(), backupCheck(), diskSpaceCheck(ci.version, flags.SkipDiskSpaceCheck, flags.OsDestDataDir),
 			disableSharding(), postChecklistIntimationCheckV4(!ci.isExternalES)}...)
 	}
 	checklists = append(checklists, showPostChecklist(&postcheck), promptUpgradeContinueV4(!ci.isExternalES), replaceurl())
@@ -538,11 +538,11 @@ func getESBasePath(timeout int64) string {
 }
 
 func getAllIndices(timeout int64) ([]byte, error) {
-	return getDataFromUrl(getESBasePath(timeout) + "_cat/indices?h=index")
+	return execRequest(getESBasePath(timeout)+"_cat/indices?h=index", "GET", nil)
 }
 
-func checkIndexVersion(timeout int64) error {
-	//basePath := getESBasePath(timeout)
+func checkIndexVersion(timeout int64, h ChecklistHelper) error {
+	basePath := getESBasePath(timeout)
 	allIndexList, err := getAllIndices(timeout)
 	if err != nil {
 		return err
@@ -550,7 +550,7 @@ func checkIndexVersion(timeout int64) error {
 
 	indexDetailsArray := []indexDetails{}
 	for _, index := range strings.Split(strings.TrimSuffix(string(allIndexList), "\n"), "\n") {
-		versionData, err := getDataFromUrl(basePath + index + "/_settings/index.version.created*?&human")
+		versionData, err := execRequest(basePath+index+"/_settings/index.version.created*?&human", "GET", nil)
 		if err != nil {
 			return err
 		}
@@ -559,6 +559,19 @@ func checkIndexVersion(timeout int64) error {
 			return err
 		}
 		if i < 6 {
+			h.Writer.Println(fmt.Sprintf("Automate is unable to upgrade because an index with name: %s is created using an older version of elasticsearch %s", index, createdString))
+			resp, err := h.Writer.Prompt("To continue, please type delete to DELETE or reindex to REINDEX")
+			if err != nil {
+				h.Writer.Error(err.Error())
+				return status.Errorf(status.InvalidCommandArgsError, err.Error())
+			}
+			if resp == "delete" {
+
+			} else if resp == "reindex" {
+
+			} else {
+				return status.Errorf(status.InvalidCommandArgsError, "The option you have entered is invalid")
+			}
 			indexDetailsArray = append(indexDetailsArray, indexDetails{Name: index, Version: createdString})
 		}
 	}
@@ -604,7 +617,7 @@ func runIndexCheck(timeout int64) Checklist {
 		Name:        "check index version",
 		Description: "confirmation check index version",
 		TestFunc: func(h ChecklistHelper) error {
-			err := checkIndexVersion(timeout)
+			err := checkIndexVersion(timeout, h)
 			if err != nil {
 				return err
 			}
@@ -624,23 +637,24 @@ func (ci *V4ChecklistManager) StoreSearchEngineSettings() error {
 }
 
 func deleteA1Indexes(timeout int64) Checklist {
+	return Checklist{}
 
-	allIndexList, err := getAllIndices(timeout)
-	if err != nil {
-		return err
-	}
+	// allIndexList, err := getAllIndices(timeout)
+	// if err != nil {
+	// 	return err
+	// }
 
-	targetList := []string{}
+	// targetList := []string{}
 
-	return Checklist{
-		Name:        "check index version",
-		Description: "confirmation check index version",
-		TestFunc: func(h ChecklistHelper) error {
-			err := checkIndexVersion(timeout)
-			if err != nil {
-				return err
-			}
-			return nil
-		},
-	}
+	// return Checklist{
+	// 	Name:        "check index version",
+	// 	Description: "confirmation check index version",
+	// 	TestFunc: func(h ChecklistHelper) error {
+	// 		err := checkIndexVersion(timeout)
+	// 		if err != nil {
+	// 			return err
+	// 		}
+	// 		return nil
+	// 	},
+	// }
 }
