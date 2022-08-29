@@ -179,7 +179,7 @@ func (ci *V4ChecklistManager) RunChecklist(timeout int64, flags ChecklistUpgrade
 	} else {
 		dbType = "Embedded"
 		postcheck = postChecklistV4Embedded
-		checklists = append(checklists, []Checklist{runIndexCheck(timeout), downTimeCheckV4(), backupCheck(), diskSpaceCheck(ci.version, flags.SkipDiskSpaceCheck, flags.OsDestDataDir),
+		checklists = append(checklists, []Checklist{deleteA1Indexes, runIndexCheck(timeout), downTimeCheckV4(), backupCheck(), diskSpaceCheck(ci.version, flags.SkipDiskSpaceCheck, flags.OsDestDataDir),
 			disableSharding(), postChecklistIntimationCheckV4(!ci.isExternalES)}...)
 	}
 	checklists = append(checklists, showPostChecklist(&postcheck), promptUpgradeContinueV4(!ci.isExternalES), replaceurl())
@@ -513,7 +513,7 @@ func replaceurl() Checklist {
 	}
 }
 
-func checkIndexVersion(timeout int64) error {
+func getESBasePath(timeout int64) string {
 	var basePath = "http://localhost:10144/"
 	cfg := dc.DefaultAutomateConfig()
 	defaultHost := cfg.GetEsgateway().GetV1().GetSys().GetService().GetHost().GetValue()
@@ -534,8 +534,16 @@ func checkIndexVersion(timeout int64) error {
 			}
 		}
 	}
+	return basePath
+}
 
-	allIndexList, err := getDataFromUrl(basePath + "_cat/indices?h=index")
+func getAllIndices(timeout int64) ([]byte, error) {
+	return getDataFromUrl(getESBasePath(timeout) + "_cat/indices?h=index")
+}
+
+func checkIndexVersion(timeout int64) error {
+	//basePath := getESBasePath(timeout)
+	allIndexList, err := getAllIndices(timeout)
 	if err != nil {
 		return err
 	}
@@ -613,4 +621,26 @@ func (ci *V4ChecklistManager) StoreSearchEngineSettings() error {
 		return StoreESSettings(isEmbeded)
 	}
 	return nil
+}
+
+func deleteA1Indexes(timeout int64) Checklist {
+
+	allIndexList, err := getAllIndices(timeout)
+	if err != nil {
+		return err
+	}
+
+	targetList := []string{}
+
+	return Checklist{
+		Name:        "check index version",
+		Description: "confirmation check index version",
+		TestFunc: func(h ChecklistHelper) error {
+			err := checkIndexVersion(timeout)
+			if err != nil {
+				return err
+			}
+			return nil
+		},
+	}
 }
