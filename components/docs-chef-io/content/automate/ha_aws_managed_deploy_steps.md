@@ -62,11 +62,14 @@ Follow the steps below to deploy Chef Automate High Availability (HA) on AWS (Am
    curl https://packages.chef.io/airgap_bundle/current/automate/latest.aib -o latest.aib
    ```
 
-   Download specific version bundle with this, example version: 4.0.91:
+   Download specific version bundle with this
 
    ```bash
-   curl https://packages.chef.io/airgap_bundle/current/automate/4.0.91.aib -o automate-4.0.91.aib
+   curl https://packages.chef.io/airgap_bundle/current/automate/<version>.aib -o automate-<version>.aib
    ```
+
+{{< note >}} Chef Automate bundles are available for 60 days from the release of a version.  
+However, the milestone release bundles are available for download forever.{{< /note >}}
 
 4. Generate init config
    Then generate init config for AWS infra structure:
@@ -128,10 +131,10 @@ Follow the steps below to deploy Chef Automate High Availability (HA) on AWS (Am
    chef-automate provision-infra config.toml --airgap-bundle latest.aib
    ```
 
-   Using specific version of Chef Automate, example: `automate-4.0.91.aib` 
+   Using specific version of Chef Automate, example: `automate-<version>.aib` 
 
    ```bash
-   chef-automate provision-infra config.toml --airgap-bundle automate-4.0.91.aib
+   chef-automate provision-infra config.toml --airgap-bundle automate-<version>.aib
    ```
 
 8. Run Deploy Command
@@ -142,10 +145,10 @@ Follow the steps below to deploy Chef Automate High Availability (HA) on AWS (Am
    chef-automate deploy config.toml --airgap-bundle latest.aib
    ```
 
-   If deploying specific version of Chef Automate, example: Deploy `automate-4.0.91.aib` with set `config.toml`
+   If deploying specific version of Chef Automate, example: Deploy `automate-<version>.aib` with set `config.toml`
 
    ```bash
-   chef-automate deploy config.toml --airgap-bundle automate-4.0.91.aib
+   chef-automate deploy config.toml --airgap-bundle automate-<version>.aib
    ```
 
 9. After Deployment is done successfully.
