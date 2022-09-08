@@ -62,7 +62,7 @@ Follow the steps below to deploy Chef Automate High Availability (HA) on AWS (Am
    curl https://packages.chef.io/airgap_bundle/current/automate/latest.aib -o latest.aib
    ```
 
-   Download specific version bundle with this
+   Download specific version bundle with this:
 
    ```bash
    curl https://packages.chef.io/airgap_bundle/current/automate/<version>.aib -o automate-<version>.aib
