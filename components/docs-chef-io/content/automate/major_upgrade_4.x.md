@@ -158,7 +158,8 @@ sudo chef-automate maintenance off
 ```
 This should return: 
 
-``Updating deployment configuration``` ```Applying deployment configuration``
+``Updating deployment configuration``
+``Applying deployment configuration``
 
 4. Migrate your data from *ElasticSearch 6.8* to *OpenSearch 1.2.4*:
 ```sh
@@ -280,8 +281,9 @@ This should return: Automate is up-to-date
 sudo chef-automate maintenance off
 ```
 This should return:
-```Updating deployment configuration```
-```Applying deployment configuration```
+
+``Updating deployment configuration``
+``Applying deployment configuration``
 
 ### Chef Automate in Air-Gapped Environment With Embedded ElasticSearch
 
@@ -381,8 +383,9 @@ This should return: Automate is up-to-date with airgap bundle `4.x.y` version
 sudo chef-automate maintenance off
 ```
 This should return:
-```Updating deployment configuration```
-```Applying deployment configuration```
+
+``Updating deployment configuration``
+``Applying deployment configuration``
 
 3. Migrate your data from *ElasticSearch 6.8* to *OpenSearch 1.2.4*:
 ```sh
@@ -532,8 +535,9 @@ sudo chef-automate upgrade status
 sudo chef-automate maintenance off
 ```
 This should return:
-```Updating deployment configuration```
-```Applying deployment configuration```
+
+``Updating deployment configuration``
+``Applying deployment configuration``
 
 {{< note >}}
 After upgrading to version 4.x, Automate will have the configurations both for OpenSearch and Elasticsearch. It is recommended to remove the Elasticsearch configuration after upgrading to External OpenSearch.
