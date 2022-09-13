@@ -295,6 +295,8 @@ ssh_port = ""
 sudo_password = ""
 ## === ===
 
+# Eg.: backup_config = "object_storage" or "file_system"
+backup_config = ""
 
 secrets_key_file = "/hab/a2_deploy_workspace/secrets.key"
 secrets_store_file = "/hab/a2_deploy_workspace/secrets.json"
@@ -359,6 +361,12 @@ chef_server_private_ips = []
 opensearch_private_ips = []
 postgresql_private_ips = []
 ## === ===
+
+[object_storage.config]
+bucket_name = ""
+access_key = ""
+secret_key = ""
+endpoint = ""
 `
 
 var UsageTemplate string = `
