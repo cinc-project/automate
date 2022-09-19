@@ -185,7 +185,7 @@ For example : Add new Automate node to the existing deployed cluster.
   | [automate.config] <br> instance_count = "1" <br> [existing_infra.config] <br> automate_private_ips = ["10.0.1.0"] |  | [automate.config] <br> instance_count = "2" <br> [existing_infra.config] <br> automate_private_ips = ["10.0.1.0","10.0.2.0"] |
 
 - Trigger the deployment command again from the bastion node.
-- In below deploy command,latest.aib will replace with your airgap bundle name which is running on the current cluster.
+- In below deploy command,`latest.aib` will replace with your airgap bundle name which is running on the current cluster.
   ```
     chef-automate deploy config.toml --airgap-bundle latest.aib
   ```
@@ -207,7 +207,7 @@ For example : Remove Automate node to the existing deployed cluster.
   | [automate.config] <br> instance_count = "3" <br> [existing_infra.config] <br> automate_private_ips = ["10.0.1.0","10.0.2.0","10.0.3.0"] |  |[automate.config] <br> instance_count = "2" <br> [existing_infra.config] <br> automate_private_ips = ["10.0.1.0","10.0.3.0"] |
   
 - Trigger the deployment command again from the bastion node.
-- In below deploy command,latest.aib will replace with your airgap bundle name which is running on the current cluster.
+- In below deploy command,`latest.aib` will replace with your airgap bundle name which is running on the current cluster.
   ```
     chef-automate deploy config.toml --airgap-bundle latest.aib
   ```
@@ -234,7 +234,7 @@ For example : Remove Automate node to the existing deployed cluster.
   cd -
   ``` 
 - Run the `deploy` command to Add new node into the cluster.
-- In below deploy command,latest.aib will replace with your airgap bundle name which is running on the current cluster.
+- In below deploy command,`latest.aib` will replace with your airgap bundle name which is running on the current cluster.
   ```
     chef-automate deploy config.toml --airgap-bundle latest.aib
   ```
@@ -251,4 +251,4 @@ For example : Remove Automate node to the existing deployed cluster.
   cd -
    ``` 
 - Once the module's tainted, run the `deploy` command again `chef-automate deploy config.toml --airgap-bundle latest.aib`
- (latest.aib will replace with your airgap bundle name which is running on the current cluster).
+ (`latest.aib` will replace with your airgap bundle name which is running on the current cluster).
