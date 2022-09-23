@@ -30,6 +30,7 @@ In case of Primary Cluster Failure, we can change the DNS routing to DR Cluster.
 
 - Running two parallel clusters can be expensive.
 - Data is available till the last backup is performed.
+- Changing the DNS from Primary cluster Load-balancer to Disaster Recovery Load-balancer might take some time to reflect.
 
 ### Steps to setup the Production and Disaster Recovery Cluster
 
