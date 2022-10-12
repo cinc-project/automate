@@ -2,6 +2,11 @@ package handler
 
 import (
 	"context"
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"strings"
+    "net/http"
 	"github.com/chef/automate/api/external/sso"
 	deployment "github.com/chef/automate/api/interservice/deployment"
 	license_control "github.com/chef/automate/api/interservice/license_control"
@@ -77,10 +82,22 @@ func (a *SsoConfig) DeleteSsoConfig(ctx context.Context, in *empty.Empty) (*sso.
 	}
 	
 	if res.Config.Dex != nil {
-		return &sso.DeleteSsoConfigResponse{
-			Message: "SSO Configuration disabled successfully",
-		}, nil
-	}
+		ip, err := getBastionIp()
+		if err != nil {
+			return nil, err
+		}
+		url := "http://" + ip
+        resp, err := a.makeRequest(ctx, "GET", url, nil)
+		if err != nil {
+			return nil, err
+		}
+		log.Println("response Body******************", resp)
+        body, _ := ioutil.ReadAll(resp.Body)
+        log.Println("response Body:", string(body))
+        return &sso.DeleteSsoConfigResponse{
+            Message: "SSO Configuration disabled successfully",
+        }, nil
+    }
 
 	return &sso.DeleteSsoConfigResponse{
 		Message: "SSO Configuration not disabled successfully",
@@ -124,3 +141,33 @@ func (a *SsoConfig) getConfigData(ctx context.Context) (*deployment.GetAutomateC
 
 	return a.client.GetAutomateConfig(ctx, req)
 }
+
+func (a *SsoConfig) makeRequest(ctx context.Context, requestType string, url string, jsonData []byte) (*http.Response, error) {
+    req, err := http.NewRequest(requestType, url, bytes.NewBuffer(jsonData))
+    req.Header.Set("Content-Type", "application/json")
+    client := &http.Client{}
+    resp, err := client.Do(req)
+
+    if err != nil {
+        log.Fatal("error occurred", err)
+		return nil, err
+    }
+    defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+    fmt.Printf("Body:************ %v\n", body)
+    return resp, nil
+}
+
+func getBastionIp() (string, error) {
+	content, err := ioutil.ReadFile("/var/bastion_info.txt")
+	if err != nil {
+		log.Fatal("error occurred", err)
+		return "", err
+	}
+	return strings.TrimSpace(string(content)), nil
+}
+
+
+
+
+
