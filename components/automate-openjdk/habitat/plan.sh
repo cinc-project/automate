@@ -9,10 +9,10 @@ pkg_origin=chef
 pkg_maintainer="Chef Software Inc. <support@chef.io>"
 pkg_name=automate-openjdk
 # Release archive https://jdk.java.net/archive/
-pkg_version=11.0.15+10
-pkg_source=https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.15%2B10/OpenJDK11U-jdk_x64_linux_hotspot_11.0.15_10.tar.gz
-pkg_shasum=5fdb4d5a1662f0cca73fec30f99e67662350b1fa61460fa72e91eb9f66b54d0b
-pkg_filename=OpenJDK11U-jdk_x64_linux_hotspot_11.0.15_10.tar.gz
+pkg_version=18.0.2.1
+pkg_source=https://download.java.net/java/GA/jdk18.0.2.1/db379da656dc47308e138f21b33976fa/1/GPL/openjdk-18.0.2.1_linux-x64_bin.tar.gz
+pkg_shasum=3bfdb59fc38884672677cebca9a216902d87fe867563182ae8bc3373a65a2ebd
+pkg_filename=openjdk-18.0.2.1_linux-x64_bin.tar.gz
 pkg_dirname="jdk-${pkg_version}"
 pkg_license=("GPL-2.0-with-classpath-exception")
 pkg_description=('Eclipse Temurin is the open source Java SE build based upon OpenJDK.')
