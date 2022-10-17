@@ -34,4 +34,7 @@ func init() {
 		}
 		return ""
 	})
+	policy.MapMethodTo("/chef.automate.api.sso.SsoConfigService/DeleteSsoConfig", "sso:config", "sso:config:delete", "DELETE", "/api/v0/sso/config", func(unexpandedResource string, input interface{}) string {
+		return unexpandedResource
+	})
 }

@@ -1,22 +1,20 @@
 package handler
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"bytes"
 	"io/ioutil"
-	"net/http"
 	"strings"
-
+    "net/http"
+	"github.com/chef/automate/api/external/sso"
 	deployment "github.com/chef/automate/api/interservice/deployment"
 	license_control "github.com/chef/automate/api/interservice/license_control"
+	"github.com/golang/protobuf/ptypes/empty"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	"github.com/chef/automate/api/external/sso"
-	"github.com/golang/protobuf/ptypes/empty"
 )
 
 // SsoConfig - the ssoconfig service data structure
@@ -35,6 +33,7 @@ type PostConfig struct {
 	Entity_issuer         string   `json:"entity_issuer"`
 	Name_id_policy_format string   `json:"name_id_policy_format"`
 }
+const ssoFilesPath = "/var/automate-ha/"
 
 // NewSsoConfigHandler - create a new ssoconfig service handler
 func NewSsoConfigHandler(license_client license_control.LicenseControlServiceClient, client deployment.DeploymentClient) *SsoConfig {
@@ -45,21 +44,13 @@ func NewSsoConfigHandler(license_client license_control.LicenseControlServiceCli
 }
 
 func (a *SsoConfig) GetSsoConfig(ctx context.Context, in *empty.Empty) (*sso.GetSsoConfigResponse, error) {
-
-	deploymentType, err := a.getDeploymentDetails(ctx)
+	err := a.validateDeploymentType(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if deploymentType != "SAAS" {
-		msg := "Unauthorized: Deployment type is not SAAS"
-		return nil, status.Error(7, msg)
-	}
-
-	req := &deployment.GetAutomateConfigRequest{}
-
-	res, err := a.client.GetAutomateConfig(ctx, req)
-	if err != nil {
+	res, err := a.getConfigData(ctx)
+	if err !=nil {
 		return nil, err
 	}
 
@@ -90,6 +81,60 @@ func (a *SsoConfig) GetSsoConfig(ctx context.Context, in *empty.Empty) (*sso.Get
 	}, nil
 }
 
+func (a *SsoConfig) getConfigData(ctx context.Context) (*deployment.GetAutomateConfigResponse, error) {
+	req := &deployment.GetAutomateConfigRequest{}
+
+	return a.client.GetAutomateConfig(ctx, req)
+}
+
+func (a *SsoConfig) DeleteSsoConfig(ctx context.Context, in *empty.Empty) (*sso.DeleteSsoConfigResponse, error) {
+	err := a.validateDeploymentType(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("Received request to delete sso config")
+	res, err := a.getConfigData(ctx)
+
+	if err !=nil {
+		return nil, err
+	}
+	
+	if res.Config.Dex != nil {
+		url, err := getBastionUrl()
+		if err != nil {
+			return nil, err
+		}
+		fileName := "revert-status.txt"
+		err = ioutil.WriteFile(ssoFilesPath+fileName, []byte("Pending"), 0777)
+		if err != nil {
+			log.Printf("Unable to write file:", err)
+			return nil, err
+		}
+		go makeRequest("DELETE", *url, nil, fileName)
+		return &sso.DeleteSsoConfigResponse{
+            Message: "Started Disabling SSO Configuration",
+        }, nil
+    }
+
+	return &sso.DeleteSsoConfigResponse{
+		Message: "SSO Configuration not disabled successfully",
+	}, nil
+}
+
+func(a *SsoConfig) validateDeploymentType(ctx context.Context) error {
+	deploymentType, err := a.getDeploymentDetails(ctx)
+	if err != nil {
+		return err
+	}
+
+	if deploymentType != "SAAS" {
+		msg := "Unauthorized: Deployment type is not SAAS"
+		return status.Error(codes.PermissionDenied, msg)
+	}
+	return nil
+}
+
 func (a *SsoConfig) getDeploymentDetails(ctx context.Context) (string, error) {
 	deployIDResponse, err := a.license_client.GetDeploymentID(ctx, &license_control.GetDeploymentIDRequest{})
 	if err != nil {
@@ -108,18 +153,6 @@ func (a *SsoConfig) getDeploymentDetails(ctx context.Context) (string, error) {
 	return deployIDResponse.DeploymentType, nil
 }
 
-func (a *SsoConfig) validateDeploymentType(ctx context.Context) error {
-	deploymentType, err := a.getDeploymentDetails(ctx)
-	if err != nil {
-		return err
-	}
-
-	if deploymentType != "SAAS" {
-		msg := "Unauthorized: Deployment type is not SAAS"
-		return status.Error(codes.PermissionDenied, msg)
-	}
-	return nil
-}
 
 func makeRequest(requestType string, url string, jsonData []byte, fileName string) {
 	req, err := http.NewRequest(requestType, url, bytes.NewBuffer(jsonData))
@@ -136,10 +169,10 @@ func makeRequest(requestType string, url string, jsonData []byte, fileName strin
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusOK {
-		ioutil.WriteFile("/var/automate-ha/"+fileName, []byte("Success"), 0777)
+		ioutil.WriteFile(ssoFilesPath+fileName, []byte("Success"), 0777)
 		return
 	}
-	ioutil.WriteFile("/var/automate-ha/"+fileName, []byte("Failure"), 0777)
+	ioutil.WriteFile(ssoFilesPath+fileName, []byte("Failure"), 0777)
 }
 
 func (a *SsoConfig) SetSsoConfig(ctx context.Context, in *sso.SetSsoConfigRequest) (*sso.SetSsoConfigResponse, error) {
@@ -175,7 +208,7 @@ func (a *SsoConfig) SetSsoConfig(ctx context.Context, in *sso.SetSsoConfigReques
 		return nil, err
 	}
 	fileName := "post-status.txt"
-	err = ioutil.WriteFile("/var/automate-ha/"+fileName, []byte("Pending"), 0777)
+	err = ioutil.WriteFile(ssoFilesPath+fileName, []byte("Pending"), 0777)
 	if err != nil {
 		fmt.Printf("Unable to write the file: %v", err)
 	}
@@ -186,7 +219,7 @@ func (a *SsoConfig) SetSsoConfig(ctx context.Context, in *sso.SetSsoConfigReques
 }
 
 func getBastionUrl() (*string, error) {
-	content, err := ioutil.ReadFile("/var/automate-ha/bastion_info.txt")
+	content, err := ioutil.ReadFile(ssoFilesPath+"bastion_info.txt")
 	if err != nil {
 		log.Fatal("Error occurred while reading file: ", err)
 		return nil, err

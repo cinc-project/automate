@@ -42,6 +42,26 @@ service SsoConfigService {
         };
     };
 
+	/*
+	Delete Sso Config 
+
+	Delete the sso config if present
+
+	Authorization Action:
+	```
+	sso:config:delete
+	```
+	*/
+
+    rpc DeleteSsoConfig (google.protobuf.Empty) returns (DeleteSsoConfigResponse) {
+		option (google.api.http) = {
+			delete: "/api/v0/sso/config"
+		};
+		option (chef.automate.api.iam.policy) = {
+			resource: "sso:config"
+			action: "sso:config:delete"
+		};
+	};
 }
 
 
@@ -54,6 +74,10 @@ message GetSsoConfigResponse {
     repeated string allowed_groups = 6;
     string entity_issuer = 7;
     string name_id_policy_format = 8;
+}
+
+message DeleteSsoConfigResponse {
+    string message = 1;
 }
   
 message SetSsoConfigRequest {
