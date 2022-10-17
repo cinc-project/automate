@@ -40,7 +40,6 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-
 	sshUser := infra.Outputs.SSHUser.Value
 	sskKeyFile := infra.Outputs.SSHKeyFile.Value
 	sshPort := infra.Outputs.SSHPort.Value
