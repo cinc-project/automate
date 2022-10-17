@@ -65,7 +65,7 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func executeCleanupOnRemote(sshUser string, sshPort string, sshKeyFile string, ip string, remoteType string) {
+func executeCleanupOnRemote(sshUser string, sshPort string, sshKeyFile string, ip string) {
 
 	pemBytes, err := ioutil.ReadFile(sshKeyFile)
 	if err != nil {
