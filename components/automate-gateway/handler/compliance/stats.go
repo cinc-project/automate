@@ -34,6 +34,20 @@ func (a *Stats) ReadSummary(ctx context.Context, in *stats.Query) (*stats.Summar
 	return out, nil
 }
 
+// should cover /controlssummary
+func (a *Stats) ReadControlsSummary(ctx context.Context, in *stats.Query) (*stats.ControlsSummary, error) {
+	inDomain := &statsService.Query{}
+	out := &stats.ControlsSummary{}
+	f := func() (proto.Message, error) {
+		return a.client.ReadControlsSummary(ctx, inDomain)
+	}
+	err := protobuf.CallDomainService(in, inDomain, f, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // should cover /trend/nodes, /trend/controls
 func (a *Stats) ReadTrend(ctx context.Context, in *stats.Query) (*stats.Trends, error) {
 	inDomain := &statsService.Query{}

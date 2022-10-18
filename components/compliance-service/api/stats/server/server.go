@@ -62,6 +62,22 @@ func (srv *Server) ReadSummary(ctx context.Context, in *stats.Query) (*stats.Sum
 	return &summary, nil
 }
 
+//ReadControlsSummary returns controls summary via date range
+func (srv *Server) ReadControlsSummary(ctx context.Context, in *stats.Query) (*stats.ControlsSummary, error) {
+
+	formattedFilters, err := relaxting.FilterByProjects(ctx, formatFilters(in.Filters))
+	if err != nil {
+		return nil, errorutils.FormatErrorMsg(err, in.Id)
+	}
+
+	in.Type = "controls"
+	controlSummary, err := srv.es.GetStatsSummaryControlsRange(formattedFilters)
+	if err != nil {
+		return nil, errorutils.FormatErrorMsg(err, "")
+	}
+	return controlSummary, nil
+}
+
 // ReadTrend returns trend information for nodes or controls
 func (srv *Server) ReadTrend(ctx context.Context, in *stats.Query) (*stats.Trends, error) {
 	var trends stats.Trends

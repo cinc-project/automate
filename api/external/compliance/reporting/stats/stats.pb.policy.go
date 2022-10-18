@@ -23,6 +23,23 @@ func init() {
 		}
 		return ""
 	})
+	policy.MapMethodTo("/chef.automate.api.compliance.reporting.stats.v1.StatsService/ReadControlsSummary", "compliance:reporting:stats:summary", "compliance:reportSummary:get", "POST", "/api/v0/compliance/reporting/stats/controlssummary", func(unexpandedResource string, input interface{}) string {
+		if m, ok := input.(*Query); ok {
+			return policy.ExpandParameterizedResource(unexpandedResource, func(want string) string {
+				switch want {
+				case "id":
+					return m.Id
+				case "type":
+					return m.Type
+				case "sort":
+					return m.Sort
+				default:
+					return ""
+				}
+			})
+		}
+		return ""
+	})
 	policy.MapMethodTo("/chef.automate.api.compliance.reporting.stats.v1.StatsService/ReadTrend", "compliance:reporting:stats:trend", "compliance:reportTrend:get", "POST", "/api/v0/compliance/reporting/stats/trend", func(unexpandedResource string, input interface{}) string {
 		if m, ok := input.(*Query); ok {
 			return policy.ExpandParameterizedResource(unexpandedResource, func(want string) string {

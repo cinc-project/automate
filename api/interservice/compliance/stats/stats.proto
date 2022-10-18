@@ -10,6 +10,7 @@ import "google/protobuf/timestamp.proto";
 
 service StatsService {
 	rpc ReadSummary(Query) returns (Summary) {};
+	rpc ReadControlsSummary(Query) returns (ControlsSummary) {};
 	rpc ReadTrend(Query) returns (Trends) {};
 	rpc ReadProfiles(Query) returns (Profile) {};
 	rpc ReadFailures(Query) returns (Failures) {};

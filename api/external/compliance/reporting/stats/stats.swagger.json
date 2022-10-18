@@ -11,6 +11,38 @@
     "application/json"
   ],
   "paths": {
+    "/api/v0/compliance/reporting/stats/controlssummary": {
+      "post": {
+        "operationId": "StatsService_ReadControlsSummary",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/chef.automate.api.compliance.reporting.stats.v1.ControlsSummary"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response",
+            "schema": {
+              "$ref": "#/definitions/grpc.gateway.runtime.Error"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/chef.automate.api.compliance.reporting.stats.v1.Query"
+            }
+          }
+        ],
+        "tags": [
+          "StatsService"
+        ]
+      }
+    },
     "/api/v0/compliance/reporting/stats/failures": {
       "post": {
         "summary": "Read Failures",

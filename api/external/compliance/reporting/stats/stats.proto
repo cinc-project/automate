@@ -50,6 +50,17 @@ service StatsService {
 		};
 	};
 
+	rpc ReadControlsSummary(Query) returns (ControlsSummary) {
+		option (google.api.http) = {
+			post: "/api/v0/compliance/reporting/stats/controlssummary"
+			body: "*"
+		};
+		option (chef.automate.api.iam.policy) = {
+			resource: "compliance:reporting:stats:summary"
+			action: "compliance:reportSummary:get"
+		};
+	};
+
 	/*
 	Read Trend
 
