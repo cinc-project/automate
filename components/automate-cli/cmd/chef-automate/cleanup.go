@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net"
 	"strings"
+
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh"
 )
@@ -29,6 +30,20 @@ var cleanupCmd = &cobra.Command {
 		RunE: runCleanupCmd,
 	}
 
+const (
+		FCLEANUP_COMMANDS = `
+		sudo systemctl stop chef-automate;
+		sudo rm -rf /hab;
+		`
+	
+		BCLEANUP_COMMANDS = `
+		sudo systemctl stop hab-sup;
+		sudo rm -rf /hab;   
+		`
+)
+
+
+
 func runCleanupCmd(cmd *cobra.Command, args []string) error {
 	infra, err := getAutomateHAInfraDetails()
 	if err != nil {
@@ -40,14 +55,16 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 	writer.Printf(strings.Join(args, ""))
 	if isA2HARBFileExist() {
 		if cleanupFlags.onprem {
-			FrontendIps := append(infra.Outputs.ChefServerPrivateIps.Value, infra.Outputs.AutomatePrivateIps.Value...)
-			BackendIps := append(infra.Outputs.PostgresqlPrivateIps.Value, infra.Outputs.OpensearchPrivateIps.Value...)
-			args = append(args, "--onprem")
-			for i := 0; i < len(FrontendIps); i++ {
-				executeCleanupOnRemote(sshUser, sshPort, sskKeyFile, FrontendIps[i], args[0])
+			frontendIps := append(infra.Outputs.ChefServerPrivateIps.Value, infra.Outputs.AutomatePrivateIps.Value...)
+			backendIps := append(infra.Outputs.PostgresqlPrivateIps.Value, infra.Outputs.OpensearchPrivateIps.Value...)
+			//args = append(args, "--onprem")
+			//FCLEANUP_COMMANDS := []string{"sudo systemctl stop chef-automate", "sudo rm -rf /hab"}
+			// scriptCommands := fmt.Sprintf(FCLEANUP_COMMANDS, args[0])
+			for i := 0; i < len(frontendIps); i++ {
+				executeCleanupOnRemote(sshUser, sshPort, sskKeyFile, frontendIps[i], FCLEANUP_COMMANDS)
 			}
-			for i := 0; i < len(BackendIps); i++ {
-				executeCleanupOnRemote(sshUser, sshPort, sskKeyFile, BackendIps[i], args[0])
+			for i := 0; i < len(backendIps); i++ {
+				executeCleanupOnRemote(sshUser, sshPort, sskKeyFile, backendIps[i],BCLEANUP_COMMANDS)
 			}
 			cleanUpScript := "hab pkg uninstall chef/automate-ha-deployment"
 			args := []string{
@@ -65,7 +82,7 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func executeCleanupOnRemote(sshUser string, sshPort string, sshKeyFile string, ip string) {
+func executeCleanupOnRemote(sshUser string, sshPort string, sshKeyFile string, ip string, commands string) {
 
 	pemBytes, err := ioutil.ReadFile(sshKeyFile)
 	if err != nil {
@@ -97,11 +114,7 @@ func executeCleanupOnRemote(sshUser string, sshPort string, sshKeyFile string, i
 	var stdoutBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
 	writer.Printf("cleaning up the nodes on IP: " + ip)
-	if ip == "FrontendIps" {
-	err = session.Run("sudo systemctl stop chef-automate;sudo rm -rf /hab")
-	} else {
-		err = session.Run("sudo systemctl stop hab-sup;sudo rm -rf /hab")
-	}
+	err = session.Run(commands)
 	if err != nil {
 		writer.Errorf("Run failed:%v", err)
 	} else {
