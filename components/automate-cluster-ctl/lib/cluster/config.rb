@@ -117,8 +117,8 @@ module AutomateCluster
       default :dbuser_username, ' '
       default :dbuser_password, ' '
       default :postgresql_certificate, ' '
-      default :postgresql_root_cert, ' '
-      default :opensearch_root_cert, ' '
+      default :postgresql_root_cert
+      default :opensearch_root_cert
     end
     # AWS Related
     config_context :aws do
