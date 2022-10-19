@@ -101,7 +101,7 @@ func (e *existingInfra) validateConfigFields() *list.List {
 	if len(e.config.ExistingInfra.Config.ChefServerPrivateIps) < 1 {
 		errorList.PushBack("Invalid or empty chef_server_private_ips")
 	}
-	if e.config.ExternalDB.Database.Type != "aws" || e.config.ExternalDB.Database.Type != "self-managed" {
+	if (e.config.ExternalDB.Database.Type != "aws") && (e.config.ExternalDB.Database.Type != "self-managed") {
 		if len(e.config.ExistingInfra.Config.OpensearchPrivateIps) < 1 {
 			errorList.PushBack("Invalid or empty opensearch_private_ips")
 		}
@@ -154,7 +154,7 @@ func (e *existingInfra) validateIPs() *list.List {
 		}
 	}
 
-	if e.config.ExternalDB.Database.Type != "aws" || e.config.ExternalDB.Database.Type != "self-managed" {
+	if (e.config.ExternalDB.Database.Type != "aws") && (e.config.ExternalDB.Database.Type != "self-managed") {
 		for _, element := range e.config.ExistingInfra.Config.OpensearchPrivateIps {
 			if checkIPAddress(element) != nil {
 				errorList.PushBack("open search private Ip " + element + notValidErrorString)
