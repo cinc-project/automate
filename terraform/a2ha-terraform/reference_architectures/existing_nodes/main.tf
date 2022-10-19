@@ -233,6 +233,8 @@ module "bootstrap_automate" {
   managed_rds_certificate            = var.managed_rds_certificate
   setup_managed_services             = var.setup_managed_services
   setup_self_managed_services        = var.setup_self_managed_services
+  opensearch_root_cert               = var.opensearch_root_cert
+  postgresql_root_cert               = var.postgresql_root_cert
   proxy_listen_port               = var.proxy_listen_port
   postgresql_private_ips          = var.setup_managed_services ? [] : var.existing_postgresql_private_ips
   postgresql_ssl_enable           = var.postgresql_ssl_enable
@@ -289,6 +291,8 @@ module "automate" {
   managed_rds_dbuser_password        = var.managed_rds_dbuser_password
   managed_rds_certificate            = var.managed_rds_certificate
   setup_managed_services             = var.setup_managed_services
+  opensearch_root_cert               = var.opensearch_root_cert
+  postgresql_root_cert               = var.postgresql_root_cert
   setup_self_managed_services        = var.setup_self_managed_services
   proxy_listen_port               = var.proxy_listen_port
   postgresql_private_ips          = var.setup_managed_services ? [] : var.existing_postgresql_private_ips
@@ -350,6 +354,8 @@ module "chef_server" {
   managed_rds_dbuser_password        = var.managed_rds_dbuser_password
   managed_rds_certificate            = var.managed_rds_certificate
   setup_managed_services             = var.setup_managed_services
+  opensearch_root_cert               = var.opensearch_root_cert
+  postgresql_root_cert               = var.postgresql_root_cert
   setup_self_managed_services        = var.setup_self_managed_services
   proxy_listen_port               = var.proxy_listen_port
   postgresql_private_ips          = var.setup_managed_services ? [] : var.existing_postgresql_private_ips

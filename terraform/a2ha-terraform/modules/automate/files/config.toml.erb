@@ -31,7 +31,7 @@
       root_cert = """<%= svc_configs[:opensearch]['tls']['rootCA'] -%>"""
 <% elsif svc_configs[:opensearch] && overrides[:setup_managed_services] == true && overrides[:setup_self_managed_services] == ture -%>   
     enable = true
-    nodes = <%= services[:opensearch][:ips].map { |ip| "https://#{ip}:#{services[:opensearch][:svc_port]}" } %>
+    nodes = ["https://<%= services[:opensearch][:managed_opensearch_domain_url] %>"]
     [global.v1.external.opensearch.auth]
       scheme = "basic_auth"
       [global.v1.external.opensearch.auth.basic_auth]
@@ -45,7 +45,7 @@
 <% end %>
 
   [global.v1.external.postgresql]
-  <% if services[:postgresql][:setup_managed_services] ==true -%>
+  <% if services[:postgresql][:setup_managed_services] ==true && overrides[:setup_self_managed_services] == false -%>
     enable = true
     nodes = ["<%= services[:postgresql][:managed_rds_instance_url] %>"]
 
@@ -89,7 +89,7 @@
     enable = true
 <% elsif svc_configs[:postgresql] && services[:postgresql][:setup_managed_services] == true && overrides[:setup_self_managed_services] == ture -%>
     enable = true
-    nodes = <%= services[:postgresql][:ips].map { |ip| "#{ip}:#{services[:postgresql][:svc_port]}" } %>
+    nodes = ["<%= services[:postgresql][:managed_rds_instance_url] %>"]
 
   [global.v1.external.postgresql.ssl]
     enable = <%= services[:postgresql][:ssl] %>
