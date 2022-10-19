@@ -368,6 +368,65 @@ opensearch_private_ips = []
 postgresql_private_ips = []
 ## === ===
 
+[external.database]
+
+# eg type = "aws" or "self-managed"
+type = ""
+
+[external.database.postgre_sql]
+
+# eg: instance_url = "managed-rds-db.cww4poze5gkx.ap-northeast-1.rds.amazonaws.com:5432"
+instance_url = ""
+
+# eg: username = "postgres"
+superuser_username = ""
+
+# eg: password = "Progress123"
+superuser_password = ""
+
+# eg: dbuser_username = "postgres"
+dbuser_username = ""
+
+# eg: dbuser_password = "Progress123"
+dbuser_password = ""
+
+# eg: postgresql_certificate =
+postgresql_certificate = "<cert content>"
+
+# in case AWS managed RDS leave it blank
+postgresql_root_cert = ""
+
+[external.database.open_search]
+
+# eg: managed_opensearch_domain_url = "search-managed-services-os-eckom3msrwqlmjlgbdu.us-east-1.es.amazonaws.com"
+opensearch_domain_url = ""
+
+# eg: managed_opensearch_username = "admin"
+opensearch_username = ""
+
+# eg: managed_opensearch_user_password = "Progress@123"
+opensearch_user_password = ""
+
+# eg: managed_opensearch_certificate = "<cert content>"
+opensearch_certificate = ""
+
+# in case AWS managed opensearch leave it blank
+opensearch_root_cert = ""
+
+[external.database.open_search.aws]
+
+# eg: managed_opensearch_domain_name = "managed-services-os"
+managed_opensearch_domain_name = ""
+
+# eg: aws_os_snapshot_role_arn = "arn:aws:iam::1127583934333:role/managed-services"
+aws_os_snapshot_role_arn = ""
+
+# eg: os_snapshot_user_access_key_id = "AKIA..........PQS7Q7A"
+os_snapshot_user_access_key_id = ""
+
+# eg: os_snapshot_user_access_key_secret = "skP4Mqihj....................anAXAX"
+os_snapshot_user_access_key_secret = ""
+
 `
 
 var UsageTemplate string = `
