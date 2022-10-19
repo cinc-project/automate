@@ -101,13 +101,14 @@ func (e *existingInfra) validateConfigFields() *list.List {
 	if len(e.config.ExistingInfra.Config.ChefServerPrivateIps) < 1 {
 		errorList.PushBack("Invalid or empty chef_server_private_ips")
 	}
+	if e.config.ExternalDB.Database.Type != "aws" || e.config.ExternalDB.Database.Type != "self-managed" {
+		if len(e.config.ExistingInfra.Config.OpensearchPrivateIps) < 1 {
+			errorList.PushBack("Invalid or empty opensearch_private_ips")
+		}
 
-	if len(e.config.ExistingInfra.Config.OpensearchPrivateIps) < 1 {
-		errorList.PushBack("Invalid or empty opensearch_private_ips")
-	}
-
-	if len(e.config.ExistingInfra.Config.PostgresqlPrivateIps) < 1 {
-		errorList.PushBack("Invalid or empty postgresql_private_ips")
+		if len(e.config.ExistingInfra.Config.PostgresqlPrivateIps) < 1 {
+			errorList.PushBack("Invalid or empty postgresql_private_ips")
+		}
 	}
 
 	if len(e.config.Architecture.ConfigInitials.BackupConfig) > 0 {
@@ -153,15 +154,17 @@ func (e *existingInfra) validateIPs() *list.List {
 		}
 	}
 
-	for _, element := range e.config.ExistingInfra.Config.OpensearchPrivateIps {
-		if checkIPAddress(element) != nil {
-			errorList.PushBack("open search private Ip " + element + notValidErrorString)
+	if e.config.ExternalDB.Database.Type != "aws" || e.config.ExternalDB.Database.Type != "self-managed" {
+		for _, element := range e.config.ExistingInfra.Config.OpensearchPrivateIps {
+			if checkIPAddress(element) != nil {
+				errorList.PushBack("open search private Ip " + element + notValidErrorString)
+			}
 		}
-	}
 
-	for _, element := range e.config.ExistingInfra.Config.PostgresqlPrivateIps {
-		if checkIPAddress(element) != nil {
-			errorList.PushBack("Postgresql private Ip " + element + notValidErrorString)
+		for _, element := range e.config.ExistingInfra.Config.PostgresqlPrivateIps {
+			if checkIPAddress(element) != nil {
+				errorList.PushBack("Postgresql private Ip " + element + notValidErrorString)
+			}
 		}
 	}
 	return errorList

@@ -123,6 +123,18 @@ variable "managed_rds_superuser_username" {
   default = ""
 }
 
+variable "setup_self_managed_services" {
+  default = false
+}
+
+variable "opensearch_root_cert" {
+  default = ""
+}
+
+variable "postgresql_root_cert" {
+  default = ""
+}
+
 variable "nfs_mount_path" {
   default = "/mnt/automate_backups"
 }
