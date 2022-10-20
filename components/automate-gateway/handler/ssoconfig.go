@@ -120,9 +120,7 @@ func (a *SsoConfig) DeleteSsoConfig(ctx context.Context, in *empty.Empty) (*sso.
         }, nil
     }
 
-	return &sso.DeleteSsoConfigResponse{
-		Message: "SSO Configuration not disabled successfully",
-	}, nil
+	return nil, status.Error(codes.PermissionDenied, "SSO configuration not present.")
 }
 
 func(a *SsoConfig) validateDeploymentType(ctx context.Context) error {
@@ -175,7 +173,7 @@ func makeRequest(requestType string, url string, jsonData []byte, fileName strin
 		ioutil.WriteFile(ssoFilesPath+fileName, []byte("Success"), 0777)
 		return
 	}
-	ioutil.WriteFile(ssoFilesPath+fileName, []byte("Failure"), 0777)
+	ioutil.WriteFile(ssoFilesPath+fileName, []byte(err.Error()), 0777)
 }
 
 // function to validate ca_contents contains "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----"
