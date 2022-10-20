@@ -140,9 +140,19 @@ variable "setup_self_managed_services" {
 }
 
 variable "opensearch_root_cert" {
-  default = ""
 }
 
 variable "postgresql_root_cert" {
+}
+
+variable "os_snapshot_user_access_key_id" {
+  default = ""
+}
+
+variable "os_snapshot_user_access_key_secret" {
+  default = ""
+}
+
+variable "aws_os_snapshot_role_arn" {
   default = ""
 }

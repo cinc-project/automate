@@ -128,11 +128,9 @@ variable "setup_self_managed_services" {
 }
 
 variable "opensearch_root_cert" {
-  default = ""
 }
 
 variable "postgresql_root_cert" {
-  default = ""
 }
 
 variable "nfs_mount_path" {
