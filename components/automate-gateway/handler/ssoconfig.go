@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"bytes"
 	"io/ioutil"
@@ -12,6 +13,7 @@ import (
 	deployment "github.com/chef/automate/api/interservice/deployment"
 	license_control "github.com/chef/automate/api/interservice/license_control"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -24,14 +26,14 @@ type SsoConfig struct {
 }
 
 type PostConfig struct {
-	Ca_contents           string   `json:"ca_contents"`
-	Sso_url               string   `json:"sso_url"`
-	Email_attr            string   `json:"email_attr"`
-	Username_attr         string   `json:"username_attr"`
-	Groups_attr           string   `json:"groups_attr"`
-	Allowed_groups        []string `json:"allowed_groups"`
-	Entity_issuer         string   `json:"entity_issuer"`
-	Name_id_policy_format string   `json:"name_id_policy_format"`
+	Ca_contents           string   `json:"ca_contents"  validate:"required"`
+	Sso_url               string   `json:"sso_url" validate:"required"`
+	Email_attr            string   `json:"email_attr"  validate:"required"`
+	Username_attr         string   `json:"username_attr" validate:"required"`
+	Groups_attr           string   `json:"groups_attr,omitempty"`
+	Allowed_groups        []string `json:"allowed_groups,omitempty"`
+	Entity_issuer         string   `json:"entity_issuer"  validate:"required"`
+	Name_id_policy_format string   `json:"name_id_policy_format,omitempty"`
 }
 const ssoFilesPath = "/var/automate-ha/"
 
@@ -42,6 +44,7 @@ func NewSsoConfigHandler(license_client license_control.LicenseControlServiceCli
 		client:         client,
 	}
 }
+var validate = validator.New()
 
 func (a *SsoConfig) GetSsoConfig(ctx context.Context, in *empty.Empty) (*sso.GetSsoConfigResponse, error) {
 	err := a.validateDeploymentType(ctx)
@@ -175,12 +178,21 @@ func makeRequest(requestType string, url string, jsonData []byte, fileName strin
 	ioutil.WriteFile(ssoFilesPath+fileName, []byte("Failure"), 0777)
 }
 
+// function to validate ca_contents contains "-----BEGIN CERTIFICATE-----" and "-----END CERTIFICATE-----"
+func validateCaContents(ca_contents string) error {
+	if strings.Contains(ca_contents, "-----BEGIN CERTIFICATE-----") && strings.Contains(ca_contents, "-----END CERTIFICATE-----") {
+		return nil
+	} else {
+		return errors.New("the ca_contents provided are not correct")
+	}
+}
+
 func (a *SsoConfig) SetSsoConfig(ctx context.Context, in *sso.SetSsoConfigRequest) (*sso.SetSsoConfigResponse, error) {
 	err := a.validateDeploymentType(ctx)
 	if err != nil {
 		return nil, err
 	}
-
+	
 	req := &sso.SetSsoConfigRequest{
 		CaContents:         in.CaContents,
 		SsoUrl:             in.SsoUrl,
@@ -191,6 +203,11 @@ func (a *SsoConfig) SetSsoConfig(ctx context.Context, in *sso.SetSsoConfigReques
 		EntityIssuer:       in.EntityIssuer,
 		NameIdPolicyFormat: in.NameIdPolicyFormat,
 	}
+	
+	if err := validateCaContents(req.CaContents); err != nil {
+		return nil, err
+	}
+	
 	bodyParams := &PostConfig{
 		Ca_contents:           req.CaContents,
 		Sso_url:               req.SsoUrl,
@@ -201,10 +218,15 @@ func (a *SsoConfig) SetSsoConfig(ctx context.Context, in *sso.SetSsoConfigReques
 		Entity_issuer:         req.EntityIssuer,
 		Name_id_policy_format: req.NameIdPolicyFormat,
 	}
+	err = validate.Struct(bodyParams)
+	if err != nil {
+		fmt.Print("Unable to fetch the required fields")
+		return nil, err
+	}
 	jsonValue, _ := json.Marshal(bodyParams)
 	url, err := getBastionUrl()
 	if err != nil {
-		log.Fatalln("Errror while creating bastion url = ", err)
+		log.Fatal("Error while creating bastion url = ", err)
 		return nil, err
 	}
 	fileName := "post-status.txt"
@@ -214,7 +236,7 @@ func (a *SsoConfig) SetSsoConfig(ctx context.Context, in *sso.SetSsoConfigReques
 	}
 	go makeRequest("POST", *url, jsonValue, fileName)
 	return &sso.SetSsoConfigResponse{
-		Response: "Config patch was successfull",
+		Response: "Started the Config Patch",
 	}, nil
 }
 
