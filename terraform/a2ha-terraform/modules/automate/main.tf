@@ -29,6 +29,7 @@ locals {
     postgresql_ssl_enable              = var.postgresql_ssl_enable ? "true" : "false",
     proxy_listen_port                  = var.proxy_listen_port,
     setup_managed_services             = var.setup_managed_services,
+    setup_self_managed_services        = var.setup_self_managed_services,
     opensearch_root_cert               = var.opensearch_root_cert,
     postgresql_root_cert               = var.postgresql_root_cert,
     teams_port                         = var.teams_port,
