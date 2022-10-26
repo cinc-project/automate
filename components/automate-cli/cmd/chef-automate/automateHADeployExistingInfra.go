@@ -167,12 +167,27 @@ func (e *existingInfra) validateConfigFields() *list.List {
 }
 
 func (e *existingInfra) validateCerts() *list.List {
+
+	// CustomCertsEnabled == false, then check if ip for all nodes are given
+
 	errorList := list.New()
 	if e.config.Automate.Config.CustomCertsEnabled {
-		if len(strings.TrimSpace(e.config.Automate.Config.RootCA)) < 1 ||
-			len(strings.TrimSpace(e.config.Automate.Config.PrivateKey)) < 1 ||
-			len(strings.TrimSpace(e.config.Automate.Config.PublicKey)) < 1 {
-			errorList.PushBack("Automate RootCA and/or Public Key and/or Private Key are missing. Set custom_certs_enabled to false to continue without custom certificates.")
+		// if Ip for all nodes are given then dont check service conf
+		for _, node := range e.config.Automate.Config.CertsByIP {
+			if len(strings.TrimSpace(node.RootCA)) < 1 ||
+				len(strings.TrimSpace(node.PrivateKey)) < 1 ||
+				len(strings.TrimSpace(node.PublicKey)) < 1 {
+				errorList.PushBack("Automate RootCA and/or Public Key and/or Private Key are missing. Set custom_certs_enabled to false to continue without custom certificates.")
+			}
+		}
+		if len(strings.TrimSpace(e.config.Automate.Config.RootCA)) > 0 ||
+			len(strings.TrimSpace(e.config.Automate.Config.PrivateKey)) > 0 ||
+			len(strings.TrimSpace(e.config.Automate.Config.PublicKey)) > 0 {
+			if len(strings.TrimSpace(e.config.Automate.Config.RootCA)) < 1 ||
+				len(strings.TrimSpace(e.config.Automate.Config.PrivateKey)) < 1 ||
+				len(strings.TrimSpace(e.config.Automate.Config.PublicKey)) < 1 {
+				errorList.PushBack("Automate RootCA and/or Public Key and/or Private Key are missing. Set custom_certs_enabled to false to continue without custom certificates.")
+			}
 		}
 	}
 	if e.config.ChefServer.Config.CustomCertsEnabled {
