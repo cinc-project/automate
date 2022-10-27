@@ -39,7 +39,7 @@ automate do
   {{ if .Automate.Config.RootCA }} root_ca "{{ .Automate.Config.RootCA }}" {{ else }} # root_ca "{{ .Automate.Config.RootCA }}" {{ end }}
   {{ if .Automate.Config.PrivateKey }} private_key "{{ .Automate.Config.PrivateKey }}" {{ else }} # private_key "{{ .Automate.Config.PrivateKey }}" {{ end }}
   {{ if .Automate.Config.PublicKey }} public_key "{{ .Automate.Config.PublicKey }}" {{ else }} # public_key "{{ .Automate.Config.PublicKey }}" {{ end }}
-  {{ if .Automate.Config.CertsByIP }} certs_by_ip [{{ range $index, $element := .Automate.Config.CertsByIP}}{{if $index}},{{end}}{ip "{{$element.IP}}", root_ca "{{$element.RootCA}}", private_key "{{$element.PrivateKey}}", public_key "{{$element.PublicKey}}"}{{end}}]{{ end }}
+  {{ if .Automate.Config.CertsByIP }} certs_by_ip [{{ range $index, $element := .Automate.Config.CertsByIP}}{{if $index}},{{end}}{ip => "{{$element.IP}}", root_ca => "{{$element.RootCA}}", private_key => "{{$element.PrivateKey}}", public_key => "{{$element.PublicKey}}"}{{end}}]{{ end }}
 end
 
 ###############################################################
@@ -50,7 +50,7 @@ chef_server do
   custom_certs_enabled "{{ .ChefServer.Config.CustomCertsEnabled }}"
   {{ if .ChefServer.Config.PrivateKey }} private_key "{{ .ChefServer.Config.PrivateKey }}" {{ else }} # private_key "{{ .ChefServer.Config.PrivateKey }}" {{ end }}
   {{ if .ChefServer.Config.PublicKey }} public_key "{{ .ChefServer.Config.PublicKey }}" {{ else }} # public_key "{{ .ChefServer.Config.PublicKey }}" {{ end }}
-  {{ if .ChefServer.Config.CertsByIP }} certs_by_ip [{{ range $index, $element := .ChefServer.Config.CertsByIP}}{{if $index}},{{end}}{ip "{{$element.IP}}", private_key "{{$element.PrivateKey}}", public_key "{{$element.PublicKey}}"}{{end}}]{{ end }}
+  {{ if .ChefServer.Config.CertsByIP }} certs_by_ip [{{ range $index, $element := .ChefServer.Config.CertsByIP}}{{if $index}},{{end}}{ip => "{{$element.IP}}", private_key => "{{$element.PrivateKey}}", public_key => "{{$element.PublicKey}}"}{{end}}]{{ end }}
 end
 
 ###############################################################
@@ -66,7 +66,7 @@ opensearch do
   {{ if .Opensearch.Config.PublicKey }} public_key "{{ .Opensearch.Config.PublicKey }}" {{ else }} # public_key "{{ .Opensearch.Config.PublicKey }}" {{ end }}
   admin_dn "{{ .Opensearch.Config.AdminDn }}"
   nodes_dn "{{ .Opensearch.Config.NodesDn }}"
-  {{ if .Opensearch.Config.CertsByIP }} certs_by_ip [{{ range $index, $element := .Opensearch.Config.CertsByIP}}{{if $index}},{{end}}{ip "{{$element.IP}}", root_ca "{{$element.RootCA}}", admin_key "{{$element.AdminKey}}", admin_cert "{{$element.AdminCert}}", private_key "{{$element.PrivateKey}}", public_key "{{$element.PublicKey}}", admin_dn "{{$element.AdminDn}}", nodes_dn "{{$element.NodesDn}}"}{{end}}]{{ end }}
+  {{ if .Opensearch.Config.CertsByIP }} certs_by_ip [{{ range $index, $element := .Opensearch.Config.CertsByIP}}{{if $index}},{{end}}{ip => "{{$element.IP}}", root_ca => "{{$element.RootCA}}", admin_key => "{{$element.AdminKey}}", admin_cert => "{{$element.AdminCert}}", private_key => "{{$element.PrivateKey}}", public_key => "{{$element.PublicKey}}", admin_dn => "{{$element.AdminDn}}", nodes_dn => "{{$element.NodesDn}}"}{{end}}]{{ end }}
 end
 
 ###############################################################
@@ -78,7 +78,7 @@ postgresql do
   {{ if .Postgresql.Config.RootCA }} root_ca "{{ .Postgresql.Config.RootCA }}" {{ else }} # root_ca "{{ .Postgresql.Config.RootCA }}" {{ end }}
   {{ if .Postgresql.Config.PrivateKey }} private_key "{{ .Postgresql.Config.PrivateKey }}" {{ else }} # private_key "{{ .Postgresql.Config.PrivateKey }}" {{ end }}
   {{ if .Postgresql.Config.PublicKey }} public_key "{{ .Postgresql.Config.PublicKey }}" {{ else }} # public_key "{{ .Postgresql.Config.PublicKey }}" {{ end }}
-  {{ if .Postgresql.Config.CertsByIP }} certs_by_ip [{{ range $index, $element := .Postgresql.Config.CertsByIP}}{{if $index}},{{end}}{ip "{{$element.IP}}", root_ca "{{$element.RootCA}}", private_key "{{$element.PrivateKey}}", public_key "{{$element.PublicKey}}"}{{end}}]{{ end }}
+  {{ if .Postgresql.Config.CertsByIP }} certs_by_ip [{{ range $index, $element := .Postgresql.Config.CertsByIP}}{{if $index}},{{end}}{ip => "{{$element.IP}}", root_ca => "{{$element.RootCA}}", private_key => "{{$element.PrivateKey}}", public_key => "{{$element.PublicKey}}"}{{end}}]{{ end }}
 end
 
 ###############################################################
