@@ -366,7 +366,7 @@ custom_certs_enabled = false
 # root_ca = ""
 # private_key = ""
 # public_key = ""
-# [[certs_by_ip]]
+# [[automate.config.certs_by_ip]]
 # ip = ""
 # root_ca = ""
 # private_key = ""
@@ -383,7 +383,7 @@ custom_certs_enabled = false
 # Add Chef Server load balancer root-ca and keys
 # private_key = ""
 # public_key = ""
-# [[certs_by_ip]]
+# [[chef_server.config.certs_by_ip]]
 # ip = ""
 # private_key = ""
 # public_key = ""
@@ -404,7 +404,7 @@ custom_certs_enabled = false
 # admin_cert = ""
 # private_key = ""
 # public_key = ""
-# [[certs_by_ip]]
+# [[opensearch.config.certs_by_ip]]
 # ip = ""
 # root_ca = ""
 # admin_key = ""
@@ -426,7 +426,7 @@ custom_certs_enabled = false
 # root_ca = ""
 # private_key = ""
 # public_key = ""
-# [[certs_by_ip]]
+# [[postgresql.config.certs_by_ip]]
 # ip = ""
 # root_ca = ""
 # private_key = ""
