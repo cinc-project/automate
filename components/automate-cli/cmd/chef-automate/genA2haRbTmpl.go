@@ -39,7 +39,7 @@ automate do
   {{ if .Automate.Config.RootCA }} root_ca "{{ .Automate.Config.RootCA }}" {{ else }} # root_ca "{{ .Automate.Config.RootCA }}" {{ end }}
   {{ if .Automate.Config.PrivateKey }} private_key "{{ .Automate.Config.PrivateKey }}" {{ else }} # private_key "{{ .Automate.Config.PrivateKey }}" {{ end }}
   {{ if .Automate.Config.PublicKey }} public_key "{{ .Automate.Config.PublicKey }}" {{ else }} # public_key "{{ .Automate.Config.PublicKey }}" {{ end }}
-  {{ if .Automate.Config.CertsByIP }} certs_by_ip [{{ range $index, $element := .Automate.Config.CertsByIP}}{{if $index}},{{end}}{ip => "{{$element.IP}}", root_ca => "{{$element.RootCA}}", private_key => "{{$element.PrivateKey}}", public_key => "{{$element.PublicKey}}"}{{end}}]{{ end }}
+  {{ if .Automate.Config.CertsByIP }} certs_by_ip  "{ {{ range $index, $element := .Automate.Config.CertsByIP}}{{if $index}} , {{end}}"{{$element.IP}}" : { "root_ca" : "{{$element.RootCA}}" ,  "private_key" : "{{$element.PrivateKey}}", "public_key" : "{{$element.PublicKey}}" } {{end}} }" {{end}}
 end
 
 ###############################################################
