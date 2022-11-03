@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -11,26 +12,24 @@ var (
 	AWS        string = "aws"
 	DEPLOYMENT string = "deployment"
 
-	AWS_PROVISION_INCOMPLETE = `
-	for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/;terraform destroy -state=/hab/a2_deploy_workspace/terraform/destroy/aws/terraform.tfstate -auto-approve;cd $i;done
-	`
-
-	AWS_PROVISION_COMPLETE = `
+	AWS_PROVISION = `
 	for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;terraform init;cd $i;done
-	for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;cp -r ../../.tf_arch .;cp -r ../../../a2ha.rb ..;terraform apply -var="destroy_bucket=true" -auto-approve;cd $i;done
-	for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;terraform destroy -auto-approve;cd $i;done
+	%s
+	for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;terraform destroy  -state=/hab/a2_deploy_workspace/terraform/destroy/aws/terraform.tfstate -auto-approve;cd $i;done
 `
 )
 
 var cleanupFlags = struct {
 	onprem bool
 	aws    bool
+	force  bool
 }{}
 
 func init() {
 	RootCmd.AddCommand(cleanupCmd)
-	cleanupCmd.PersistentFlags().BoolVar(&cleanupFlags.onprem, "onprem", false, "Cleaning up all the instances related to onprem ")
-	cleanupCmd.PersistentFlags().BoolVar(&cleanupFlags.aws, "aws", false, "Remove AWS resources created by provisioning and clean-up hab workspace")
+	cleanupCmd.PersistentFlags().BoolVar(&cleanupFlags.onprem, "onprem-deployment", false, "Cleaning up all the instances related to onprem ")
+	cleanupCmd.PersistentFlags().BoolVar(&cleanupFlags.aws, "aws-deployment", false, "Remove AWS resources created by provisioning and clean-up hab workspace")
+	cleanupCmd.PersistentFlags().BoolVar(&cleanupFlags.force, "force", false, "Remove backup storage")
 
 }
 
@@ -137,11 +136,16 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 				}
 				var arch = strings.Trim(string(archBytes), "\n")
 
+				appendString := ""
+				if infra.Outputs.BackupConfigS3.Value == "true" && cleanupFlags.force {
+					appendString = appendString + `for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;cp -r ../../.tf_arch .;cp -r ../../../a2ha.rb ..;terraform apply -var="destroy_bucket=true" -auto-approve;cd $i;done`
+				} else if infra.Outputs.BackupConfigEFS.Value == "true" && !cleanupFlags.force {
+					appendString = appendString + `for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;terraform state rm "module.efs[0].aws_efs_file_system.backups";cd $i;done`
+				}
 				if arch == DEPLOYMENT {
-					writer.Println("DEPLOYMENT: " + DEPLOYMENT)
 					args := []string{
 						"-c",
-						AWS_PROVISION_INCOMPLETE,
+						fmt.Sprintf(AWS_PROVISION, appendString),
 					}
 					err = executeCommand("/bin/sh", args, "")
 					if err != nil {
@@ -149,10 +153,9 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 					}
 				}
 				if arch == "aws" {
-					writer.Println("AWS: " + AWS)
 					args := []string{
 						"-c",
-						AWS_PROVISION_COMPLETE,
+						fmt.Sprintf(AWS_PROVISION, appendString),
 					}
 					err = executeCommand("/bin/sh", args, "")
 					if err != nil {
