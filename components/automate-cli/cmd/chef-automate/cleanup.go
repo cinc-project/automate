@@ -64,7 +64,6 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if infra != nil {
-		writer.Printf(strings.Join(args, ""))
 		if isA2HARBFileExist() {
 			sshUser := infra.Outputs.SSHUser.Value
 			sskKeyFile := infra.Outputs.SSHKeyFile.Value
@@ -76,46 +75,46 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 				opensearchIps := infra.Outputs.OpensearchPrivateIps.Value
 				for i := 0; i < len(automateIps); i++ {
 					servername := "Automate"
-					writer.Println("cleanup is starting on " + servername + " node : " + automateIps[i] + "\n")
+					writer.Println("Cleanup has started on " + servername + " node : " + automateIps[i] + "\n")
 					_, err := ConnectAndExecuteCommandOnRemote(sshUser, sshPort, sskKeyFile, automateIps[i], FRONTENDCLEANUP_COMMANDS)
 					if err != nil {
 						writer.Errorf("%s", err.Error())
 						return err
 					} else {
-						writer.Success("cleanup is successfully completed on " + servername + " node : " + automateIps[i] + "\n")
+						writer.Success("Cleanup is completed on " + servername + " node : " + automateIps[i] + "\n")
 					}
 				}
 				for i := 0; i < len(chefserverIps); i++ {
 					servername := "chef server"
-					writer.Println("cleanup is starting on " + servername + " node : " + chefserverIps[i] + "\n")
+					writer.Println("Cleanup has started on " + servername + " node : " + chefserverIps[i] + "\n")
 					_, err := ConnectAndExecuteCommandOnRemote(sshUser, sshPort, sskKeyFile, chefserverIps[i], FRONTENDCLEANUP_COMMANDS)
 					if err != nil {
 						writer.Error(err.Error())
 						return err
 					} else {
-						writer.Success("cleanup is successful on " + servername + " node : " + chefserverIps[i] + "\n")
+						writer.Success("Cleanup is completed on " + servername + " node : " + chefserverIps[i] + "\n")
 					}
 				}
 				for i := 0; i < len(postgresqlIps); i++ {
 					servername := "postgresql"
-					writer.Println("cleanup is starting on " + servername + " node : " + postgresqlIps[i] + "\n")
+					writer.Println("Cleanup has started on " + servername + " node : " + postgresqlIps[i] + "\n")
 					_, err := ConnectAndExecuteCommandOnRemote(sshUser, sshPort, sskKeyFile, postgresqlIps[i], BACKENDCLEANUP_COMMANDS)
 					if err != nil {
 						writer.Error(err.Error())
 						return err
 					} else {
-						writer.Success("cleanup is successful on " + servername + " node : " + postgresqlIps[i] + "\n")
+						writer.Success("Cleanup is completed on " + servername + " node : " + postgresqlIps[i] + "\n")
 					}
 				}
 				for i := 0; i < len(opensearchIps); i++ {
 					servername := "opensearch"
-					writer.Println("cleanup is starting on " + servername + " node : " + opensearchIps[i] + "\n")
+					writer.Println("Cleanup has started on " + servername + " node : " + opensearchIps[i] + "\n")
 					_, err := ConnectAndExecuteCommandOnRemote(sshUser, sshPort, sskKeyFile, opensearchIps[i], BACKENDCLEANUP_COMMANDS)
 					if err != nil {
 						writer.Error(err.Error())
 						return err
 					} else {
-						writer.Success("cleanup is successful on " + servername + " node : " + opensearchIps[i] + "\n")
+						writer.Success("Cleanup is completed on " + servername + " node : " + opensearchIps[i] + "\n")
 					}
 				}
 				cleanUpScript := "hab pkg uninstall chef/automate-ha-deployment"
@@ -142,6 +141,8 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 				} else if infra.Outputs.BackupConfigEFS.Value == "true" && !cleanupFlags.force {
 					appendString = appendString + `for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;terraform state rm "module.efs[0].aws_efs_file_system.backups";cd $i;done`
 				}
+
+				writer.Println("Cleaning up all AWS provisioned resources.")
 				if arch == DEPLOYMENT {
 					args := []string{
 						"-c",
@@ -171,6 +172,7 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 				if err != nil {
 					return err
 				}
+				writer.Success("Cleaning up completed.")
 			}
 		}
 	} else {
