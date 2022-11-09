@@ -63,9 +63,6 @@ const (
 		cert = """%v"""
 		key = """%v"""`
 
-	CHEF_SERVER_CONFIG = FRONTEND_CONFIG + `
-	`
-
 	POSTGRES_CONFIG = `
 	[ssl]
 		enable = true
