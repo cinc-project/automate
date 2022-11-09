@@ -82,6 +82,18 @@ func (e *existingInfra) getDistinguishedNameFromKey(publicKey string) (string, e
 	return fmt.Sprintf("%v", cert.Subject), nil
 }
 
+func (e *existingInfra) getCommonName(publicKey string) (string, error) {
+	block, _ := pem.Decode([]byte(publicKey))
+	if block == nil {
+		return "", status.New(status.ConfigError, "failed to decode certificate PEM")
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return "", status.Wrap(err, status.ConfigError, "failed to parse certificate PEM")
+	}
+	return fmt.Sprintf("%v", cert.Subject.CommonName), nil
+}
+
 func (e *existingInfra) getConfigPath() string {
 	return e.configPath
 }
