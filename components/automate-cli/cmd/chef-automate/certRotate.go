@@ -63,6 +63,9 @@ const (
 		cert = """%v"""
 		key = """%v"""`
 
+	CHEF_SERVER_CONFIG = FRONTEND_CONFIG + `
+	`
+
 	POSTGRES_CONFIG = `
 	[ssl]
 		enable = true
@@ -220,7 +223,7 @@ func certRotate(cmd *cobra.Command, args []string) error {
 			}
 
 			// Writing the required configurations in the toml file
-			config := fmt.Sprintf(OPENSEARCH_CONFIG, string(rootCA), string(adminCert), string(adminKey), string(publicCert), string(privateCert), admin_dn, nodes_dn)
+			config := fmt.Sprintf(OPENSEARCH_CONFIG, string(rootCA), string(adminCert), string(adminKey), string(publicCert), string(privateCert), fmt.Sprintf("%v", admin_dn), fmt.Sprintf("%v", nodes_dn))
 			_, err = f.Write([]byte(config))
 			if err != nil {
 				log.Fatal(err)
@@ -241,11 +244,7 @@ func certRotate(cmd *cobra.Command, args []string) error {
 			}
 
 			// Patching root-ca to frontend-nodes
-			cn, err := e.getCommonName(string(publicCert))
-			if err != nil {
-				return err
-			}
-
+			cn := nodes_dn.CommonName
 			filename_fe := "os_fe.toml"
 			// Creating and Writing the required configurations in the toml file
 			config_fe := fmt.Sprintf(OPENSEARCH_FRONTEND_CONFIG, string(rootCA), cn)

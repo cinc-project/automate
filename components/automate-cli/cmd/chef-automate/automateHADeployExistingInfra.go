@@ -3,6 +3,7 @@ package main
 import (
 	"container/list"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
@@ -58,40 +59,28 @@ func (e *existingInfra) generateConfig() error {
 		if err != nil {
 			return err
 		}
-		e.config.Opensearch.Config.AdminDn = admin_dn
+		e.config.Opensearch.Config.AdminDn = fmt.Sprintf("%v", admin_dn)
 		nodes_dn, err := e.getDistinguishedNameFromKey(e.config.Opensearch.Config.PublicKey)
 		if err != nil {
 			return err
 		}
-		e.config.Opensearch.Config.NodesDn = nodes_dn
+		e.config.Opensearch.Config.NodesDn = fmt.Sprintf("%v", nodes_dn)
 	}
 	finalTemplate := renderSettingsToA2HARBFile(existingNodesA2harbTemplate, e.config)
 	writeToA2HARBFile(finalTemplate, initConfigHabA2HAPathFlag.a2haDirPath+"a2ha.rb")
 	return nil
 }
 
-func (e *existingInfra) getDistinguishedNameFromKey(publicKey string) (string, error) {
+func (e *existingInfra) getDistinguishedNameFromKey(publicKey string) (pkix.Name, error) {
 	block, _ := pem.Decode([]byte(publicKey))
 	if block == nil {
-		return "", status.New(status.ConfigError, "failed to decode certificate PEM")
+		return pkix.Name{}, status.New(status.ConfigError, "failed to decode certificate PEM")
 	}
 	cert, err := x509.ParseCertificate(block.Bytes)
 	if err != nil {
-		return "", status.Wrap(err, status.ConfigError, "failed to parse certificate PEM")
+		return pkix.Name{}, status.Wrap(err, status.ConfigError, "failed to parse certificate PEM")
 	}
-	return fmt.Sprintf("%v", cert.Subject), nil
-}
-
-func (e *existingInfra) getCommonName(publicKey string) (string, error) {
-	block, _ := pem.Decode([]byte(publicKey))
-	if block == nil {
-		return "", status.New(status.ConfigError, "failed to decode certificate PEM")
-	}
-	cert, err := x509.ParseCertificate(block.Bytes)
-	if err != nil {
-		return "", status.Wrap(err, status.ConfigError, "failed to parse certificate PEM")
-	}
-	return fmt.Sprintf("%v", cert.Subject.CommonName), nil
+	return cert.Subject, nil
 }
 
 func (e *existingInfra) getConfigPath() string {
