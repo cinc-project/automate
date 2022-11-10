@@ -28,6 +28,10 @@ var sshFlag = struct {
 	opensearch bool
 }{}
 
+var ipFlag = struct {
+	postgresIp string
+}{}
+
 var certRotateCmd = &cobra.Command{
 	Use:   "cert-rotate",
 	Short: "Chef Automate rotate cert",
@@ -52,6 +56,7 @@ func init() {
 	certRotateCmd.PersistentFlags().StringVar(&certFlags.rootCA, "root-ca", "", "RootCA certificate")
 	certRotateCmd.PersistentFlags().StringVar(&certFlags.adminCert, "admin-cert", "", "Admin certificate")
 	certRotateCmd.PersistentFlags().StringVar(&certFlags.adminKey, "admin-key", "", "Admin Private certificate")
+	certRotateCmd.PersistentFlags().StringVar(&ipFlag.postgresIp, "ip", "", "Postgres Node IP")
 }
 
 const (
@@ -200,11 +205,40 @@ func certRotatePG(publicCert, privateCert, rootCA string, infra *AutomteHAInfraD
 	}
 	f.Close()
 
-	postgresIps := infra.Outputs.PostgresqlPrivateIps.Value
+	remoteService := "postgresql"
+
+	var postgresIps []string
+	if ipFlag.postgresIp != "" {
+		postgresIps = append(postgresIps, ipFlag.postgresIp)
+
+		//check for issuer_cert (root-ca)
+		getPgConfigCmd := fmt.Sprintf(GET_CONFIG, remoteService)
+		pgConfigRawOutput, err := ConnectAndExecuteCommandOnRemote(sshUser, sshPort, sskKeyFile, ipFlag.postgresIp, getPgConfigCmd)
+		if err != nil {
+			return err
+		}
+		var pgConfig PostgresqlConfig
+		if _, err := toml.Decode(cleanToml(pgConfigRawOutput), &pgConfig); err != nil {
+			return err
+		}
+
+		if string(rootCA) != pgConfig.Ssl.IssuerCert {
+			ok, err := writer.Confirm("apply root-ca to all nodes?")
+			if err != nil || !ok {
+				if !ok {
+					err = errors.New("failed to update root-ca")
+				}
+				return err
+			}
+			postgresIps = infra.Outputs.PostgresqlPrivateIps.Value
+		}
+	} else {
+		postgresIps = infra.Outputs.PostgresqlPrivateIps.Value
+	}
+
 	if len(postgresIps) == 0 {
 		return errors.New("No Postgres IPs are found")
 	}
-	remoteService := "postgresql"
 
 	// Defining set of commands which run on postgres nodes
 	scriptCommands := fmt.Sprintf(COPY_USER_CONFIG, remoteService+timestamp, remoteService)
