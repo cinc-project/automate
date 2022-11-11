@@ -367,6 +367,19 @@ func copyFileToRemote(sshKeyFile string, tomlFilePath string, sshUser string, ho
 	return nil
 }
 
+// This function will copy file from remote to local and return new local file path
+func copyFileFromRemote(sshKeyFile string, remoteFilePath string, sshUser string, hostIP string, outputFileName string) (string, error) {
+	cmd := "scp"
+	ts := time.Now().Format("20060102150405")
+	destFileName := "/tmp/" + ts + "_" + outputFileName
+	exec_args := []string{"-o StrictHostKeyChecking=no", "-i", sshKeyFile, "-r", sshUser + "@" + hostIP + ":" + remoteFilePath, destFileName}
+	if err := exec.Command(cmd, exec_args...).Run(); err != nil {
+		writer.Print("Failed to copy file from remote\n")
+		return "", err
+	}
+	return destFileName, nil
+}
+
 func createKnownHosts() {
 	f, fErr := os.OpenFile(filepath.Join(os.Getenv("HOME"), ".ssh", "known_hosts"), os.O_CREATE, 0600)
 	if fErr != nil {
