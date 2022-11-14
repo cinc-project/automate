@@ -2,12 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
-	"net"
 	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
 	"time"
 
 	"github.com/chef/automate/components/automate-cli/pkg/status"
@@ -29,6 +26,10 @@ var sshFlag = struct {
 	chefserver bool
 	postgres   bool
 	opensearch bool
+}{}
+
+var nodeFlag = struct {
+	node string
 }{}
 
 var certRotateCmd = &cobra.Command{
@@ -55,6 +56,8 @@ func init() {
 	certRotateCmd.PersistentFlags().StringVar(&certFlags.rootCA, "root-ca", "", "RootCA certificate")
 	certRotateCmd.PersistentFlags().StringVar(&certFlags.adminCert, "admin-cert", "", "Admin certificate")
 	certRotateCmd.PersistentFlags().StringVar(&certFlags.adminKey, "admin-key", "", "Admin Private certificate")
+
+	certRotateCmd.PersistentFlags().StringVar(&nodeFlag.node, "ip", "", "IP of a particular node")
 }
 
 const (
@@ -106,21 +109,19 @@ const (
 	sudo systemctl stop hab-sup.service
 	echo "y" | sudo cp /tmp/%s /hab/user/automate-ha-%s/config/user.toml
 	sudo systemctl start hab-sup.service`
-
-	IP_V4_REGEX = `(\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}`
 )
 
 // This function will rotate the certificates of Automate, Chef Infra Server, Postgres and Opensearch.
 func certRotate(cmd *cobra.Command, args []string) error {
+	rootCA, publicCert, privateCert, adminCert, adminKey, err := getCerts()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if isA2HARBFileExist() {
 		infra, err := getAutomateHAInfraDetails()
 		if err != nil {
 			return err
-		}
-
-		rootCA, publicCert, privateCert, adminCert, adminKey, err := getCerts(infra)
-		if err != nil {
-			log.Fatal(err)
 		}
 
 		if sshFlag.automate || sshFlag.chefserver {
@@ -166,6 +167,9 @@ func certRotateFrontend(publicCert, privateCert string, infra *AutomteHAInfraDet
 
 // This function will rotate the certificates of Postgres
 func certRotatePG(publicCert, privateCert, rootCA string, infra *AutomteHAInfraDetails) error {
+	if isManagedServicesOn() {
+		return errors.New("You can not rotate certs for AWS managed services")
+	}
 	fileName := "cert-rotate-pg.toml"
 	timestamp := time.Now().Format("20060102150405")
 	remoteService := "postgresql"
@@ -191,6 +195,9 @@ func certRotatePG(publicCert, privateCert, rootCA string, infra *AutomteHAInfraD
 
 // This function will rotate the certificates of OpenSearch
 func certRotateOS(publicCert, privateCert, rootCA, adminCert, adminKey string, infra *AutomteHAInfraDetails) error {
+	if isManagedServicesOn() {
+		return errors.New("You can not rotate certs for AWS managed services")
+	}
 	fileName := "cert-rotate-os.toml"
 	timestamp := time.Now().Format("20060102150405")
 	remoteService := "opensearch"
@@ -238,7 +245,16 @@ func patchConfig(config, filename, timestamp, remoteService string, infra *Autom
 	}
 	f.Close()
 
-	ips := getIps(remoteService, infra)
+	var ips []string
+	if nodeFlag.node != "" {
+		isValid := validateEachIp(remoteService, infra)
+		if !isValid {
+			return errors.New(fmt.Sprintf("Please Enter Valid %s IP", remoteService))
+		}
+		ips = append(ips, nodeFlag.node)
+	} else {
+		ips = getIps(remoteService, infra)
+	}
 	if len(ips) == 0 {
 		return errors.New(fmt.Sprintf("No %s IPs are found", remoteService))
 	}
@@ -289,6 +305,16 @@ func copyAndExecute(ips []string, sshUser string, sshPort string, sskKeyFile str
 	return nil
 }
 
+func validateEachIp(remoteService string, infra *AutomteHAInfraDetails) bool {
+	ips := getIps(remoteService, infra)
+	for i := 0; i < len(ips); i++ {
+		if ips[i] == nodeFlag.node {
+			return true
+		}
+	}
+	return false
+}
+
 // This function will return the SSH details.
 func getSshDetails(infra *AutomteHAInfraDetails) (string, string, string) {
 	return infra.Outputs.SSHUser.Value, infra.Outputs.SSHKeyFile.Value, infra.Outputs.SSHPort.Value
@@ -311,13 +337,12 @@ func getIps(remoteService string, infra *AutomteHAInfraDetails) []string {
 }
 
 // This function will read the certificate paths, and then return the required certificates.
-func getCerts(infra *AutomteHAInfraDetails) (string, string, string, string, string, error) {
+func getCerts() (string, string, string, string, string, error) {
 	privateCertPath := certFlags.privateCert
 	publicCertPath := certFlags.publicCert
 	rootCaPath := certFlags.rootCA
 	adminCertPath := certFlags.adminCert
 	adminKeyPath := certFlags.adminKey
-
 	var rootCA, adminCert, adminKey []byte
 	var err error
 
@@ -325,21 +350,21 @@ func getCerts(infra *AutomteHAInfraDetails) (string, string, string, string, str
 		return "", "", "", "", "", errors.New("Please provide public and private cert paths")
 	}
 
-	privateCert, err := getCertFromFile(privateCertPath, infra)
+	privateCert, err := ioutil.ReadFile(privateCertPath) // nosemgrep
 	if err != nil {
 		return "", "", "", "", "", status.Wrap(
 			err,
 			status.FileAccessError,
-			fmt.Sprintf("failed reading data from the given source, %s", err.Error()),
+			fmt.Sprintf("failed reading data from file: %s", err.Error()),
 		)
 	}
 
-	publicCert, err := getCertFromFile(publicCertPath, infra)
+	publicCert, err := ioutil.ReadFile(publicCertPath) // nosemgrep
 	if err != nil {
 		return "", "", "", "", "", status.Wrap(
 			err,
 			status.FileAccessError,
-			fmt.Sprintf("failed reading data from the given source, %s", err.Error()),
+			fmt.Sprintf("failed reading data from file: %s", err.Error()),
 		)
 	}
 
@@ -348,12 +373,12 @@ func getCerts(infra *AutomteHAInfraDetails) (string, string, string, string, str
 		if rootCaPath == "" {
 			return "", "", "", "", "", errors.New("Please provide rootCA path")
 		}
-		rootCA, err = getCertFromFile(rootCaPath, infra)
+		rootCA, err = ioutil.ReadFile(rootCaPath) // nosemgrep
 		if err != nil {
 			return "", "", "", "", "", status.Wrap(
 				err,
 				status.FileAccessError,
-				fmt.Sprintf("failed reading data from the given source, %s", err.Error()),
+				fmt.Sprintf("failed reading data from file: %s", err.Error()),
 			)
 		}
 	}
@@ -363,67 +388,25 @@ func getCerts(infra *AutomteHAInfraDetails) (string, string, string, string, str
 		if adminCertPath == "" || adminKeyPath == "" {
 			return "", "", "", "", "", errors.New("Please provide Admin cert and Admin key paths")
 		}
-		adminCert, err = getCertFromFile(adminCertPath, infra)
+		adminCert, err = ioutil.ReadFile(adminCertPath) // nosemgrep
 		if err != nil {
 			return "", "", "", "", "", status.Wrap(
 				err,
 				status.FileAccessError,
-				fmt.Sprintf("failed reading data from the given source, %s", err.Error()),
+				fmt.Sprintf("failed reading data from file: %s", err.Error()),
 			)
 		}
 
-		adminKey, err = getCertFromFile(adminKeyPath, infra)
+		adminKey, err = ioutil.ReadFile(adminKeyPath) // nosemgrep
 		if err != nil {
 			return "", "", "", "", "", status.Wrap(
 				err,
 				status.FileAccessError,
-				fmt.Sprintf("failed reading data from the given source, %s", err.Error()),
+				fmt.Sprintf("failed reading data from file: %s", err.Error()),
 			)
 		}
 	}
 	return string(rootCA), string(publicCert), string(privateCert), string(adminCert), string(adminKey), nil
-}
-
-// This function will read the certificate from the given path (local or remote).
-func getCertFromFile(certPath string, infra *AutomteHAInfraDetails) ([]byte, error) {
-	// Checking if the given path is remote or local.
-	if isRemotePath(certPath) {
-		// Get Host IP from the given path and validate it.
-		hostIP := getIPV4(certPath)
-		if net.ParseIP(hostIP).To4() == nil {
-			return nil, errors.New(fmt.Sprintf("%v is not a valid IPv4 address", hostIP))
-		}
-
-		// Get the file path from the given remote address.
-		certPaths := strings.Split(certPath, ":")
-		if len(certPaths) != 2 {
-			return nil, errors.New(fmt.Sprintf("Invalid remote path: %v", certPath))
-		}
-		remoteFilePath := strings.TrimSpace(certPaths[1])
-		fileName := filepath.Base(remoteFilePath)
-		if remoteFilePath == "" || fileName == "" {
-			return nil, errors.New(fmt.Sprintf("Invalid remote path: %v", certPath))
-		}
-
-		// Download certificate from remote host.
-		sshUser, sskKeyFile, _ := getSshDetails(infra)
-		filePath, err := copyFileFromRemote(sskKeyFile, remoteFilePath, sshUser, hostIP, fileName)
-		if err == nil {
-			return nil, errors.New(fmt.Sprintf("Unable to copy file from remote path: %v", certPath))
-		}
-		return os.ReadFile(filePath)
-	}
-	return os.ReadFile(certPath)
-}
-
-func isRemotePath(path string) bool {
-	pattern := regexp.MustCompile(IP_V4_REGEX)
-	return pattern.MatchString(path)
-}
-
-func getIPV4(path string) string {
-	pattern := regexp.MustCompile(IP_V4_REGEX)
-	return pattern.FindString(path)
 }
 
 /*
