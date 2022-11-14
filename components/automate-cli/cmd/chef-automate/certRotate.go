@@ -21,6 +21,10 @@ var certFlags = struct {
 	adminKey    string
 }{}
 
+var nodeFlag = struct {
+	node string
+}{}
+
 var sshFlag = struct {
 	automate   bool
 	chefserver bool
@@ -52,6 +56,7 @@ func init() {
 	certRotateCmd.PersistentFlags().StringVar(&certFlags.rootCA, "root-ca", "", "RootCA certificate")
 	certRotateCmd.PersistentFlags().StringVar(&certFlags.adminCert, "admin-cert", "", "Admin certificate")
 	certRotateCmd.PersistentFlags().StringVar(&certFlags.adminKey, "admin-key", "", "Admin Private certificate")
+	certRotateCmd.PersistentFlags().StringVar(&nodeFlag.node, "node", "", "Node Ip address")
 }
 
 const (
@@ -69,6 +74,13 @@ const (
 		ssl_key = """%v"""
 		ssl_cert = """%v"""
 		issuer_cert = """%v"""`
+
+	POSTGRES_CONFIG_IGNORE_ISSUER_CERT = `
+	[ssl]
+		enable = true
+		ssl_key = """%v"""
+		ssl_cert = """%v"""
+		`
 
 	POSTGRES_FRONTEND_CONFIG = `
 	[global.v1.external.postgresql.ssl]
@@ -169,12 +181,23 @@ func certRotatePG(publicCert, privateCert, rootCA string, infra *AutomteHAInfraD
 	remoteService := "postgresql"
 
 	// Creating and patching the required configurations.
-	config := fmt.Sprintf(POSTGRES_CONFIG, privateCert, publicCert, rootCA)
+	var config string
+	if nodeFlag.node != "" {
+		writer.Warn("root-ca flag will be ignored when node flag is provided")
+		config = fmt.Sprintf(POSTGRES_CONFIG_IGNORE_ISSUER_CERT, privateCert, publicCert)
+	} else {
+		config = fmt.Sprintf(POSTGRES_CONFIG, privateCert, publicCert, rootCA)
+	}
+
 	err := patchConfig(config, fileName, timestamp, remoteService, infra)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	// ignore patching of root-ca when node flag is provided
+	if nodeFlag.node != "" {
+		return nil
+	}
 	// Patching root-ca to frontend-nodes for maintaining the connection.
 	filename_fe := "pg_fe.toml"
 	remoteService = "frontend"
@@ -239,7 +262,14 @@ func patchConfig(config, filename, timestamp, remoteService string, infra *Autom
 	}
 	f.Close()
 
-	ips := getIps(remoteService, infra)
+	// check for individual node ip
+	var ips []string
+	if nodeFlag.node != "" {
+		ips = append(ips, nodeFlag.node)
+	} else {
+		ips = getIps(remoteService, infra)
+	}
+
 	if len(ips) == 0 {
 		return errors.New(fmt.Sprintf("No %s IPs are found", remoteService))
 	}
