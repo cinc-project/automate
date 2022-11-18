@@ -15,7 +15,8 @@ func getModeFromConfig(configPath string) (string, error) {
 		initConfigHAPath = configPath
 	}
 	fmt.Println("Sanju Changes")
-	fmt.Println("Sanju Changes 2")
+	fmt.Println("Hello")
+	fmt.Println("Sahiba Changes 2")
 	if checkIfFileExist(initConfigHAPath) {
 		config, err := ptoml.LoadFile(initConfigHAPath)
 		if err != nil {
