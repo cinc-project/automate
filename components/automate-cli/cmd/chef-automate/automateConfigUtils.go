@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"path/filepath"
 
@@ -13,6 +14,8 @@ func getModeFromConfig(configPath string) (string, error) {
 	if len(configPath) > 0 {
 		initConfigHAPath = configPath
 	}
+	fmt.Println("Sanju Changes")
+	fmt.Println("Sanju Changes 2")
 	if checkIfFileExist(initConfigHAPath) {
 		config, err := ptoml.LoadFile(initConfigHAPath)
 		if err != nil {
