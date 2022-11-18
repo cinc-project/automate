@@ -32,7 +32,11 @@ type airgapFlags struct {
 }
 
 func (f airgapFlags) validateArgs() error {
-
+	fmt.Println("hello")
+	fmt.Println("hello")
+	fmt.Println("hello")
+	fmt.Println("hello")
+	fmt.Println("hello")
 	if f.manifestPath != "" && f.version != "" {
 		return status.New(status.AirgapCreateInstallBundleError, "You cannot provide both a manifest.json and a version")
 	}

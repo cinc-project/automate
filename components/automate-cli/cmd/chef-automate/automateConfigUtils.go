@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net"
 	"path/filepath"
 
@@ -9,6 +10,7 @@ import (
 )
 
 func getModeFromConfig(configPath string) (string, error) {
+	fmt.Println("Hii")
 	initConfigHAPath := initConfigHAPathFlags.path
 	if len(configPath) > 0 {
 		initConfigHAPath = configPath
