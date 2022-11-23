@@ -99,7 +99,7 @@ func (s *SSHUtilImpl) getConnection() (*ssh.Client, error) {
 	// Open connection
 	conn, err := ssh.Dial("tcp", s.SshConfig.hostIP+":"+s.SshConfig.sshPort, config)
 	if conn == nil || err != nil {
-		writer.Errorf("dial failed:%v", err)
+		writer.Errorf("dial failed:%v\n", err)
 		return nil, err
 	}
 	return conn, err
@@ -151,7 +151,7 @@ func (s *SSHUtilImpl) connectAndExecuteCommandOnRemote(remoteCommands string, sp
 	// Open session
 	session, err := conn.NewSession()
 	if err != nil {
-		writer.Errorf("session failed:%v", err)
+		writer.Errorf("session failed:%v\n", err)
 		return "", err
 	}
 
@@ -167,7 +167,7 @@ func (s *SSHUtilImpl) connectAndExecuteCommandOnRemote(remoteCommands string, sp
 		writer.StopSpinner()
 	}
 	if err != nil {
-		writer.Errorf("Run failed: %v", err)
+		writer.Errorf("Run failed: %v\n", err)
 		return "", err
 	}
 	defer session.Close()
