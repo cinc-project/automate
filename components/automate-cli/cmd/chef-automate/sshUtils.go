@@ -23,6 +23,7 @@ type SSHConfig struct {
 	sshKeyFile string
 	hostIP     string
 }
+
 type SSHUtil interface {
 	getSSHConfig() *SSHConfig
 	setSSHConfig(sshConfig *SSHConfig)
