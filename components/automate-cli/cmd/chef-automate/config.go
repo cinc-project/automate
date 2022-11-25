@@ -26,8 +26,8 @@ var configCmdFlags = struct {
 	timeout       int64
 	acceptMLSA    bool
 
-	// automate    bool
-	// chef_server bool
+	automate         bool
+	chef_server      bool
 	frontend         bool
 	opensearch       bool
 	postgresql       bool
@@ -49,8 +49,10 @@ const (
 
 	GET_CONFIG = `
 	source <(sudo cat /hab/sup/default/SystemdEnvironmentFile.sh);
-	automate-backend-ctl show --svc=automate-ha-%s | tail -n +2
+	automate-backend-ctl show --svc=automate-ha-%s
 	`
+
+	GET_FRONTEND_CONFIGS = `sudo chef-automate config show`
 
 	dateFormat = "%Y%m%d%H%M%S"
 
@@ -65,7 +67,11 @@ func init() {
 	configCmd.AddCommand(patchConfigCmd)
 	configCmd.AddCommand(setConfigCmd)
 
-	showConfigCmd.Flags().BoolVarP(&configCmdFlags.overwriteFile, "overwrite", "o", false, "Overwrite existing config.toml")
+	showConfigCmd.Flags().BoolVarP(&configCmdFlags.overwriteFile, "overwrite", "O", false, "Overwrite existing config.toml")
+	showConfigCmd.PersistentFlags().BoolVarP(&configCmdFlags.automate, "automate", "a", false, "Shows configurations from Automate node(HA)")
+	showConfigCmd.PersistentFlags().BoolVarP(&configCmdFlags.chef_server, "chef_server", "c", false, "Shows configurations from Chef-server node(HA)")
+	showConfigCmd.PersistentFlags().BoolVarP(&configCmdFlags.postgresql, "postgresql", "p", false, "Shows configurations from PostgresQL node")
+	showConfigCmd.PersistentFlags().BoolVarP(&configCmdFlags.opensearch, "opensearch", "o", false, "Shows configurations from OpenSearch node")
 
 	// patchConfigCmd.PersistentFlags().BoolVarP(&configCmdFlags.automate, "automate", "a", false, "Patch toml configuration to the automate node")
 	// patchConfigCmd.PersistentFlags().BoolVarP(&configCmdFlags.chef_server, "chef_server", "c", false, "Patch toml configuration to the chef_server node")
@@ -90,7 +96,7 @@ var showConfigCmd = &cobra.Command{
 	Short: "show the Chef Automate configuration",
 	Long:  "Show the Chef Automate configuration. When given a filepath, the output will be written to the file instead of printed to STDOUT",
 	RunE:  runShowCmd,
-	Args:  cobra.RangeArgs(0, 1),
+	Args:  cobra.RangeArgs(0, 2),
 }
 
 var patchConfigCmd = &cobra.Command{
@@ -109,6 +115,60 @@ var setConfigCmd = &cobra.Command{
 }
 
 func runShowCmd(cmd *cobra.Command, args []string) error {
+
+	if isA2HARBFileExist() {
+
+		infra, err := getAutomateHAInfraDetails()
+		if err != nil {
+			return err
+		}
+
+		sshUser := infra.Outputs.SSHUser.Value
+		sskKeyFile := infra.Outputs.SSHKeyFile.Value
+		sshPort := infra.Outputs.SSHPort.Value
+
+		sshConfig := &SSHConfig{
+			sshUser:    sshUser,
+			sshKeyFile: sskKeyFile,
+			sshPort:    sshPort,
+		}
+		sshUtil := NewSSHUtil(sshConfig)
+
+		if configCmdFlags.overwriteFile && len(args) <= 1 {
+			writer.Error("Mention node type with flag")
+			return errors.New("Node not mentioned")
+		}
+
+		var scriptCommand string
+		var hostIpArray []string
+		switch true {
+		case configCmdFlags.automate:
+			hostIpArray = append(hostIpArray, infra.Outputs.AutomatePrivateIps.Value[0])
+			scriptCommand = GET_FRONTEND_CONFIGS
+		case configCmdFlags.chef_server:
+			hostIpArray = append(hostIpArray, infra.Outputs.ChefServerPrivateIps.Value[0])
+			scriptCommand = GET_FRONTEND_CONFIGS
+		case configCmdFlags.postgresql:
+			hostIpArray = infra.Outputs.PostgresqlPrivateIps.Value
+			scriptCommand = fmt.Sprintf(GET_CONFIG, "postgresql")
+		case configCmdFlags.opensearch:
+			hostIpArray = infra.Outputs.OpensearchPrivateIps.Value
+			scriptCommand = fmt.Sprintf(GET_CONFIG, "opensearch")
+		default:
+			return errors.New("Unsupported flag")
+		}
+		for i := 0; i < len(hostIpArray); i++ {
+			sshUtil.getSSHConfig().hostIP = hostIpArray[i]
+			output, err := sshUtil.connectAndExecuteCommandOnRemote(scriptCommand, true)
+			if err != nil {
+				return err
+			}
+			writer.Success("\nConfig on node IP: " + hostIpArray[i] + "\n")
+			writer.Println(output)
+		}
+
+		return nil
+	}
 	res, err := client.GetAutomateConfig(configCmdFlags.timeout)
 	if err != nil {
 		return err
@@ -511,17 +571,11 @@ func getConfigForArgsPostgresqlOrOpenSearch(args []string, remoteService string)
 		}
 		return dest, nil
 	}
-
-	return nil, nil
-
 }
 
 // isConfigChanged checks if configuration is changed
 func isConfigChanged(src interface{}, dest interface{}) bool {
-	if reflect.DeepEqual(src, dest) {
-		return false
-	}
-	return true
+	return !reflect.DeepEqual(src, dest)
 }
 
 // getExistingAndRequestedConfigForPostgres get requested and existing config for postgresql
