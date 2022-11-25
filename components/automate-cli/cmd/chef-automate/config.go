@@ -163,7 +163,7 @@ func runShowCmd(cmd *cobra.Command, args []string) error {
 			if err != nil {
 				return err
 			}
-			writer.Success("\nConfig on node IP: " + hostIpArray[i] + "\n")
+			writer.Success("Config on node IP: " + hostIpArray[i] + "\n")
 			writer.Println(output)
 		}
 
