@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/x509/pkix"
+	"encoding/pem"
 	"fmt"
 	"log"
 	"net"
@@ -168,7 +169,6 @@ func (c *certRotateFlow) certRotate(cmd *cobra.Command, args []string, flagsObj 
 		if err != nil {
 			return err
 		}
-
 		certs, err := c.getCerts(infra, flagsObj)
 		if err != nil {
 			log.Fatal(err)
@@ -199,6 +199,8 @@ func (c *certRotateFlow) certRotate(cmd *cobra.Command, args []string, flagsObj 
 			if err != nil {
 				log.Fatal(err)
 			}
+		} else {
+			return errors.New("Please Provide service flag")
 		}
 	} else {
 		log.Fatal(fmt.Errorf("cert-rotate command should be executed from Automate HA Bastion Node"))
@@ -499,7 +501,7 @@ func (c *certRotateFlow) getCerts(infra *AutomteHAInfraDetails, flagsObj *flags)
 	const fileAccessErrorMsg string = "failed reading data from the given source, %s"
 
 	if privateCertPath == "" || publicCertPath == "" {
-		return nil, errors.New("Please provide public and private cert paths")
+		return nil, errors.New("Please provide both Public and Private cert flags")
 	}
 
 	privateCert, err := c.getCertFromFile(privateCertPath, infra)
@@ -510,6 +512,10 @@ func (c *certRotateFlow) getCerts(infra *AutomteHAInfraDetails, flagsObj *flags)
 			fmt.Sprintf(fileAccessErrorMsg, err.Error()),
 		)
 	}
+	block, _ := pem.Decode(privateCert)
+	if block == nil {
+		return &certificates{}, errors.New("Please provide a valid certificate")
+	}
 
 	publicCert, err := c.getCertFromFile(publicCertPath, infra)
 	if err != nil {
@@ -519,11 +525,15 @@ func (c *certRotateFlow) getCerts(infra *AutomteHAInfraDetails, flagsObj *flags)
 			fmt.Sprintf(fileAccessErrorMsg, err.Error()),
 		)
 	}
+	block, _ = pem.Decode(publicCert)
+	if block == nil {
+		return &certificates{}, errors.New("Please provide a valid certificate")
+	}
 
 	// Root CA is mandatory for A2, PG and OS nodes. But root CA is ignored when node flag is provided
 	if flagsObj.automate || flagsObj.postgres || flagsObj.opensearch {
 		if rootCaPath == "" && flagsObj.node == "" {
-			return nil, errors.New("Please provide rootCA path")
+			return nil, errors.New("Please provide rootCA flag")
 		}
 		if rootCaPath != "" {
 			rootCA, err = c.getCertFromFile(rootCaPath, infra)
@@ -534,13 +544,17 @@ func (c *certRotateFlow) getCerts(infra *AutomteHAInfraDetails, flagsObj *flags)
 					fmt.Sprintf(fileAccessErrorMsg, err.Error()),
 				)
 			}
+			block, _ = pem.Decode(rootCA)
+			if block == nil {
+				return &certificates{}, errors.New("Please provide a valid certificate")
+			}
 		}
 	}
 
 	// Admin Cert and Admin Key is mandatory for OS nodes.
 	if flagsObj.opensearch {
 		if (adminCertPath == "" || adminKeyPath == "") && flagsObj.node == "" {
-			return nil, errors.New("Please provide Admin cert and Admin key paths")
+			return nil, errors.New("Please provide both Admin cert and Admin key flags")
 		}
 		if adminCertPath != "" && adminKeyPath != "" {
 			adminCert, err = c.getCertFromFile(adminCertPath, infra)
@@ -551,6 +565,10 @@ func (c *certRotateFlow) getCerts(infra *AutomteHAInfraDetails, flagsObj *flags)
 					fmt.Sprintf(fileAccessErrorMsg, err.Error()),
 				)
 			}
+			block, _ = pem.Decode(adminCert)
+			if block == nil {
+				return &certificates{}, errors.New("Please provide a valid certificate")
+			}
 
 			adminKey, err = c.getCertFromFile(adminKeyPath, infra)
 			if err != nil {
@@ -559,6 +577,10 @@ func (c *certRotateFlow) getCerts(infra *AutomteHAInfraDetails, flagsObj *flags)
 					status.FileAccessError,
 					fmt.Sprintf(fileAccessErrorMsg, err.Error()),
 				)
+			}
+			block, _ = pem.Decode(adminKey)
+			if block == nil {
+				return &certificates{}, errors.New("Please provide a valid certificate")
 			}
 		}
 	}
