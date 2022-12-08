@@ -35,7 +35,6 @@ var configCmdFlags = struct {
 	file             string
 }{}
 
-
 const (
 	dateFormat       = "%Y%m%d%H%M%S"
 	postgresql       = "postgresql"
@@ -280,6 +279,7 @@ func runPatchCommand(cmd *cobra.Command, args []string) error {
 	} else {
 
 		cfg, err := dc.LoadUserOverrideConfigFile(args[0])
+		cfg.Deployment.V1.Svc.Products = nil
 		if err != nil {
 			return status.Annotate(err, status.ConfigError)
 		}
@@ -341,6 +341,7 @@ func setConfigForPostgresqlNodes(args []string, remoteService string, sshUtil SS
 	//Implementing the config if there is some change in the database configuration
 	if isConfigChangedDatabase {
 		tomlFile := args[0] + timestamp
+		reqConfig.Ssl = nil
 		tomlFilePath, err := createTomlFileFromConfig(&reqConfig, tomlFile)
 		if err != nil {
 			return err
@@ -391,7 +392,7 @@ func setConfigForOpensearch(args []string, remoteService string, sshUtil SSHUtil
 	//Implementing the config if there is some change in the database configuration
 	if isConfigChangedDatabase {
 		tomlFile := args[0] + timestamp
-		// reqConfig.TLS = nil
+		reqConfig.TLS = nil
 		tomlFilePath, err := createTomlFileFromConfig(&reqConfig, tomlFile)
 
 		if err != nil {
