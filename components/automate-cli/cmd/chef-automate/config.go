@@ -295,10 +295,14 @@ func runPatchCommand(cmd *cobra.Command, args []string) error {
 // setConfigForFrontEndNodes patches the configuration for front end nodes in Automate HA
 func setConfigForFrontEndNodes(args []string, sshUtil SSHUtil, frontendIps []string, remoteService string, timestamp string) error {
 	scriptCommands := fmt.Sprintf(FRONTEND_COMMANDS, remoteService+timestamp, dateFormat)
+	srcPath, err := parseAndRemoveRestrictedKeysFromSrcFile(args[0])
+	if err != nil {
+		return err
+	}
 	for i := 0; i < len(frontendIps); i++ {
 		writer.Print("Connecting to the " + remoteService + " node : " + frontendIps[i])
 		sshUtil.getSSHConfig().hostIP = frontendIps[i]
-		err := sshUtil.copyFileToRemote(args[0], remoteService+timestamp, false)
+		err := sshUtil.copyFileToRemote(srcPath, remoteService+timestamp, false)
 		if err != nil {
 			writer.Errorf("%v", err)
 			return err
@@ -678,4 +682,23 @@ func createTomlFileFromConfig(config interface{}, tomlFile string) (string, erro
 
 	return tomlFile, nil
 
+}
+
+func parseAndRemoveRestrictedKeysFromSrcFile(srcString string) (string, error) {
+
+	tomlbyt, _ := ioutil.ReadFile(srcString)
+	destString := string(tomlbyt)
+	var dest dc.AutomateConfig
+	if _, err := toml.Decode(destString, &dest); err != nil {
+		fmt.Println(err)
+	}
+
+	// Following are the unsupported or restricted key to patch via bastion
+	dest.Deployment.V1.Svc.Products = nil
+
+	srcString, err := createTomlFileFromConfig(dest, srcString)
+	if err != nil {
+		return "", err
+	}
+	return srcString, nil
 }
