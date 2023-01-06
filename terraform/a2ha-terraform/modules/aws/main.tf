@@ -224,7 +224,18 @@ resource "aws_volume_attachment" "chef_automate_postgresql" {
   device_name = "/dev/sdh"
   volume_id = aws_ebs_volume.chef_automate_postgresql[count.index].id
   instance_id = aws_instance.chef_automate_postgresql[count.index].id
+
+    provisioner "remote-exec" {
+    inline = [
+        "sudo mkdir -p /hab",
+        "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
+        "echo '$DNAME  /hab xfs defaults 0 0' >> sudo /etc/fstab",
+        "sudo mkfs -t xfs $DNAME ",
+        "sudo mount $DNAME  /hab/",
+    ]
+  }
 }
+
 
 resource "aws_instance" "chef_automate_opensearch" {
   count = var.setup_managed_services ? 0 : var.opensearch_instance_count
@@ -272,7 +283,18 @@ resource "aws_volume_attachment" "chef_automate_opensearch" {
   device_name = "/dev/sdh"
   volume_id = aws_ebs_volume.chef_automate_opensearch[count.index].id
   instance_id = aws_instance.chef_automate_opensearch[count.index].id
+
+  provisioner "remote-exec" {
+    inline = [
+        "sudo mkdir -p /hab",
+        "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
+        "echo '$DNAME  /hab xfs defaults 0 0' >> sudo /etc/fstab",
+        "sudo mkfs -t xfs $DNAME ",
+        "sudo mount $DNAME  /hab/",
+    ]
+  }
 }
+
 
 resource "aws_instance" "chef_automate" {
   count = var.automate_instance_count
@@ -319,6 +341,16 @@ resource "aws_volume_attachment" "chef_automate" {
   device_name = "/dev/sdh"
   volume_id = aws_ebs_volume.chef_automate[count.index].id
   instance_id = aws_instance.chef_automate[count.index].id
+
+  provisioner "remote-exec" {
+    inline = [
+        "sudo mkdir -p /hab",
+        "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
+        "echo '$DNAME  /hab xfs defaults 0 0' >> sudo /etc/fstab",
+        "sudo mkfs -t xfs $DNAME ",
+        "sudo mount $DNAME  /hab/",
+    ]
+  }
 }
 
 resource "aws_instance" "chef_server" {
@@ -367,4 +399,14 @@ resource "aws_volume_attachment" "chef_server" {
   device_name = "/dev/sdh"
   volume_id = aws_ebs_volume.chef_server[count.index].id
   instance_id = aws_instance.chef_server[count.index].id
+
+  provisioner "remote-exec" {
+    inline = [
+        "sudo mkdir -p /hab",
+        "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
+        "echo '$DNAME  /hab xfs defaults 0 0' >> sudo /etc/fstab",
+        "sudo mkfs -t xfs $DNAME ",
+        "sudo mount $DNAME  /hab/",
+    ]
+  }
 }
