@@ -40,14 +40,14 @@ func (a *awsDeployment) doDeployWork(args []string) error {
 		archBytes, err := ioutil.ReadFile(filepath.Join(initConfigHabA2HAPathFlag.a2haDirPath, "terraform", ".tf_arch")) // nosemgrep
 		if err != nil {
 			writer.Errorf("%s", err.Error())
-			return  err
+			return err
 		}
 		var arch = strings.Trim(string(archBytes), "\n")
 		sharedConfigToml.Architecture.ConfigInitials.Architecture = arch
 		writer.Println("Reference architecture type : " + arch)
 		shardConfig, err := toml.Marshal(sharedConfigToml)
 		if err != nil {
-			return  status.Wrap(err, status.ConfigError, "unable to marshal config to file")
+			return status.Wrap(err, status.ConfigError, "unable to marshal config to file")
 		}
 		err = ioutil.WriteFile(filepath.Join(initConfigHabA2HAPathFlag.a2haDirPath, "config.toml"), shardConfig, 0644) // nosemgrep
 		if err != nil {
@@ -257,13 +257,17 @@ func (a *awsDeployment) validateEnvFields() *list.List {
 func (a *awsDeployment) validateCerts() *list.List {
 	errorList := list.New()
 	if a.config.Automate.Config.EnableCustomCerts {
-		if len(strings.TrimSpace(a.config.Automate.Config.RootCA)) < 1 ||
-			len(strings.TrimSpace(a.config.Automate.Config.PrivateKey)) < 1 ||
+		if len(strings.TrimSpace(a.config.Automate.Config.PrivateKey)) < 1 ||
 			len(strings.TrimSpace(a.config.Automate.Config.PublicKey)) < 1 {
-			errorList.PushBack("Automate root_ca and/or public_key and/or private_key are missing. Otherwise set enable_custom_certs to false.")
+			errorList.PushBack("Automate public_key and/or private_key are missing. Otherwise set enable_custom_certs to false.")
+		}
+		// If root_ca is provided, check that it is valid
+		if len(strings.TrimSpace(a.config.Automate.Config.RootCA)) > 0 {
+			errorList.PushBackList(checkCertValid([]keydetails{
+				{key: a.config.Automate.Config.RootCA, certtype: "root_ca", svc: "automate"},
+			}))
 		}
 		errorList.PushBackList(checkCertValid([]keydetails{
-			{key: a.config.Automate.Config.RootCA, certtype: "root_ca", svc: "automate"},
 			{key: a.config.Automate.Config.PrivateKey, certtype: "private_key", svc: "automate"},
 			{key: a.config.Automate.Config.PublicKey, certtype: "public_key", svc: "automate"},
 		}))
