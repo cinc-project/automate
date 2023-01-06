@@ -189,12 +189,12 @@ resource "aws_instance" "chef_automate_postgresql" {
     script_path = "${var.tmp_path}/tf_inline_script_aws.sh"
   }
 
-  root_block_device {
-    delete_on_termination = var.delete_on_termination
-    iops                  = var.postgresql_ebs_volume_type == "io1" ? var.postgresql_ebs_volume_iops : 0
-    volume_size           = var.postgresql_ebs_volume_size
-    volume_type           = var.postgresql_ebs_volume_type
-  }
+  # root_block_device {
+  #   delete_on_termination = var.delete_on_termination
+  #   iops                  = var.postgresql_ebs_volume_type == "io1" ? var.postgresql_ebs_volume_iops : 0
+  #   volume_size           = var.postgresql_ebs_volume_size
+  #   volume_type           = var.postgresql_ebs_volume_type
+  # }
 
   tags = merge(var.tags,
     map("Name",
@@ -208,6 +208,24 @@ resource "aws_instance" "chef_automate_postgresql" {
   depends_on = [aws_route_table.route1,aws_route_table.route2,aws_route_table.route3]
 
 }
+
+resource "aws_ebs_volume" "chef_automate_postgresql" {
+  count = var.setup_managed_services ? 0 : var.postgresql_instance_count
+  availability_zone = aws_instance.chef_automate_postgresql[count.index].availability_zone
+  size = var.postgresql_ebs_volume_size
+  type = var.postgresql_ebs_volume_type
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_volume_attachment" "chef_automate_postgresql" {
+  count = var.setup_managed_services ? 0 : var.postgresql_instance_count
+  device_name = "/dev/sdh"
+  volume_id = aws_ebs_volume.chef_automate_postgresql[count.index].id
+  instance_id = aws_instance.chef_automate_postgresql[count.index].id
+}
+
 resource "aws_instance" "chef_automate_opensearch" {
   count = var.setup_managed_services ? 0 : var.opensearch_instance_count
 
@@ -220,12 +238,12 @@ resource "aws_instance" "chef_automate_opensearch" {
   ebs_optimized               = true
   iam_instance_profile        = var.aws_instance_profile_name
 
-  root_block_device {
-    delete_on_termination = var.delete_on_termination
-    iops                  = var.opensearch_ebs_volume_type == "io1" ? var.opensearch_ebs_volume_iops : 0
-    volume_size           = var.opensearch_ebs_volume_size
-    volume_type           = var.opensearch_ebs_volume_type
-  }
+  # root_block_device {
+  #   delete_on_termination = var.delete_on_termination
+  #   iops                  = var.opensearch_ebs_volume_type == "io1" ? var.opensearch_ebs_volume_iops : 0
+  #   volume_size           = var.opensearch_ebs_volume_size
+  #   volume_type           = var.opensearch_ebs_volume_type
+  # }
 
   tags = merge(
     var.tags,
@@ -236,6 +254,24 @@ resource "aws_instance" "chef_automate_opensearch" {
 
   depends_on = [aws_route_table.route1,aws_route_table.route2,aws_route_table.route3]
 
+}
+
+
+resource "aws_ebs_volume" "chef_automate_opensearch" {
+  count = var.setup_managed_services ? 0 : var.opensearch_instance_count
+  availability_zone = aws_instance.chef_automate_opensearch[count.index].availability_zone
+  size = var.opensearch_ebs_volume_size
+  type = var.opensearch_ebs_volume_type
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_volume_attachment" "chef_automate_opensearch" {
+  count = var.setup_managed_services ? 0 : var.opensearch_instance_count
+  device_name = "/dev/sdh"
+  volume_id = aws_ebs_volume.chef_automate_opensearch[count.index].id
+  instance_id = aws_instance.chef_automate_opensearch[count.index].id
 }
 
 resource "aws_instance" "chef_automate" {
@@ -250,12 +286,12 @@ resource "aws_instance" "chef_automate" {
   ebs_optimized               = true
   iam_instance_profile        = var.aws_instance_profile_name
 
-  root_block_device {
-    delete_on_termination = var.delete_on_termination
-    iops                  = var.automate_ebs_volume_type == "io1" ? var.automate_ebs_volume_iops : 0
-    volume_size           = var.automate_ebs_volume_size
-    volume_type           = var.automate_ebs_volume_type
-  }
+  # root_block_device {
+  #   delete_on_termination = var.delete_on_termination
+  #   iops                  = var.automate_ebs_volume_type == "io1" ? var.automate_ebs_volume_iops : 0
+  #   volume_size           = var.automate_ebs_volume_size
+  #   volume_type           = var.automate_ebs_volume_type
+  # }
 
   tags = merge(
     var.tags,
@@ -266,6 +302,23 @@ resource "aws_instance" "chef_automate" {
 
   depends_on = [aws_route_table.route1,aws_route_table.route2,aws_route_table.route3]
   
+}
+
+resource "aws_ebs_volume" "chef_automate" {
+  count = var.automate_instance_count
+  availability_zone = aws_instance.chef_automate[count.index].availability_zone
+  size = var.automate_ebs_volume_size
+  type = var.automate_ebs_volume_type
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_volume_attachment" "chef_automate" {
+  count = var.automate_instance_count
+  device_name = "/dev/sdh"
+  volume_id = aws_ebs_volume.chef_automate[count.index].id
+  instance_id = aws_instance.chef_automate[count.index].id
 }
 
 resource "aws_instance" "chef_server" {
@@ -281,12 +334,12 @@ resource "aws_instance" "chef_server" {
   ebs_optimized               = true
   iam_instance_profile        = var.aws_instance_profile_name
 
-  root_block_device {
-    delete_on_termination = var.delete_on_termination
-    iops                  = var.chef_ebs_volume_type == "io1" ? var.chef_ebs_volume_iops : 0
-    volume_size           = var.chef_ebs_volume_size
-    volume_type           = var.chef_ebs_volume_type
-  }
+  # root_block_device {
+  #   delete_on_termination = var.delete_on_termination
+  #   iops                  = var.chef_ebs_volume_type == "io1" ? var.chef_ebs_volume_iops : 0
+  #   volume_size           = var.chef_ebs_volume_size
+  #   volume_type           = var.chef_ebs_volume_type
+  # }
 
   tags = merge(
     var.tags,
@@ -297,4 +350,21 @@ resource "aws_instance" "chef_server" {
   
   depends_on = [aws_route_table.route1,aws_route_table.route2,aws_route_table.route3]
 
+}
+
+resource "aws_ebs_volume" "chef_server" {
+  count = var.chef_server_instance_count
+  availability_zone = aws_instance.chef_server[count.index].availability_zone
+  size = var.chef_ebs_volume_size
+  type = var.chef_ebs_volume_type
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_volume_attachment" "chef_server" {
+  count = var.chef_server_instance_count
+  device_name = "/dev/sdh"
+  volume_id = aws_ebs_volume.chef_server[count.index].id
+  instance_id = aws_instance.chef_server[count.index].id
 }
