@@ -345,7 +345,7 @@ func TestDeleteNodeDeployWithNewOSNode(t *testing.T) {
 			deployed = true
 			return nil
 		},
-		genConfigfunc: func(path string) error {
+		writeHAConfigFilesFunc: func(templateName string, data interface{}) error {
 			return nil
 		},
 		getModeFromConfigFunc: func(path string) (string, error) {
@@ -402,7 +402,7 @@ func TestDeleteNodeDeployWithNewOSMinCountError(t *testing.T) {
 		executeAutomateClusterCtlCommandAsyncfunc: func(command string, args []string, helpDocs string) error {
 			return nil
 		},
-		genConfigfunc: func(path string) error {
+		writeHAConfigFilesFunc: func(templateName string, data interface{}) error {
 			return nil
 		},
 		getModeFromConfigFunc: func(path string) (string, error) {
@@ -439,7 +439,7 @@ func TestDeleteNodeDeployWithNewOSNodeError(t *testing.T) {
 		executeAutomateClusterCtlCommandAsyncfunc: func(command string, args []string, helpDocs string) error {
 			return nil
 		},
-		genConfigfunc: func(path string) error {
+		writeHAConfigFilesFunc: func(templateName string, data interface{}) error {
 			return nil
 		},
 		getModeFromConfigFunc: func(path string) (string, error) {
@@ -496,7 +496,7 @@ func TestRemovenodeExecuteWithNewOSNodeNoCertsByIP(t *testing.T) {
 			deployed = true
 			return nil
 		},
-		genConfigfunc: func(path string) error {
+		writeHAConfigFilesFunc: func(templateName string, data interface{}) error {
 			return nil
 		},
 		isA2HARBFileExistFunc: func() bool {
@@ -566,7 +566,7 @@ func TestRemovenodeExecuteWithNewOSNode(t *testing.T) {
 			deployed = true
 			return nil
 		},
-		genConfigfunc: func(path string) error {
+		writeHAConfigFilesFunc: func(templateName string, data interface{}) error {
 			return nil
 		},
 		isA2HARBFileExistFunc: func() bool {
