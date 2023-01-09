@@ -214,26 +214,9 @@ resource "aws_ebs_volume" "chef_automate_postgresql" {
   availability_zone = aws_instance.chef_automate_postgresql[count.index].availability_zone
   size = var.postgresql_ebs_volume_size
   type = var.postgresql_ebs_volume_type
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-resource "aws_volume_attachment" "chef_automate_postgresql" {
-  count = var.setup_managed_services ? 0 : var.postgresql_instance_count
-  device_name = "/dev/sdh"
-  volume_id = aws_ebs_volume.chef_automate_postgresql[count.index].id
-  instance_id = aws_instance.chef_automate_postgresql[count.index].id
-
-    provisioner "remote-exec" {
-    inline = [
-        "sudo mkdir -p /hab",
-        "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
-        "echo '$DNAME  /hab xfs defaults 0 0' >> sudo /etc/fstab",
-        "sudo mkfs -t xfs $DNAME ",
-        "sudo mount $DNAME  /hab/",
-    ]
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 
@@ -273,9 +256,9 @@ resource "aws_ebs_volume" "chef_automate_opensearch" {
   availability_zone = aws_instance.chef_automate_opensearch[count.index].availability_zone
   size = var.opensearch_ebs_volume_size
   type = var.opensearch_ebs_volume_type
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "aws_volume_attachment" "chef_automate_opensearch" {
@@ -285,6 +268,38 @@ resource "aws_volume_attachment" "chef_automate_opensearch" {
   instance_id = aws_instance.chef_automate_opensearch[count.index].id
 
   provisioner "remote-exec" {
+    connection {
+      user        = var.aws_ssh_user
+      private_key = file(var.aws_ssh_key_file)
+      host        = aws_instance.chef_automate_opensearch[count.index].private_ip
+      port        = var.aws_ssh_port
+    }
+    
+    inline = [
+        "sudo mkdir -p /hab",
+        "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
+        "echo '$DNAME  /hab xfs defaults 0 0' >> sudo /etc/fstab",
+        "sudo mkfs -t xfs $DNAME ",
+        "sudo mount $DNAME  /hab/",
+    ]
+  }
+}
+
+resource "aws_volume_attachment" "chef_automate_postgresql" {
+  count = var.setup_managed_services ? 0 : var.postgresql_instance_count
+  device_name = "/dev/sdh"
+  volume_id = aws_ebs_volume.chef_automate_postgresql[count.index].id
+  instance_id = aws_instance.chef_automate_postgresql[count.index].id
+
+    provisioner "remote-exec" {
+
+    connection {
+      user        = var.aws_ssh_user
+      private_key = file(var.aws_ssh_key_file)
+      host        = aws_instance.chef_automate_postgresql[count.index].private_ip
+      port        = var.aws_ssh_port
+    }
+
     inline = [
         "sudo mkdir -p /hab",
         "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
@@ -331,9 +346,9 @@ resource "aws_ebs_volume" "chef_automate" {
   availability_zone = aws_instance.chef_automate[count.index].availability_zone
   size = var.automate_ebs_volume_size
   type = var.automate_ebs_volume_type
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "aws_volume_attachment" "chef_automate" {
@@ -343,6 +358,14 @@ resource "aws_volume_attachment" "chef_automate" {
   instance_id = aws_instance.chef_automate[count.index].id
 
   provisioner "remote-exec" {
+
+    connection {
+      user        = var.aws_ssh_user
+      private_key = file(var.aws_ssh_key_file)
+      host        = aws_instance.chef_automate[count.index].private_ip
+      port        = var.aws_ssh_port
+    }
+
     inline = [
         "sudo mkdir -p /hab",
         "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
@@ -389,9 +412,9 @@ resource "aws_ebs_volume" "chef_server" {
   availability_zone = aws_instance.chef_server[count.index].availability_zone
   size = var.chef_ebs_volume_size
   type = var.chef_ebs_volume_type
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "aws_volume_attachment" "chef_server" {
@@ -401,6 +424,14 @@ resource "aws_volume_attachment" "chef_server" {
   instance_id = aws_instance.chef_server[count.index].id
 
   provisioner "remote-exec" {
+
+    connection {
+      user        = var.aws_ssh_user
+      private_key = file(var.aws_ssh_key_file)
+      host        = aws_instance.chef_server[count.index].private_ip
+      port        = var.aws_ssh_port
+    }
+
     inline = [
         "sudo mkdir -p /hab",
         "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
