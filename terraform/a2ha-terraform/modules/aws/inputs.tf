@@ -101,6 +101,10 @@ variable "delete_on_termination" {
   default = true
 }
 
+variable "device_name" {
+  default = "/dev/sdh"
+}
+
 variable "json_data" {
 }
 

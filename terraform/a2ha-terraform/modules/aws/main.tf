@@ -12,7 +12,7 @@ data "aws_vpc" "default" {
 
 locals {                                                            
   private_subnet_ids_string = join(",", var.private_custom_subnets)
-  private_subnet_ids_list = split(",", local.private_subnet_ids_string)             
+  private_subnet_ids_list = split(",", local.private_subnet_ids_string)
 }
 
 data "aws_subnet" "default" {                                  
@@ -214,80 +214,11 @@ resource "aws_ebs_volume" "chef_automate_postgresql" {
   availability_zone = aws_instance.chef_automate_postgresql[count.index].availability_zone
   size = var.postgresql_ebs_volume_size
   type = var.postgresql_ebs_volume_type
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-}
-
-
-resource "aws_instance" "chef_automate_opensearch" {
-  count = var.setup_managed_services ? 0 : var.opensearch_instance_count
-
-  ami                         = local.ami
-  instance_type               = var.opensearch_server_instance_type
-  key_name                    = var.aws_ssh_key_pair_name
-  subnet_id                   = length(var.private_custom_subnets) > 0 ? element(data.aws_subnet.default.*.id, count.index) : element(aws_subnet.default.*.id, count.index)
-  vpc_security_group_ids      = [aws_security_group.base_linux.id, aws_security_group.habitat_supervisor.id, aws_security_group.chef_automate.id]
-  associate_public_ip_address = false //Changes to false as Dashboards are no longer enabled
-  ebs_optimized               = true
-  iam_instance_profile        = var.aws_instance_profile_name
-
-  # root_block_device {
-  #   delete_on_termination = var.delete_on_termination
-  #   iops                  = var.opensearch_ebs_volume_type == "io1" ? var.opensearch_ebs_volume_iops : 0
-  #   volume_size           = var.opensearch_ebs_volume_size
-  #   volume_type           = var.opensearch_ebs_volume_type
-  # }
-
-  tags = merge(
-    var.tags,
-    map("Name",
-      format("${var.tag_name}_${random_id.random.hex}_chef_automate_opensearch_%02d", count.index + 1)
-    )
-  )
-
-  depends_on = [aws_route_table.route1,aws_route_table.route2,aws_route_table.route3]
-
-}
-
-
-resource "aws_ebs_volume" "chef_automate_opensearch" {
-  count = var.setup_managed_services ? 0 : var.opensearch_instance_count
-  availability_zone = aws_instance.chef_automate_opensearch[count.index].availability_zone
-  size = var.opensearch_ebs_volume_size
-  type = var.opensearch_ebs_volume_type
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-}
-
-resource "aws_volume_attachment" "chef_automate_opensearch" {
-  count = var.setup_managed_services ? 0 : var.opensearch_instance_count
-  device_name = "/dev/sdh"
-  volume_id = aws_ebs_volume.chef_automate_opensearch[count.index].id
-  instance_id = aws_instance.chef_automate_opensearch[count.index].id
-
-  provisioner "remote-exec" {
-    connection {
-      user        = var.aws_ssh_user
-      private_key = file(var.aws_ssh_key_file)
-      host        = aws_instance.chef_automate_opensearch[count.index].private_ip
-      port        = var.aws_ssh_port
-    }
-    
-    inline = [
-        "sudo mkdir -p /hab",
-        "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
-        "echo '$DNAME  /hab xfs defaults 0 0' >> sudo /etc/fstab",
-        "sudo mkfs -t xfs $DNAME ",
-        "sudo mount $DNAME  /hab/",
-    ]
-  }
 }
 
 resource "aws_volume_attachment" "chef_automate_postgresql" {
   count = var.setup_managed_services ? 0 : var.postgresql_instance_count
-  device_name = "/dev/sdh"
+  device_name = var.device_name
   volume_id = aws_ebs_volume.chef_automate_postgresql[count.index].id
   instance_id = aws_instance.chef_automate_postgresql[count.index].id
 
@@ -310,6 +241,60 @@ resource "aws_volume_attachment" "chef_automate_postgresql" {
   }
 }
 
+resource "aws_instance" "chef_automate_opensearch" {
+  count = var.setup_managed_services ? 0 : var.opensearch_instance_count
+
+  ami                         = local.ami
+  instance_type               = var.opensearch_server_instance_type
+  key_name                    = var.aws_ssh_key_pair_name
+  subnet_id                   = length(var.private_custom_subnets) > 0 ? element(data.aws_subnet.default.*.id, count.index) : element(aws_subnet.default.*.id, count.index)
+  vpc_security_group_ids      = [aws_security_group.base_linux.id, aws_security_group.habitat_supervisor.id, aws_security_group.chef_automate.id]
+  associate_public_ip_address = false //Changes to false as Dashboards are no longer enabled
+  ebs_optimized               = true
+  iam_instance_profile        = var.aws_instance_profile_name
+
+  tags = merge(
+    var.tags,
+    map("Name",
+      format("${var.tag_name}_${random_id.random.hex}_chef_automate_opensearch_%02d", count.index + 1)
+    )
+  )
+
+  depends_on = [aws_route_table.route1,aws_route_table.route2,aws_route_table.route3]
+
+}
+
+
+resource "aws_ebs_volume" "chef_automate_opensearch" {
+  count = var.setup_managed_services ? 0 : var.opensearch_instance_count
+  availability_zone = aws_instance.chef_automate_opensearch[count.index].availability_zone
+  size = var.opensearch_ebs_volume_size
+  type = var.opensearch_ebs_volume_type
+}
+
+resource "aws_volume_attachment" "chef_automate_opensearch" {
+  count = var.setup_managed_services ? 0 : var.opensearch_instance_count
+  device_name = var.device_name
+  volume_id = aws_ebs_volume.chef_automate_opensearch[count.index].id
+  instance_id = aws_instance.chef_automate_opensearch[count.index].id
+
+  provisioner "remote-exec" {
+    connection {
+      user        = var.aws_ssh_user
+      private_key = file(var.aws_ssh_key_file)
+      host        = aws_instance.chef_automate_opensearch[count.index].private_ip
+      port        = var.aws_ssh_port
+    }
+    
+    inline = [
+        "sudo mkdir -p /hab",
+        "export DNAME=$(lsblk -o PATH,MOUNTPOINT| grep nvme[1-9] | awk 'length($2) == 0')",
+        "echo '$DNAME  /hab xfs defaults 0 0' >> sudo /etc/fstab",
+        "sudo mkfs -t xfs $DNAME ",
+        "sudo mount $DNAME  /hab/",
+    ]
+  }
+}
 
 resource "aws_instance" "chef_automate" {
   count = var.automate_instance_count
@@ -322,13 +307,6 @@ resource "aws_instance" "chef_automate" {
   associate_public_ip_address = false
   ebs_optimized               = true
   iam_instance_profile        = var.aws_instance_profile_name
-
-  # root_block_device {
-  #   delete_on_termination = var.delete_on_termination
-  #   iops                  = var.automate_ebs_volume_type == "io1" ? var.automate_ebs_volume_iops : 0
-  #   volume_size           = var.automate_ebs_volume_size
-  #   volume_type           = var.automate_ebs_volume_type
-  # }
 
   tags = merge(
     var.tags,
@@ -346,14 +324,11 @@ resource "aws_ebs_volume" "chef_automate" {
   availability_zone = aws_instance.chef_automate[count.index].availability_zone
   size = var.automate_ebs_volume_size
   type = var.automate_ebs_volume_type
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
 }
 
 resource "aws_volume_attachment" "chef_automate" {
   count = var.automate_instance_count
-  device_name = "/dev/sdh"
+  device_name = var.device_name
   volume_id = aws_ebs_volume.chef_automate[count.index].id
   instance_id = aws_instance.chef_automate[count.index].id
 
@@ -389,13 +364,6 @@ resource "aws_instance" "chef_server" {
   ebs_optimized               = true
   iam_instance_profile        = var.aws_instance_profile_name
 
-  # root_block_device {
-  #   delete_on_termination = var.delete_on_termination
-  #   iops                  = var.chef_ebs_volume_type == "io1" ? var.chef_ebs_volume_iops : 0
-  #   volume_size           = var.chef_ebs_volume_size
-  #   volume_type           = var.chef_ebs_volume_type
-  # }
-
   tags = merge(
     var.tags,
     map("Name",
@@ -412,14 +380,11 @@ resource "aws_ebs_volume" "chef_server" {
   availability_zone = aws_instance.chef_server[count.index].availability_zone
   size = var.chef_ebs_volume_size
   type = var.chef_ebs_volume_type
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
 }
 
 resource "aws_volume_attachment" "chef_server" {
   count = var.chef_server_instance_count
-  device_name = "/dev/sdh"
+  device_name = var.device_name
   volume_id = aws_ebs_volume.chef_server[count.index].id
   instance_id = aws_instance.chef_server[count.index].id
 
