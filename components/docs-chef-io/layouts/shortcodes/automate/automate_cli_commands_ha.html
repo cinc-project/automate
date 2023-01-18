@@ -4,7 +4,6 @@
 {{ $command := strings.TrimPrefix "chef-automate " .name }}
 {{ if or (not .compatible_with) (eq .compatible_with "AutomateHA") }}
   <h3 id="{{ $id }}">{{ .name }}</h2>
-
     <p>{{ .description }}</p>
 
   <h4 id="{{ $id }}-usage">Usage</h3>
@@ -12,23 +11,21 @@
 
   <h4 id="{{ $id }}-flags">Flags</h3>
   <div class="fake-code grid-x">
-  {{- range .options -}}
-    {{ if or (not .compatible_with_options) (eq .compatible_with_options "AutomateHA") }}
-    <div class="cell medium-4"></b>{{ if .shorthand }}-{{ .shorthand }}, {{ end }}--{{ .name }}</div>
+    {{- range .options -}}
+    <div class="cell medium-4">{{ if .shorthand }}-{{ .shorthand }}, {{ end }}--{{ .name }}</div>
     <div class="cell medium-8">{{ .usage }}{{ if .default_value }} (default: {{ .default_value }}){{ end }}</div>
     {{ end }}
   {{- end -}}
 
     {{- range .inherited_options -}}
-    {{ if or (not .compatible_with_options) (eq .compatible_with_options "AutomateHA") }}
-    <div class="cell medium-4"></b>{{ if .shorthand }}-{{ .shorthand }}, {{ end }}--{{ .name }}</div>
+    <div class="cell medium-4">{{ if .shorthand }}-{{ .shorthand }}, {{ end }}--{{ .name }}</div>
     <div class="cell medium-8">{{ .usage }}{{ if .default_value }} (default: {{ .default_value }}){{ end }}</div>
     {{ end }}
     {{- end -}}
   </div>
 
   <h4>Supported On</h4>
-  <p>{{ .supported_on }}</p>
+  <p>Bastion Nodes</p>
 
   <h4 id="{{ $id }}-see-also">See Also</h3>
   <div class="grid-x">
