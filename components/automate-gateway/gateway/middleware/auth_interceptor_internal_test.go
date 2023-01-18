@@ -58,7 +58,7 @@ func TestHeaderAuthValidForClientAndPeer(t *testing.T) {
 	albCert, _ := devCertToEncodedAndPeer(t, "automate-load-balancer")
 	_, agPeer := devCertToEncodedAndPeer(t, "automate-gateway")
 	otherServiceCert, otherServicePeer := devCertToEncodedAndPeer(t, "deployment-service")
-	hash := "8e262b67fee52a16196effa42bef2a86ee061d8c7216e1bb3dd3a36948880847"
+	hash := "ca5f907e35ce1a2e2ae5209b0de9fabe42d36caa788c502902ae89c7be6731ad"
 
 	cases := map[string]struct {
 		ctx           context.Context
@@ -105,7 +105,7 @@ func TestHeaderAuthValidForClientAndPeer(t *testing.T) {
 
 			require.Equal(t, !tc.expectFailure, ok, "expected operation result=>%v but actual=>%v", !tc.expectFailure, ok)
 			if !tc.expectFailure {
-				assert.Equal(t, fmt.Sprintf("tls:service:deployment-service:%s", hash), name)
+				assert.Equal(t, fmt.Sprintf("tls:service:Deployment Service:%s", hash), name)
 			}
 		})
 	}
@@ -183,7 +183,7 @@ func TestComboAuth(t *testing.T) {
 
 		authInfo := auth_context.FromContext(returnedCtx)
 
-		expectedSubj := []string{"tls:service:deployment-service:8e262b67fee52a16196effa42bef2a86ee061d8c7216e1bb3dd3a36948880847"}
+		expectedSubj := []string{"tls:service:Deployment Service:ca5f907e35ce1a2e2ae5209b0de9fabe42d36caa788c502902ae89c7be6731ad"}
 		expectedProjects := []string{"project1", "project2"}
 
 		assert.Equal(t, expectedSubj, authInfo.Subjects)
