@@ -55,8 +55,8 @@ locals {
 resource "null_resource" "createS3bucket" {
   provisioner "local-exec" {
     command =  <<-EOT
-  chmod 700 ${module.path}/template/createS3Bucket.sh
-  bash ${module.path}/template/createS3Bucket.sh create ${var.aws_s3_bucketName} ${var.aws_region}
+  chmod 700 ${path.module}/template/createS3Bucket.sh
+  bash ${path.module}/template/createS3Bucket.sh create ${var.aws_s3_bucketName} ${var.aws_region}
 EOT
   }
 }
