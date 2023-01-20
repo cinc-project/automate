@@ -9,5 +9,7 @@ else
   echo "$BUCKET_CREATION"
   if echo "$BUCKET_CREATION" | grep -q "http://$1.s3.amazonaws.com/"; then
     echo "Bucket is created"
+  else
+    echo "Error in creating bucket"
   fi
 fi
