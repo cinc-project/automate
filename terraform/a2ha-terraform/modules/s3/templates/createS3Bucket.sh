@@ -2,9 +2,12 @@
 
 echo $1
 echo $2
-if sudo hab pkg exec core/aws-cli aws s3 ls s3://$1; then
+if hab pkg exec core/aws-cli aws s3 ls s3://$1; then
   echo "Bucket already exists"
 else
- sudo hab pkg exec core/aws-cli aws s3 mb s3://$1 --region $2
-  echo "Bucket is created"
+  export BUCKET_CREATION=$(hab pkg exec core/aws-cli aws s3api create-bucket --bucket $1  --acl private --create-bucket-configuration LocationConstraint=$2)
+  echo "$BUCKET_CREATION"
+  if echo "$BUCKET_CREATION" | grep -q "http://$1.s3.amazonaws.com/"; then
+    echo "Bucket is created"
+  fi
 fi
