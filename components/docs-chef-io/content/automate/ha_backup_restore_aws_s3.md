@@ -163,20 +163,8 @@ For Disaster Recovery or AMI upgarde, while running the restore in secondary clu
 
 -  First, Take the bakup in Secondary Cluster
 -  Then make a curl request `curl -XGET https://localhost:9200/_snapshot?pretty -u admin:admin -k`
--  check the curl request response if the bucket and region is not matching with the primary cluster follow the below steps:
-1. Modify the bucket and region separetly in three places to fe nodes by patching the below configs with command, `chef-automate config patch <file-name>.toml --fe`
-
-```cmd
-[global.v1.backups.s3.bucket]
-          endpoint = "https://s3.amazonaws.com"
-          base_path = "automate"
-          name = "<YOUR-S3-BUCKET>"
-```
-
-```cmd
-[global.v1.external.opensearch.backup.s3]
-            bucket = "<YOUR-S3-BUCKET>"
-```
+-  check the curl request response if the region is not matching with the primary cluster follow the below steps:
+1. Modify the region separetly in three places to fe nodes by patching the below configs with command, `chef-automate config patch <file-name>.toml --fe`
 
 ```cmd
 [global.v1.external.opensearch.backup.s3.settings]
@@ -192,17 +180,19 @@ chef-automate-es6-compliance-service
 chef-automate-es6-event-feed-service
 chef-automate-es6-ingest-service
 )
-curl -XPUT -k -H 'Content-Type: application/json' https://<YOUR-IP>:9200/_snapshot/$index --data-binary @- << EOF
+for index in ${indices[@]}; do
+curl -XPUT -k -H 'Content-Type: application/json' https://<IP>:9200/_snapshot/$index --data-binary @- << EOF
 {
   "type" : "s3",
     "settings" : {
-      "bucket" : "<YOUR-S3-BUCKET>",
-      "base_path" : "elasticsearch/automate-elasticsearch-data/chef-automate-es6-event-feed-service",
-      "region" : "us-west-2",
+      "bucket" : "<YOUR-PRIMARY-CLUSTER-BUCKET-NAME>",
+      "base_path" : "elasticsearch/automate-elasticsearch-data/$index",
+      "region" : "<YOUR-PRIMARY-CLUSTER-REGION>",
       "role_arn" : " ",
       "compress" : "false"
     }
 }
 EOF
 done
+
 ```
