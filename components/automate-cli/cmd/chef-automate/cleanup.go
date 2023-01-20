@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"strings"
 
+	dc "github.com/chef/automate/api/config/deployment"
+
 	"github.com/spf13/cobra"
 )
 
@@ -134,7 +136,10 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 
 				appendString := ""
 				if infra.Outputs.BackupConfigS3.Value == "true" && cleanupFlags.force {
-					appendString = appendString + `for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;cp -r ../../.tf_arch .;cp -r ../../../a2ha.rb ..;terraform apply -var="destroy_bucket=true" -auto-approve;cd $i;done`
+					config := &dc.AutomateConfig{}
+					bucket_name := config.GetGlobal().GetV1().GetBackups().GetS3().GetBucket().GetName().Value
+					writer.Body("BucketName :" + bucket_name)
+					appendString = appendString + fmt.Sprintf(`sudo hab pkg exec core/aws-cli aws s3 rm s3://%s --recursive; sudo hab pkg exec core/aws-cli aws s3 rb s3://%s`, bucket_name, bucket_name)
 				} else if infra.Outputs.BackupConfigEFS.Value == "true" && !cleanupFlags.force {
 					appendString = appendString + `for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;terraform state rm "module.efs[0].aws_efs_file_system.backups";cd $i;done`
 				}

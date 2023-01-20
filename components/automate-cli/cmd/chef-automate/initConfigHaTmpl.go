@@ -26,7 +26,7 @@ backup_config = ""
 
 # If s3 is selected for backup_config,
 #    then uncomment and give s3_bucketName 
-#    or else default chef-automate-ha.<deployment-string> will be used.
+#    & make sure to use unique name to create new bucket
 # s3_bucketName = ""
 ## === ===
 
