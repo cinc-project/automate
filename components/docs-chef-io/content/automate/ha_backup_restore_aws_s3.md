@@ -164,7 +164,7 @@ For Disaster Recovery or AMI upgarde, while running the restore in secondary clu
 -  First, Take the bakup in Secondary Cluster
 -  Then make a curl request `curl -XGET https://localhost:9200/_snapshot?pretty -u admin:admin -k`
 -  check the curl request response if the region is not matching with the primary cluster follow the below steps:
-1. Modify the region separetly in three places to fe nodes by patching the below configs with command, `chef-automate config patch <file-name>.toml --fe`
+1. Modify the region in fe nodes by patching the below configs with command, `chef-automate config patch <file-name>.toml --fe`
 
 ```cmd
 [global.v1.external.opensearch.backup.s3.settings]
