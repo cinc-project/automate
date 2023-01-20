@@ -54,7 +54,7 @@ locals {
 # Creating s3 bucket using AWS-CLI (hab -> core/aws-cli)
 resource "null_resource" "createS3bucket" {
   provisioner "local-exec" {
-    command = "sudo bash ./template/createS3Bucket.sh create ${var.aws_s3_bucketName} ${var.aws_region}"
+    command = "sudo chmod 700 ./template/createS3Bucket.sh ; sudo bash ./template/createS3Bucket.sh create ${var.aws_s3_bucketName} ${var.aws_region}"
   }
 }
 
