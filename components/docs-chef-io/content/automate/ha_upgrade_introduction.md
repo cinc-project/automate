@@ -90,27 +90,16 @@ We can also pass a flag in upgade command to avoid prompt for workspace upgrade.
 
 1. Two identical clusters located in same/different AWS regions.
 1. Amazon S3 access in both regions for Application backup.
-1. Ability to schedule jobs to run backup and restore commands in both clusters. We recommend using corn or a similar tool like anacron.
 
 In the above approach, there will be two identical clusters
 
 - Primary Cluster (or Production Cluster)
 - Secondary Cluster (Having upgraded AMI)
 
-The Primary cluster will be active and regular backups will be performed using `chef-automate backup create`. At the same time, the new cluster will be restoring the latest backup data using `chef-automate backup restore`.
-
-When the Primary cluster fails, accomplish the failover by updating DNS records to the DR cluster Load balancer.
-
 {{< note >}}
 
   The AWS deployment should be configured with S3.  
 {{< /note >}}
-
-### Caveat with the above approach
-
-- Running two parallel clusters can be expensive.
-- The amount of data loss will depend on how frequently backups are performed in the Primary cluster.
-- Changing DNS records from the Primary load-balancer to the Secondary load-balancer can take time to propagate through the network.
 
 ### Steps to set up the AMI Upgraded Cluster
 
@@ -121,13 +110,12 @@ When the Primary cluster fails, accomplish the failover by updating DNS records 
 1. Do the backup configuration only when you have not provided the (backup information) configuration at the time of deployment. Refer backup section for [object storage](/automate/ha_backup_restore_aws_s3/).
 
     {{< note >}}
-    - During the deployment for the Primary and DR clusters, use the same S3 bucket name.
-    - Configure backups for both clusters using only [object storage](/automate/ha_backup_restore_aws_s3/).
+     During the deployment for the Primary and Secondary clusters, use the same S3 bucket name.
     {{< /note >}}
 
 1. On Primary Cluster
 
-    - Configure a cronjob to regularly run the `chef-automate backup` command from one of the Chef Automate nodes. The sample cron for backup looks like this:
+    - Take a backup of Primary cluster from bastion by running below command:
 
     ```sh
     chef-automate backup create --no-progress > /var/log/automate-backups.log
@@ -141,19 +129,6 @@ When the Primary cluster fails, accomplish the failover by updating DNS records 
 
     - Copy `bootstrap.abb` to all Automate and Chef Infra frontend nodes in the Secondary cluster.
 
-    {{< note >}}
-    - Suggested frequency of backup and restore jobs is one hour. Monitor backup times to ensure they can be completed in the available time.
-    - Make sure the Restore cron always restores the latest backed-up data.
-    - A cron job is a Linux command used to schedule a job that is executed periodically.
-    {{< /note >}}
-
-    - To clean the data from the backed-up storage, either schedule a cron or delete it manually.
-        - To prune all but a certain number of the most recent backups manually, parse the chef-automate backup list's output and apply the chef-automate backup delete command.
-        For example:
-
-        ```sh
-        export KEEP=10; export HAB_LICENSE=accept-no-persist; chef-automate backup list --result-json backup.json > /dev/null && hab pkg exec core/jq-static jq "[.result.backups[].id] | sort | reverse | .[]" -rM backup.json | tail -n +$(($KEEP+1)) | xargs -L1 -i chef-automate backup delete --yes {}
-        ```
 
 1. On New AMI upgraded Cluster
 
@@ -163,23 +138,13 @@ When the Primary cluster fails, accomplish the failover by updating DNS records 
     sudo chef-automate bootstrap bundle unpack bootstrap.abb
     ```
 
-    - We don't recommend creating backups from the new cluster unless it has become the active cluster and receiving traffic from the clients/nodes.
-
-    - Stop all the services on all Automate and Chef Infra frontend nodes using the following command:
-
-    ```sh
-    systemctl stop chef-automate
-    ```
-
-    - Make sure both backup and restore cron are aligned.
-
-    - Run the following command in one of the Automate nodes to get the IDs of all the backups:
+    - Run the following command in bastion to get the ID of the backups:
 
     ```sh
     chef-automate backup list
     ```
 
-    - Configure the cron that triggers the `chef-automate backup restore` on one of the Chef Automate nodes.
+    -On Secondary Cluster Trigger restore command `chef-automate backup restore` on one of the Chef Automate nodes.
 
         - To run the restore command, you need the airgap bundle. Get the Automate HA airgap bundle from the location `/var/tmp/` in Automate instance. For example: `frontend-4.x.y.aib`.
 
@@ -210,13 +175,9 @@ When the Primary cluster fails, accomplish the failover by updating DNS records 
 
 Steps to switch to the New cluster are as follows:
 
-- Stop the backup restore cron.
 - Start the services on all the Automate and Chef Infra frontend nodes, using the below command:
 
     ```sh
     systemctl start chef-automate
     ```
-
-- Update the Automate FQDN DNS entry to resolve the Disaster Recovery load balancer.
-- The Disaster Recovery cluster will be the primary cluster. It may take some time for DNS changes to propagate fully.
-- Set up a backup cron to start taking backups of the active cluster.
+- Once the restore is successful ,you can destroy the Primary Cluster
