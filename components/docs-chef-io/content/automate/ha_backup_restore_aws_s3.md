@@ -171,7 +171,7 @@ For Disaster Recovery or AMI upgarde, while running the restore in secondary clu
               region = "<FIRST-CLUSTER-REGION>"
 ```
 
-2. Make a PUT request in an Opensearch node for the following indices:
+2. Make a PUT request in an Opensearch node by running this script:
 
 ```cmd
 indices=(
