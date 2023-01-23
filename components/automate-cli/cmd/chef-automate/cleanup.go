@@ -17,7 +17,9 @@ var (
 	%s
 	for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;terraform destroy  -state=/hab/a2_deploy_workspace/terraform/destroy/aws/terraform.tfstate -auto-approve;cd $i;done
 `
+
 	DEPLOYMENT_CLEANUP = `hab pkg uninstall chef/automate-ha-deployment`
+	DESTROY_S3_BUCKET  = `export HAB_LICENSE=accept-no-persist sudo hab pkg exec core/aws-cli aws s3 rm s3://%s --recursive; sudo hab pkg exec core/aws-cli aws s3 rb s3://%s`
 )
 
 var cleanupFlags = struct {
@@ -148,7 +150,7 @@ func runCleanupCmd(cmd *cobra.Command, args []string) error {
 						return err
 					}
 					writer.Body("BucketName :" + bucket_name)
-					appendString = appendString + fmt.Sprintf(`export HAB_LICENSE=accept-no-persist sudo hab pkg exec core/aws-cli aws s3 rm s3://%s --recursive; sudo hab pkg exec core/aws-cli aws s3 rb s3://%s`, bucket_name, bucket_name)
+					appendString = appendString + fmt.Sprintf(DESTROY_S3_BUCKET, bucket_name, bucket_name)
 				} else if infra.Outputs.BackupConfigEFS.Value == "true" && !cleanupFlags.force {
 					appendString = appendString + `for i in 1;do i=$PWD;cd /hab/a2_deploy_workspace/terraform/destroy/aws/;terraform state rm "module.efs[0].aws_efs_file_system.backups";cd $i;done`
 				}
