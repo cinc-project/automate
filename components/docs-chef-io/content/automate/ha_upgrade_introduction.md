@@ -81,7 +81,7 @@ We can also pass a flag in upgade command to avoid prompt for workspace upgrade.
 
 {{< note >}}
 
-  AMI Upgrade is only for AWS deployment ,as in Onpremise Deployment all the resources are managed by customers its self.  
+  AMI Upgrade is only for AWS deployment, as in On-Premise Deployment all the resources are managed by the customers themselves.  
 {{< /note >}}
 
 ## AMI Upgrade Setup For AWS Deployment
