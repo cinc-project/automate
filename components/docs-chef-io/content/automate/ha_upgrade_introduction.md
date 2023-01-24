@@ -144,19 +144,9 @@ In the above approach, there will be two identical clusters
     chef-automate backup list
     ```
 
-    -On Secondary Cluster Trigger restore command `chef-automate backup restore` on one of the Chef Automate nodes.
+    -On Secondary Cluster Trigger restore command from bastion.
 
-        - To run the restore command, you need the airgap bundle. Get the Automate HA airgap bundle from the location `/var/tmp/` in Automate instance. For example: `frontend-4.x.y.aib`.
-
-        - In case the airgap bundle is not present at `/var/tmp`, it can be copied from the bastion node to the Automate frontend node
-
-        - Run the command at the Automate node of Automate HA cluster to get the applied config:
-
-        ```bash
-        sudo chef-automate config show > current_config.toml
-        ```
-
-        - Add the OpenSearch credentials to the applied config. If using Chef Managed OpenSearch, add the config below into `current_config.toml` (without any changes).
+        - To run the restore command, you need to add the OpenSearch credentials to the applied config. If using Chef Managed OpenSearch,For that we need to have automate config and add the below config to it into `current_config.toml` (without any changes).
 
         ```bash
         [global.v1.external.opensearch.auth.basic_auth]
@@ -164,20 +154,10 @@ In the above approach, there will be two identical clusters
             password = "admin"
         ```
 
-        - In the New AMI Upgraded cluster, use the following sample command to restore the latest backup from any Chef Automate frontend instance.
+        - In the New AMI Upgraded cluster, use the following restore command to restore the backup of Primary Cluster from bastion.
 
         ```cmd
-        id=$(chef-automate backup list | grep completed | tail -1 | awk '{print $1}')
-        sudo chef-automate backup restore <backup-url-to-object-storage>/automate/$id/ --patch-config /path/to/current_config.toml --airgap-bundle /var/tmp/frontend-4.x.y.aib --skip-preflight --s3-access-key "Access_Key"  --s3-secret-key "Secret_Key"
+        sudo chef-automate backup restore s3://<s3-bucket-name>/<path-to-backup>/<backup-id>/ --patch-config /path/to/current_config.toml --airgap-bundle /path/to/airgap-bundle --skip-preflight --s3-access-key "Access_Key"  --s3-secret-key "Secret_Key"
         ```
 
-### Switch to New Upgraded Cluster
-
-Steps to switch to the New cluster are as follows:
-
-- Start the services on all the Automate and Chef Infra frontend nodes, using the below command:
-
-    ```sh
-    systemctl start chef-automate
-    ```
 - Once the restore is successful ,you can destroy the Primary Cluster

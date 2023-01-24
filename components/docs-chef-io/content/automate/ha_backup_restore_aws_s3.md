@@ -159,12 +159,11 @@ While running the restore command, If it prompts any error follow the steps give
 -  If the deployment services is not healthy then reload it using `hab svc load chef/deployment-service`.
 -  Now, check the status of Automate node and then try running the restore command from bastion.
 
-For Disaster Recovery or AMI upgarde, while running the restore in secondary cluster which is in different region follow the steps given below.
+For **Disaster Recovery or AMI upgarde**, while running the restore in secondary cluster which is in different region follow the steps given below.
 
--  First, Take the bakup in Secondary Cluster
--  Then make a curl request `curl -XGET https://localhost:9200/_snapshot?pretty -u admin:admin -k`
+-  Make a curl request in any opensearch node`curl -XGET https://localhost:9200/_snapshot?pretty --cacert /hab/svc/automate-ha-opensearch/config/certificates/root-ca.pem --key /hab/svc/automate-ha-opensearch/config/certificates/admin-key.pem --cert /hab/svc/automate-ha-opensearch/config/certificates/admin.pem -k`
 -  check the curl request response if the region is not matching with the primary cluster follow the below steps:
-1. Modify the region in fe nodes by patching the below configs with command, `chef-automate config patch <file-name>.toml --fe`
+1. Modify the region in FrontEnd nodes by patching the below configs with command, `chef-automate config patch <file-name>.toml --fe`
 
 ```cmd
 [global.v1.external.opensearch.backup.s3.settings]
