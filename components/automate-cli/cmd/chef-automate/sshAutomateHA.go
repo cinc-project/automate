@@ -75,10 +75,6 @@ type AutomteHAInfraDetails struct {
 			Value []string `json:"value"`
 			Type  []string `json:"type"`
 		} `json:"opensearch_private_ips"`
-		OpensearchPublicIps struct {
-			Value []string `json:"value"`
-			Type  []string `json:"type"`
-		} `json:"opensearch_public_ips"`
 		OpensearchSSH struct {
 			Value []string `json:"value"`
 			Type  []string `json:"type"`

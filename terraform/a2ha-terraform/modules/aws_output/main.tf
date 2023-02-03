@@ -2,7 +2,6 @@ locals {
   output_tfvars = templatefile("${path.module}/files/output.tfvars.tpl",{
       automate_private_ips      = join(", ", formatlist("\"%s\"", var.automate_private_ips)),
       chef_server_private_ips   = join(", ", formatlist("\"%s\"", var.chef_server_private_ips)),
-      opensearch_public_ips  = join(", ", formatlist("\"%s\"", var.opensearch_public_ips)),
       opensearch_private_ips = join(", ", formatlist("\"%s\"", var.opensearch_private_ips)),
       postgresql_private_ips    = join(", ", formatlist("\"%s\"", var.postgresql_private_ips)),
       aws_os_snapshot_role_arn  = var.aws_os_snapshot_role_arn,

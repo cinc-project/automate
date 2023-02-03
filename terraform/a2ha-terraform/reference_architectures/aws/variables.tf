@@ -217,7 +217,3 @@ variable "ssh_user" {
 variable "sudo_cmd" {
   default = "sudo"
 }
-
-variable "tag_name" {
-  default = "A2"
-}

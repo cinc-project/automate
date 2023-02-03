@@ -26,10 +26,6 @@ variable "opensearch_private_ips" {
   default = []
 }
 
-variable "opensearch_public_ips" {
-  default = []
-}
-
 variable "os_snapshot_user_access_key_id" {
   default = ""
 }

@@ -59,6 +59,9 @@ variable "aws_ssh_key_pair_name" {
 variable "aws_tags" {
 }
 
+variable "aws_vpc_id" {
+}
+
 variable "backup_config_efs" {
   default = "false"
 }
@@ -99,6 +102,10 @@ variable "delete_on_termination" {
 }
 
 variable "managed_opensearch_certificate" {
+  default = ""
+}
+
+variable "managed_opensearch_domain_name" {
   default = ""
 }
 
@@ -151,10 +158,6 @@ variable "opensearch_ebs_volume_type" {
 }
 
 variable "opensearch_private_ips" {
-  default = []
-}
-
-variable "opensearch_public_ips" {
   default = []
 }
 
@@ -223,4 +226,11 @@ variable "ssh_user" {
 
 variable "sudo_cmd" {
   default = "sudo"
+}
+
+variable "aws_cidr_block_addr" {
+}
+
+variable "aws_s3_bucketName" {
+  default = "chef-automate-ha"
 }
