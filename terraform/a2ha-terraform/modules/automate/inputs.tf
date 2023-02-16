@@ -33,6 +33,9 @@ variable "automate_dc_token" {
 variable "automate_fqdn" {
 }
 
+variable "automate_lb_fqdn" {
+}
+
 variable "automate_instance_count" {
   default = 1
 }
