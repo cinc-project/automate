@@ -59,6 +59,7 @@ if [ -L /hab/a2_deploy_workspace ]; then
   rm /hab/a2_deploy_workspace
   # copy over tfvars from old workspace if any exist
   find $OLD_WORKSPACE/terraform -name \*.tfvars -exec cp {} $NEW_WORKSPACE/terraform \;
+  find $NEW_WORKSPACE/terraform -name \*.auto.tfvars -exec sed -i 's/automate_fqdn/automate_lb_fqdn/g' {} \;
   # copy over tfstate from old workspace if any exist
   # find $OLD_WORKSPACE/terraform -name \*.tfstate -exec cp {} $NEW_WORKSPACE/terraform \;
   echo "Copying old workspace terraform/terraform.tfstate" >> $LOGGER
@@ -75,6 +76,8 @@ if [ -L /hab/a2_deploy_workspace ]; then
     find $OLD_WORKSPACE/terraform/destroy/aws -name \*.tf -exec cp {} $NEW_WORKSPACE/terraform/destroy/aws/ \;
     echo "Copied tf to new workspace" >> $LOGGER
   fi
+  # Removing or updating variables in new workspace
+  find $NEW_WORKSPACE/terraform -name output.auto.tfvars -exec sed -i '/^\s*automate_fqdn/ s/automate_fqdn/automate_lb_fqdn/1' {} \;
   echo " copy .abb files from old workspace if any exist" >> $LOGGER
   # copy .abb files from old workspace if any exist
   find $OLD_WORKSPACE/terraform -name \*.abb -exec cp {} $NEW_WORKSPACE/terraform \;
