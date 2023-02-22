@@ -172,15 +172,10 @@ func (s *SSHUtilImpl) connectAndExecuteCommandOnRemote(remoteCommands string, sp
 	}
 	output, err := session.CombinedOutput(remoteCommands)
 	if err != nil {
-		return "", err
+		return string(output), err
 	}
-
 	if spinner {
 		writer.StopSpinner()
-	}
-	if err != nil {
-		writer.Errorf("Run failed: %v\n", err)
-		return "", err
 	}
 	defer session.Close()
 	logrus.Debug("Execution of command done......")
