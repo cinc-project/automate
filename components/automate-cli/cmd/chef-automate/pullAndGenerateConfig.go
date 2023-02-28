@@ -1080,13 +1080,14 @@ func getModeOfDeployment() string {
 
 func getStorageType(config map[string]*dc.AutomateConfig) string {
 	for _, ele := range config {
+		writer.Bodyf("Storage: %v \n", ele.Global.V1.External.Opensearch)
 		if ele.Global != nil && ele.Global.V1 != nil && ele.Global.V1.External != nil && ele.Global.V1.External.Opensearch.Backup != nil && len(strings.TrimSpace(ele.Global.V1.External.Opensearch.Backup.Location.Value)) > 0 {
-			// writer.Bodyf("Storage: %v \n", ele.Global.V1.Backups.Location.Value)
+			writer.Bodyf("Storage: %v \n", ele.Global.V1.External.Opensearch.Backup.Location.Value)
 			deploymentType := getModeOfDeployment()
 			if deploymentType == EXISTING_INFRA_MODE {
-				return getInfraBackupType(ele.Global.V1.Backups.Location.Value)
+				return getInfraBackupType(ele.Global.V1.External.Opensearch.Backup.Location.Value)
 			}
-			return ele.Global.V1.Backups.Location.Value
+			return ele.Global.V1.External.Opensearch.Backup.Location.Value
 		}
 	}
 	return ""
