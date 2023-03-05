@@ -371,37 +371,99 @@ func runPatchCommand(cmd *cobra.Command, args []string) error {
 
 // patchConfigForFrontEndNodes patches the configuration for front end nodes in Automate HA
 func patchConfigForFrontEndNodes(args []string, sshUtil SSHUtil, frontendIps []string, remoteService string, timestamp string, writer *cli.Writer) error {
-	scriptCommands := fmt.Sprintf(FRONTEND_COMMAND, PATCH, remoteService+timestamp, dateFormat)
+	resultChan := make(chan ResultConfigSet, len(frontendIps))
+	configFile := remoteService + timestamp
+	scriptCommands := fmt.Sprintf(FRONTEND_COMMAND, SET, configFile, dateFormat)
+	//scriptCommands := fmt.Sprintf(FRONTEND_COMMAND, PATCH, remoteService+timestamp, dateFormat)
+	originalSSHConfig := sshUtil.getSSHConfig()
 
-	srcPath, err := parseAndRemoveRestrictedKeysFromSrcFile(args[0])
-	if err != nil {
-		return err
+	// srcPath, err := parseAndRemoveRestrictedKeysFromSrcFile(args[0])
+	// if err != nil {
+	// 	return err
+	// }
+
+	for _, hostIP := range frontendIps {
+		newSSHConfig := &SSHConfig{
+			sshUser:    originalSSHConfig.sshUser,
+			sshPort:    originalSSHConfig.sshPort,
+			sshKeyFile: originalSSHConfig.sshKeyFile,
+			hostIP:     hostIP,
+		}
+		newSSHUtil := NewSSHUtil(newSSHConfig)
+
+		printConnectionMessage(remoteService, hostIP, writer)
+
+		go func(args []string, configFile string, remoteService string, scriptCommands string, newSSHUtil SSHUtil, resultChan chan ResultConfigSet) {
+			rc := ResultConfigSet{newSSHUtil.getSSHConfig().hostIP, "", nil}
+			err := newSSHUtil.copyFileToRemote(args[0], configFile, false)
+			if err != nil {
+				rc.Error = err
+				resultChan <- rc
+				return
+			}
+
+			output, err := newSSHUtil.connectAndExecuteCommandOnRemote(scriptCommands, true)
+			if err != nil {
+				rc.Error = err
+				resultChan <- rc
+				return
+			}
+
+			err = checkOutputForError(output)
+			if err != nil {
+				rc.Error = err
+				resultChan <- rc
+				return
+			}
+
+			rc.Output = output
+			resultChan <- rc
+		}(args, configFile, remoteService, scriptCommands, newSSHUtil, resultChan)
 	}
 
 	for i := 0; i < len(frontendIps); i++ {
-		printConnectionMessage(remoteService, frontendIps[i], writer)
-		sshUtil.getSSHConfig().hostIP = frontendIps[i]
+		// printConnectionMessage(remoteService, frontendIps[i], writer)
+		// sshUtil.getSSHConfig().hostIP = frontendIps[i]
 
-		err := sshUtil.copyFileToRemote(srcPath, remoteService+timestamp, false)
-		if err != nil {
-			writer.Errorf("%v", err)
-			return err
+		// err := sshUtil.copyFileToRemote(srcPath, remoteService+timestamp, false)
+		// if err != nil {
+		// 	writer.Errorf("%v", err)
+		// 	return err
+		// }
+
+		// output, err := sshUtil.connectAndExecuteCommandOnRemote(scriptCommands, true)
+		// if err != nil {
+		// 	writer.Errorf("%v", err)
+		// 	return err
+		// }
+
+		// err = checkOutputForError(output)
+		// if err != nil {
+		// 	return err
+		// }
+
+		// writer.Printf(output + "\n")
+		// printConfigSuccessMessage(patching, remoteService, frontendIps[i], writer)
+		result := <-resultChan
+		if i == 0 {
+			writer.StopSpinner()
+			writer.Println("=====================================================")
 		}
 
-		output, err := sshUtil.connectAndExecuteCommandOnRemote(scriptCommands, true)
-		if err != nil {
-			writer.Errorf("%v", err)
-			return err
+		if result.Error != nil {
+			printConfigErrorMessage(setting, remoteService, result.HostIP, writer, result.Error.Error())
+		} else {
+			writer.Printf("Output for Host IP %s : %s", result.HostIP, result.Output+"\n")
+			printConfigSuccessMessage(setting, remoteService, result.HostIP, writer)
 		}
 
-		err = checkOutputForError(output)
-		if err != nil {
-			return err
+		if i < len(frontendIps)-1 {
+			writer.Println("=====================================================")
+			writer.StartSpinner()
 		}
-
-		writer.Printf(output + "\n")
-		printConfigSuccessMessage(patching, remoteService, frontendIps[i], writer)
 	}
+
+	close(resultChan)
 	return nil
 }
 
