@@ -54,4 +54,22 @@ func parseStandaloneConfig(configFile string) (*sc.AutomateConfig, error) {
 		return nil, err
 	}
 	return config, nil
+} 
+
+func ArseOnPremConfig(configFile string) (*HAOnPremConfigToml, error) {
+
+	/* This function will read the OnPrem config toml file and will try to parse it in the structure.
+	   On successful parse, it will return the config structure. This is applicable for Chef Managed,
+	   AWS Managed and Customer Managed resources*/
+
+	templateBytes, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		return nil, status.Wrap(err, status.FileAccessError, "error in reading config toml file")
+	}
+	config := HAOnPremConfigToml{}
+	err = ptoml.Unmarshal(templateBytes, &config)
+	if err != nil {
+		return nil, status.Wrap(err, status.ConfigError, "error in unmarshalling config toml file")
+	}
+	return &config, nil
 }
