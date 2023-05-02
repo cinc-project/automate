@@ -6,6 +6,7 @@ import (
 
 type IStatusService interface {
 	GetServices() []models.ServiceDetails
+	GetSoftwareVersion() string
 }
 
 type StatusService struct{}
@@ -16,4 +17,8 @@ func NewStatusService() IStatusService {
 
 func (ss *StatusService) GetServices() []models.ServiceDetails {
 	return []models.ServiceDetails{}
+}
+
+func (ss *StatusService) GetSoftwareVersion() string {
+	return ""
 }

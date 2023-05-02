@@ -9,3 +9,7 @@ type MockStatusService struct {
 func (mss *MockStatusService) GetServices() []models.ServiceDetails {
 	return mss.GetServicesFunc()
 }
+
+func (mss *MockStatusService) GetSoftwareVersion() string {
+	panic("implement me")
+}
