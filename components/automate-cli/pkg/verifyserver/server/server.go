@@ -6,6 +6,7 @@ import (
 	"github.com/ansrivas/fiberprometheus"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/logger"
 	v1 "github.com/chef/automate/components/automate-cli/pkg/verifyserver/server/api/v1"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/s3configservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/fiberutils"
 	"github.com/gofiber/cors"
@@ -33,7 +34,8 @@ func NewVerifyServer(port string, debug bool) *VerifyServer {
 	}
 	app := fiber.New(fconf)
 	handler := v1.NewHandler(log).
-		AddStatusService(statusservice.NewStatusService())
+		AddStatusService(statusservice.NewStatusService()).
+		AddS3ConfigService(s3configservice.NewS3ConfigService())
 	vs := &VerifyServer{
 		Port:    port,
 		Log:     log,
