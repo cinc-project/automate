@@ -11,8 +11,9 @@ type Config struct {
 		PrivateKey   string `json:"private_key"`
 		SudoPassword string `json:"sudo_password"`
 	} `json:"ssh_user"`
-	Arch   string `json:"arch"`
-	Backup struct {
+	Arch        string `json:"arch"`
+	DeployState string `json:"deploy_state"`
+	Backup      struct {
 		FileSystem struct {
 			MountLocation string `json:"mount_location"`
 		} `json:"file_system"`
@@ -34,4 +35,32 @@ type Config struct {
 		OpensearchNodeCount      int      `json:"opensearch_node_count"`
 		OpensearchNodeIps        []string `json:"opensearch_node_ips"`
 	} `json:"hardware"`
+	Certificate struct {
+		Fqdn     string     `json:"fqdn"`
+		RootCert string     `json:"root_cert"`
+		Nodes    []NodeCert `json:"nodes"`
+	} `json:"certificate"`
+	ExternalOS struct {
+		OSDomainName   string `json:"opensearch_domain_name"`
+		OSDomainURL    string `json:"opensearch_domain_url"`
+		OSUsername     string `json:"opensearch_usename"`
+		OSUserPassword string `json:"opensearch_user_password"`
+		OSCert         string `json:"opensearch_cert"`
+	} `json:"external_opensearch"`
+	ExternalPG struct {
+		PGInstanceURL       string `json:"postgresql_instance_url"`
+		PGSuperuserName     string `json:"postgresql_superuser_username"`
+		PGSuperuserPassword string `json:"postgresql_superuser_password"`
+		PGDbUserName        string `json:"postgresql_dbuser_username"`
+		PGDbUserPassword    string `json:"postgresql_dbuser_password"`
+		PGRootCert          string `json:"postgresql_root_cert"`
+	} `json:"external_postgresql"`
+}
+
+type NodeCert struct {
+	IP        string `json:"ip"`
+	Cert      string `json:"cert"`
+	Key       string `json:"key"`
+	AdminKey  string `json:"admin_key"`
+	AdminCert string `json:"admin_cert"`
 }
