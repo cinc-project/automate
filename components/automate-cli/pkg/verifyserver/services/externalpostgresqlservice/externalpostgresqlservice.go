@@ -12,22 +12,21 @@ type ISExternalPostgresqlService interface {
 
 type ExternalPostgresqlService struct{
 	DBUtils db.DB
-	req models.ExternalPgRequest
+	req *models.ExternalPgRequest
 }
 
 func NewExternalPostgresqlService(db db.DB) ISExternalPostgresqlService {
-
 	return &ExternalPostgresqlService{DBUtils:db}
 }
 
 func (pg *ExternalPostgresqlService) GetPgConnection(req models.ExternalPgRequest) models.ExternalPgConnectionDetails {
-	//return []models.ExternalPgConnectionDetails{}
-	pg.req = req
+	pg.req = &req
 	err := pg.CheckExternalPgConnection()
 	if err != nil {
 		return models.ExternalPgConnectionDetails{
 			Title:         "Postgres Connection failed",
 			Passed:        false,
+			Status:		   "PASS",
 			SuccessMsg:    "",
 			ErrorMsg:      "Machine is unable to connect with External Managed Postgresql",
 			ResolutionMsg: "Ensure that the Postgres configuration provided is correct. Review security group or firewall settings as well on the infrastructure",			
@@ -37,6 +36,7 @@ func (pg *ExternalPostgresqlService) GetPgConnection(req models.ExternalPgReques
 	return models.ExternalPgConnectionDetails{
 		Title:         "Connection successfully tested",
 		Passed:        true,
+		Status:		   "PASS",
 		SuccessMsg:    "Machine is able to connect with External Managed Postgres",
 		ErrorMsg:      "",
 		ResolutionMsg: "",
@@ -45,12 +45,10 @@ func (pg *ExternalPostgresqlService) GetPgConnection(req models.ExternalPgReques
 
 
 	
-func (result *ExternalPostgresqlService) CheckExternalPgConnection() error {
-		p := new(models.ExternalPgRequest)
-		sslrootcert := p.PostgresqlRootCert
+func (p *ExternalPostgresqlService) CheckExternalPgConnection() error {
 		//construct the connection string
-		con := fmt.Sprintf("PostgresqlInstanceUrl=%s PostgresqlSuperUserUserName=%s PostgresqlSuperUserPassword=%s PostgresqlDbUserUserName=%s PostgresqlDbUserPassword=%s sslrootcert=%s",p.PostgresqlInstanceUrl,p.PostgresqlSuperUserUserName,p.PostgresqlSuperUserPassword,p.PostgresqlDbUserUserName,p.PostgresqlDbUserPassword,sslrootcert)
-		err := result.DBUtils.InitPostgresDB(con)
+		con := fmt.Sprintf("PostgresqlInstanceUrl=%s PostgresqlSuperUserUserName=%s PostgresqlSuperUserPassword=%s PostgresqlDbUserUserName=%s PostgresqlDbUserPassword=%s sslrootcert=%s",p.req.PostgresqlInstanceUrl,p.req.PostgresqlSuperUserUserName,p.req.PostgresqlSuperUserPassword,p.req.PostgresqlDbUserUserName,p.req.PostgresqlDbUserPassword,p.req.PostgresqlRootCert)
+		err := p.DBUtils.InitPostgresDB(con)
 		if err != nil{
 			return err
 		}
