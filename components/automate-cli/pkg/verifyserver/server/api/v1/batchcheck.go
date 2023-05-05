@@ -7,7 +7,7 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/constants"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/response"
-	"github.com/ghetzel/go-stockutil/sliceutil"
+	"github.com/chef/automate/lib/stringutils"
 	"github.com/gofiber/fiber"
 )
 
@@ -32,7 +32,7 @@ func validateChecks(checks []string) error {
 		return err
 	}
 	allChecks := constants.GetAllChecks()
-	diff := sliceutil.Difference(checks, allChecks)
+	diff := stringutils.SliceDifference(checks, allChecks)
 	if len(diff) > 0 {
 		err := fmt.Errorf("following checks are not supported %v", diff)
 		return err
