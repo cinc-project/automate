@@ -45,7 +45,7 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 	app := fiber.New(fconf)
 	handler := v1.NewHandler(l).
 		AddStatusService(
-			statusservice.NewStatusService(fiberutils.ExecuteShellCommand)).
+			statusservice.NewStatusService(fiberutils.ExecuteShellCommand, l)).
 		AddBatchCheckService(
 			batchcheckservice.NewBatchCheckService(trigger.NewCheckTrigger(
 				trigger.NewHardwareResourceCountCheck(),
