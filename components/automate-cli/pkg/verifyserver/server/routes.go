@@ -13,5 +13,8 @@ func (vs *VerifyServer) SetupRoutes() {
 	apiChecksGroup := apiV1Group.Group("/checks")
 	apiChecksGroup.Get("/fqdn", vs.Handler.CheckFqdn)
 
+	apiStartGroup := apiV1Group.Group("/start")
+	apiStartGroup.Get("/mock-server/:port", vs.Handler.StartMockServer)
+
 	fiberutils.LogResgisteredRoutes(vs.App.Stack(), vs.Log)
 }
