@@ -1,25 +1,17 @@
 package v1
 
 import (
-	"net"
-
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
 	"github.com/chef/automate/lib/logger"
 )
 
-type Server struct {
-	port        int
-	listenerTCP net.Listener
-	listenerUDP net.PacketConn
-	protocol    string
-}
-
 type Handler struct {
-	Logger            logger.Logger
-	StatusService     statusservice.IStatusService
-	BatchCheckService batchcheckservice.IBatchCheckService
-	servers           []*Server
+	Logger             logger.Logger
+	StatusService      statusservice.IStatusService
+	BatchCheckService  batchcheckservice.IBatchCheckService
+	MockServerServices []*models.Server
 }
 
 func NewHandler(logger logger.Logger) *Handler {

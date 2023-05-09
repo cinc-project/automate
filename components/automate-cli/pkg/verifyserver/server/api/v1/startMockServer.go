@@ -2,14 +2,12 @@ package v1
 
 import (
 	"fmt"
-	"log"
 	"net"
-	"os"
-	"strconv"
 	"sync"
 	"time"
 
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/gofiber/fiber"
 )
 
@@ -29,91 +27,91 @@ func (h *Handler) StartMockServer(c *fiber.Ctx) {
 		return
 	}
 
-	portInt := reqBody.Port
+	// portInt := reqBody.Port
 
-	for _, s := range h.servers {
-		if s.port == portInt {
+	for _, s := range h.MockServerServices {
+		if s.Port == reqBody.Port {
 			// Server is already running
-			c.Status(fiber.ErrConflict.Code).JSON(fiber.Map{"port": portInt, "message": fmt.Sprintf("Server is already running on port %d", portInt), "listener": s.listenerTCP})
+			c.Status(fiber.ErrConflict.Code).JSON(fiber.Map{"port": reqBody.Port, "message": fmt.Sprintf("Server is already running on port %d", reqBody.Port), "listener": s.ListenerTCP})
 			return
 		}
 	}
 
-	var (
-		HOST = "localhost"
-	)
+	service := startmockserverservice.MockServerService{}
+	mockServer, err := service.StartMockServer(*reqBody)
 
-	// create a TCP listener on the specified port and
-	// save the listener instance in the handler struct
-	var ln net.Listener
-	var lnUDP net.PacketConn
-	var s *Server
+	fmt.Printf("Error: %v", err)
+	h.MockServerServices = append(h.MockServerServices, mockServer)
 
-	switch reqBody.Protocol {
-	case "tcp":
-		ln, err = net.Listen(reqBody.Protocol, fmt.Sprintf("%s:%d", HOST, portInt))
+	// var ln net.Listener
+	// var lnUDP net.PacketConn
+	// var s *models.Server
 
-		s = &Server{port: portInt, listenerTCP: ln, protocol: reqBody.Protocol}
-	case "udp":
-		lnUDP, err = net.ListenPacket("udp", ":"+strconv.Itoa(portInt))
-		if err != nil {
-			c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
-			return
-		}
-		// fmt.Print("addr: ")
-		// fmt.Print(reqBody.Protocol)
-		// fmt.Print(addr)
-		// lnUDP, err := net.ListenUDP("udp", addr)
-		s = &Server{port: portInt, listenerUDP: lnUDP, protocol: reqBody.Protocol}
-		if err != nil {
-			fmt.Printf("Error: %v", err)
-		}
-		// defer lnUDP.Close()
-	}
+	// // switch reqBody.Protocol {
+	// // case "tcp":
+	// // 	ln, err = net.Listen(reqBody.Protocol, fmt.Sprintf("localhost:%d", portInt))
 
-	if err != nil {
-		// Port is already consumed by external Server
-		c.Status(fiber.ErrConflict.Code).JSON(fiber.Map{"port": portInt, "message": fmt.Sprintf("Port %d is already consumed by other/external Server", portInt), "error": err})
-	}
+	// // 	s = &models.Server{Port: portInt, ListenerTCP: ln, Protocol: reqBody.Protocol}
+	// // case "udp":
+	// // 	lnUDP, err = net.ListenPacket("udp", ":"+strconv.Itoa(portInt))
+	// // 	if err != nil {
+	// // 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
+	// // 		return
+	// // 	}
+	// // 	// fmt.Print("addr: ")
+	// // 	// fmt.Print(reqBody.Protocol)
+	// // 	// fmt.Print(addr)
+	// // 	// lnUDP, err := net.ListenUDP("udp", addr)
+	// // 	s = &models.Server{Port: portInt, ListenerUDP: lnUDP, Protocol: reqBody.Protocol}
+	// // 	if err != nil {
+	// // 		fmt.Printf("Error: %v", err)
+	// // 	}
+	// // 	// defer lnUDP.Close()
+	// // }
 
-	h.servers = append(h.servers, s)
-	fmt.Printf("HI Arvi: %v", h.servers)
-	switch reqBody.Protocol {
-	case "tcp":
-		go func() {
-			for {
-				conn, err := ln.Accept()
-				// fmt.Printf("%v", err)
-				if err != nil {
-					log.Fatal(err)
-					os.Exit(1)
-				}
-				go handleRequest(conn)
-				conn.Close()
-			}
-		}()
-	case "udp":
-		go func() {
-			var wg sync.WaitGroup
-			fmt.Printf("UDP Socket: %v", lnUDP)
-			for {
-				buffer := make([]byte, 1024)
-				_, addr, err := lnUDP.ReadFrom(buffer)
-				wg.Add(1)
-				if err != nil {
-					fmt.Println("Error receiving message: ", err.Error())
-					continue
-				}
-				// fmt.Println("Message received from ", addr.String(), ": ", string(buffer[:n]))
-				go handleUDPRequest(&wg, lnUDP, addr, buffer)
-			}
-			wg.Wait()
-		}()
+	// if err != nil {
+	// 	// Port is already consumed by external Server
+	// 	c.Status(fiber.ErrConflict.Code).JSON(fiber.Map{"port": portInt, "message": fmt.Sprintf("Port %d is already consumed by other/external Server", portInt), "error": err})
+	// }
 
-		fmt.Printf("UDP server started on port %d\n", portInt)
-		// return nil
+	// h.MockServerServices = append(h.MockServerServices, s)
+	// fmt.Printf("HI Arvi: %v", h.MockServerServices)
+	// switch reqBody.Protocol {
+	// case "tcp":
+	// 	go func() {
+	// 		for {
+	// 			conn, err := ln.Accept()
+	// 			// fmt.Printf("%v", err)
+	// 			if err != nil {
+	// 				log.Fatal(err)
+	// 				os.Exit(1)
+	// 			}
+	// 			go handleRequest(conn)
+	// 			conn.Close()
+	// 		}
+	// 	}()
+	// case "udp":
+	// 	go func() {
+	// 		var wg sync.WaitGroup
+	// 		fmt.Printf("UDP Socket: %v", lnUDP)
+	// 		for {
+	// 			buffer := make([]byte, 1024)
+	// 			_, addr, err := lnUDP.ReadFrom(buffer)
+	// 			wg.Add(1)
+	// 			if err != nil {
+	// 				fmt.Println("Error receiving message: ", err.Error())
+	// 				continue
+	// 			}
+	// 			// fmt.Println("Message received from ", addr.String(), ": ", string(buffer[:n]))
+	// 			go handleUDPRequest(&wg, lnUDP, addr, buffer)
+	// 		}
+	// 		wg.Wait()
+	// 	}()
 
-	}
+	// 	fmt.Printf("UDP server started on port %d\n", portInt)
+	// 	// return nil
+
+	// }
 }
 
 // func (h *Handler) StopMockServer(c *fiber.Ctx) {
@@ -132,33 +130,6 @@ func (h *Handler) StartMockServer(c *fiber.Ctx) {
 // 	// return success response
 // 	c.Status(200).SendString("TCP server stopped")
 // }
-
-func handleRequest(conn net.Conn) {
-	// defer conn.Close()
-
-	// Read data from connection
-	fmt.Println("I am here")
-	buf := make([]byte, 1024)
-	_, err := conn.Read(buf)
-	fmt.Printf("%v", err)
-	if err != nil {
-		fmt.Println("Error reading data from connection:", err)
-		return
-	}
-
-	// Echo data back to client
-	// _, err = conn.Write(buf[:n])
-	// if err != nil {
-	// 	fmt.Println("Error writing data to connection:", err)
-	// }
-	time := time.Now().Format(time.ANSIC)
-	responseStr := fmt.Sprintf("Your message is: %v. Received time: %v", string(buf[:]), time)
-	conn.Write([]byte(responseStr))
-
-	// close conn
-	conn.Close()
-
-}
 
 func handleUDPRequest(wg *sync.WaitGroup, udpServer net.PacketConn, addr net.Addr, buf []byte) {
 	defer wg.Done()
