@@ -12,11 +12,11 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
 )
 
-// MockServerService provides functionality to start mock servers.
-type MockServerService struct{}
+// StartMockServerService provides functionality to start mock servers.
+type StartMockServerService struct{}
 
 // StartMockServer starts a mock server of the given type and port.
-func (servers *MockServerService) StartMockServer(cfg models.StartMockServerRequestBody) (*models.Server, error) {
+func (servers *StartMockServerService) StartMockServer(cfg models.StartMockServerRequestBody) (*models.Server, error) {
 	switch cfg.Protocol {
 	case "tcp":
 		return servers.startTCPServer(cfg.Port)
@@ -29,7 +29,7 @@ func (servers *MockServerService) StartMockServer(cfg models.StartMockServerRequ
 	}
 }
 
-func (s *MockServerService) startTCPServer(port int) (*models.Server, error) {
+func (s *StartMockServerService) startTCPServer(port int) (*models.Server, error) {
 	// create a TCP listener on the specified port and
 	// save the listener instance in the handler struct
 	listener, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
@@ -61,7 +61,7 @@ func (s *MockServerService) startTCPServer(port int) (*models.Server, error) {
 	}, nil
 }
 
-func (s *MockServerService) handleTCPRequest(conn net.Conn) {
+func (s *StartMockServerService) handleTCPRequest(conn net.Conn) {
 	defer conn.Close()
 	buf := make([]byte, 1024)
 	_, err := conn.Read(buf)
@@ -80,7 +80,7 @@ func (s *MockServerService) handleTCPRequest(conn net.Conn) {
 
 }
 
-func (s *MockServerService) startUDPServer(port int) (*models.Server, error) {
+func (s *StartMockServerService) startUDPServer(port int) (*models.Server, error) {
 	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return nil, err
@@ -113,13 +113,13 @@ func (s *MockServerService) startUDPServer(port int) (*models.Server, error) {
 	}, nil
 }
 
-func (s *MockServerService) handleUDPRequest(conn *net.UDPConn, addr *net.UDPAddr, buf []byte) {
+func (s *StartMockServerService) handleUDPRequest(conn *net.UDPConn, addr *net.UDPAddr, buf []byte) {
 	log.Printf("UDP request received from %v", addr)
 	response := []byte("UDP response")
 	conn.WriteToUDP(response, addr)
 }
 
-func (s *MockServerService) startHTTPSServer(port int, cert string, key string) (*models.Server, error) {
+func (s *StartMockServerService) startHTTPSServer(port int, cert string, key string) (*models.Server, error) {
 
 	// Load the TLS certificate and private key
 	tlsCert, err := tls.LoadX509KeyPair(cert, key)

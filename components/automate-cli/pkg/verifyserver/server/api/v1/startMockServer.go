@@ -32,7 +32,7 @@ func (h *Handler) StartMockServer(c *fiber.Ctx) {
 		}
 	}
 
-	service := startmockserverservice.MockServerService{}
+	service := startmockserverservice.StartMockServerService{}
 	mockServer, err := service.StartMockServer(*reqBody)
 
 	fmt.Printf("Error: %v", err)
