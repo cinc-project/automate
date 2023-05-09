@@ -9,16 +9,17 @@ import (
 )
 
 func (h *Handler) StartMockServer(c *fiber.Ctx) {
-	// Specify the server type and port
-	// parse the port number from the request body
 
 	reqBody := new(models.StartMockServerRequestBody)
 	err := c.BodyParser(&reqBody)
+
+	// If request body is invalid
 	if err != nil {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid request body"})
 		return
 	}
 
+	// If port number is invalid
 	if reqBody.Port < 0 || reqBody.Port > 65535 {
 		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid port number"})
 		return
@@ -26,8 +27,8 @@ func (h *Handler) StartMockServer(c *fiber.Ctx) {
 
 	for _, s := range h.MockServerServices {
 		if s.Port == reqBody.Port {
-			// Server is already running
-			c.Status(fiber.ErrConflict.Code).JSON(fiber.Map{"port": reqBody.Port, "message": fmt.Sprintf("Server is already running on port %d", reqBody.Port), "listener": s.ListenerTCP})
+			// Server is already running in the port
+			c.Status(fiber.ErrConflict.Code).JSON(fiber.Map{"port": reqBody.Port, "message": fmt.Sprintf(`"%s" server is already running on port %d`, s.Protocol, reqBody.Port), "listener": s.ListenerTCP})
 			return
 		}
 	}
@@ -38,20 +39,3 @@ func (h *Handler) StartMockServer(c *fiber.Ctx) {
 	fmt.Printf("Error: %v", err)
 	h.MockServerServices = append(h.MockServerServices, mockServer)
 }
-
-// func (h *Handler) StopMockServer(c *fiber.Ctx) {
-// 	if server != nil {
-// 		// close the listener and stop the server
-// 		err := h.listener.Close()
-// 		if err != nil {
-// 			c.Status(500).SendString("Failed to stop TCP server")
-// 			return
-// 		}
-
-// 		// reset the listener instance in the handler struct
-// 		h.listener = nil
-// 	}
-
-// 	// return success response
-// 	c.Status(200).SendString("TCP server stopped")
-// }

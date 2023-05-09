@@ -122,8 +122,10 @@ func (s *StartMockServerService) handleUDPRequest(conn *net.UDPConn, addr *net.U
 func (s *StartMockServerService) startHTTPSServer(port int, cert string, key string) (*models.Server, error) {
 
 	// Load the TLS certificate and private key
-	tlsCert, err := tls.LoadX509KeyPair(cert, key)
+	tlsCert, err := tls.X509KeyPair([]byte(cert), []byte(key))
 	if err != nil {
+		fmt.Println("Cert error")
+		fmt.Printf("%v", err)
 		return nil, err
 	}
 
@@ -140,7 +142,9 @@ func (s *StartMockServerService) startHTTPSServer(port int, cert string, key str
 
 	// Start the HTTPS server
 	go func() {
-		err := server.ListenAndServeTLS("", "")
+		// err := http.ListenAndServeTLS(fmt.Sprintf(":%d", port), cert, key, nil)
+		err = server.ListenAndServeTLS("", "")
+		fmt.Println("Serv error")
 		if err != nil && err != http.ErrServerClosed {
 			fmt.Println("Error starting HTTPS server: ", err)
 		}
