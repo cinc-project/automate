@@ -1,6 +1,9 @@
 package models
 
-import "net"
+import (
+	"net"
+	"net/http"
+)
 
 // StartMockServerRequestBody contains the configuration for starting a mock server.
 type StartMockServerRequestBody struct {
@@ -21,8 +24,9 @@ func NewStartMockServerRequestBody(port int, protocol string, cert string, key s
 }
 
 type Server struct {
-	Port        int
-	ListenerTCP net.Listener
-	ListenerUDP net.PacketConn
-	Protocol    string
+	Port         int
+	ListenerTCP  net.Listener
+	ListenerUDP  net.PacketConn
+	ListenerHTTP *http.Server
+	Protocol     string
 }

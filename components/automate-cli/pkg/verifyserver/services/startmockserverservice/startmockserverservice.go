@@ -22,8 +22,8 @@ func (servers *MockServerService) StartMockServer(cfg models.StartMockServerRequ
 		return servers.startTCPServer(cfg.Port)
 	case "udp":
 		return servers.startUDPServer(cfg.Port)
-	// case "https":
-	// 	return servers.startHTTPSServer(cfg.Port, cfg.Cert, cfg.Key)
+	case "https":
+		return servers.startHTTPSServer(cfg.Port, cfg.Cert, cfg.Key)
 	default:
 		return nil, errors.New("unsupported protocol")
 	}
@@ -121,17 +121,37 @@ func (s *MockServerService) handleUDPRequest(conn *net.UDPConn, addr *net.UDPAdd
 
 func (s *MockServerService) startHTTPSServer(port int, cert string, key string) (*models.Server, error) {
 
-	server := &http.Server{
-		Addr: fmt.Sprintf(":%d", port),
-		TLSConfig: &tls.Config{
-			Certificates: []tls.Certificate{{
-				Certificate: [][]byte{[]byte(cert)},
-				PrivateKey:  []byte(key),
-			}},
-		},
+	// Load the TLS certificate and private key
+	tlsCert, err := tls.LoadX509KeyPair(cert, key)
+	if err != nil {
+		return nil, err
 	}
 
-	log.Printf("HTTPS server started on port %d", port)
+	// Create the TLS configuration for the server
+	config := &tls.Config{
+		Certificates: []tls.Certificate{tlsCert},
+	}
 
-	return server.ListenAndServeTLS("", ""), nil
+	// Create the HTTPS server
+	server := &http.Server{
+		Addr:      fmt.Sprintf(":%d", port),
+		TLSConfig: config,
+	}
+
+	// Start the HTTPS server
+	go func() {
+		err := server.ListenAndServeTLS("", "")
+		if err != nil && err != http.ErrServerClosed {
+			fmt.Println("Error starting HTTPS server: ", err)
+		}
+	}()
+
+	fmt.Printf("HTTPS server started on port %d\n", port)
+	return &models.Server{
+		Port:         port,
+		ListenerTCP:  nil,
+		ListenerUDP:  nil,
+		ListenerHTTP: server,
+		Protocol:     "tcp",
+	}, nil
 }
