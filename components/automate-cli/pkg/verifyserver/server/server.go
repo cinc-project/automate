@@ -1,8 +1,10 @@
 package server
 
 import (
-	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/hardwareresourcechecktrigger"
 	"strings"
+
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/hardwareresourcechecktrigger"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/softwareversionservice"
 
 	"github.com/ansrivas/fiberprometheus"
 	v1 "github.com/chef/automate/components/automate-cli/pkg/verifyserver/server/api/v1"
@@ -62,7 +64,8 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 				trigger.NewSoftwareVersionCheck(),
 				trigger.NewSystemResourceCheck(),
 				trigger.NewSshUserAccessCheck(),
-			)))
+			))).
+			AddSoftwareVersionService(softwareversionservice.NewSoftwareVersionService())
 	vs := &VerifyServer{
 		Port:    port,
 		Log:     l,
