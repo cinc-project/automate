@@ -65,7 +65,6 @@ func (s *StartMockServerService) handleTCPRequest(conn net.Conn) {
 	defer conn.Close()
 	buf := make([]byte, 1024)
 	_, err := conn.Read(buf)
-	fmt.Printf("%v", err)
 	if err != nil {
 		fmt.Println("Error reading data from connection:", err)
 		return
