@@ -36,10 +36,10 @@ func NewVerifyServer(port string, debug bool) *VerifyServer {
 	app := fiber.New(fconf)
 	handler := v1.NewHandler(log).
 		AddStatusService(statusservice.NewStatusService()).
-		AddExternalPostgresqlService(externalpostgresqlservice.NewExternalPostgresqlService(db.NewDBImpl()))
+		AddExternalPostgresqlService(externalpostgresqlservice.NewExternalPostgresqlService(db.NewDBImpl(),logger.l))
 	vs := &VerifyServer{
 		Port:    port,
-		Log:     log,
+		Log:     l,
 		App:     app,
 		Handler: handler,
 	}

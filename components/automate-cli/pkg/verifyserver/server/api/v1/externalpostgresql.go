@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/response"
@@ -10,7 +11,9 @@ import (
 func (h *Handler)CheckExternalPostgresql(c *fiber.Ctx)  {
 	externalPostgresqlRequest := new(models.ExternalPgRequest)
 	if err := c.BodyParser(&externalPostgresqlRequest); err != nil {
-		c.Status(503).Send(err)
+		errString := fmt.Sprintf("External postgresql config request body parsing failed: %v", err.Error())
+		h.Logger.Error(fmt.Errorf(errString))
+		c.Status(fiber.StatusBadRequest).JSON(response.BuildFailedResponse(&fiber.Error{Message: err.Error()}))
 		return
 	}
 	pgConnection := h.ExternalPostgresqlService.GetPgConnection(*externalPostgresqlRequest)
