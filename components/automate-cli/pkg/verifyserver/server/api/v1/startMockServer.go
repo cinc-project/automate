@@ -32,7 +32,7 @@ func (h *Handler) StartMockServer(c *fiber.Ctx) {
 	for _, s := range h.MockServerServices {
 		if s.Port == reqBody.Port {
 			// Server is already running in the port
-			errString := fmt.Sprintf("start mock-server request body contains unavailable port: %v", err.Error())
+			errString := fmt.Sprintf("start mock-server request body contains unavailable port: %v", reqBody.Port)
 			h.Logger.Error(fmt.Errorf(errString))
 			c.Status(fiber.ErrConflict.Code).JSON(fiber.Map{"port": reqBody.Port, "message": fmt.Sprintf(`"%s" server is already running on port %d`, s.Protocol, reqBody.Port)})
 			return

@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"time"
 
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
 )
@@ -19,17 +18,17 @@ type StartMockServerService struct{}
 func (servers *StartMockServerService) StartMockServer(cfg models.StartMockServerRequestBody) (*models.Server, error) {
 	switch cfg.Protocol {
 	case "tcp":
-		return servers.startTCPServer(cfg.Port)
+		return servers.StartTCPServer(cfg.Port)
 	case "udp":
-		return servers.startUDPServer(cfg.Port)
+		return servers.StartUDPServer(cfg.Port)
 	case "https":
-		return servers.startHTTPSServer(cfg.Port, cfg.Cert, cfg.Key)
+		return servers.StartHTTPSServer(cfg.Port, cfg.Cert, cfg.Key)
 	default:
 		return nil, errors.New("unsupported protocol")
 	}
 }
 
-func (s *StartMockServerService) startTCPServer(port int) (*models.Server, error) {
+func (s *StartMockServerService) StartTCPServer(port int) (*models.Server, error) {
 	// create a TCP listener on the specified port and
 	// save the listener instance in the handler struct
 	listener, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
@@ -46,9 +45,9 @@ func (s *StartMockServerService) startTCPServer(port int) (*models.Server, error
 			conn, err := listener.Accept()
 			if err != nil {
 				log.Println("Error accepting connection:", err)
-				continue
+				return
 			}
-			go s.handleTCPRequest(conn)
+			go s.HandleTCPRequest(conn)
 			conn.Close()
 		}
 	}()
@@ -61,7 +60,7 @@ func (s *StartMockServerService) startTCPServer(port int) (*models.Server, error
 	}, nil
 }
 
-func (s *StartMockServerService) handleTCPRequest(conn net.Conn) {
+func (s *StartMockServerService) HandleTCPRequest(conn net.Conn) {
 	defer conn.Close()
 	buf := make([]byte, 1024)
 	_, err := conn.Read(buf)
@@ -70,8 +69,8 @@ func (s *StartMockServerService) handleTCPRequest(conn net.Conn) {
 		return
 	}
 
-	time := time.Now().Format(time.ANSIC)
-	responseStr := fmt.Sprintf("Your message is: %v. Received time: %v", string(buf[:]), time)
+	// time := time.Now().Format(time.ANSIC)
+	responseStr := fmt.Sprintf("Your message is: %v.", string(buf[:]))
 	conn.Write([]byte(responseStr))
 
 	// close conn
@@ -79,7 +78,7 @@ func (s *StartMockServerService) handleTCPRequest(conn net.Conn) {
 
 }
 
-func (s *StartMockServerService) startUDPServer(port int) (*models.Server, error) {
+func (s *StartMockServerService) StartUDPServer(port int) (*models.Server, error) {
 	addr, err := net.ResolveUDPAddr("udp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return nil, err
@@ -98,9 +97,9 @@ func (s *StartMockServerService) startUDPServer(port int) (*models.Server, error
 			n, addr, err := conn.ReadFromUDP(buf)
 			if err != nil {
 				log.Println("Error receiving message:", err)
-				continue
+				return
 			}
-			go s.handleUDPRequest(conn, addr, buf[:n])
+			go s.HandleUDPRequest(conn, addr, buf[:n])
 		}
 	}()
 
@@ -112,13 +111,13 @@ func (s *StartMockServerService) startUDPServer(port int) (*models.Server, error
 	}, nil
 }
 
-func (s *StartMockServerService) handleUDPRequest(conn *net.UDPConn, addr *net.UDPAddr, buf []byte) {
+func (s *StartMockServerService) HandleUDPRequest(conn *net.UDPConn, addr *net.UDPAddr, buf []byte) {
 	log.Printf("UDP request received from %v", addr)
-	response := []byte("UDP response")
-	conn.WriteToUDP(response, addr)
+	responseStr := []byte(fmt.Sprintf("Your message is: %v.", string(buf[:])))
+	conn.WriteToUDP(responseStr, addr)
 }
 
-func (s *StartMockServerService) startHTTPSServer(port int, cert string, key string) (*models.Server, error) {
+func (s *StartMockServerService) StartHTTPSServer(port int, cert string, key string) (*models.Server, error) {
 
 	// Load the TLS certificate and private key
 	tlsCert, err := tls.X509KeyPair([]byte(cert), []byte(key))
@@ -146,6 +145,7 @@ func (s *StartMockServerService) startHTTPSServer(port int, cert string, key str
 		fmt.Println("Serv error")
 		if err != nil && err != http.ErrServerClosed {
 			fmt.Println("Error starting HTTPS server: ", err)
+			return
 		}
 	}()
 
