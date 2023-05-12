@@ -33,19 +33,17 @@ func TestStartMockServer(t *testing.T) {
 		// Check that the server is listening on the correct port
 		require.Equal(t, cfg.Protocol, server.ListenerTCP.Addr().Network())
 		require.Equal(t, cfg.Port, server.ListenerTCP.Addr().(*net.TCPAddr).Port)
+	})
 
-		err = servers.StartMockServer(cfg)
-		server2 := servers.GetMockServers()[1]
-		require.Error(t, err)
-		require.Nil(t, server2)
-		// fmt.Print()
-		// Stop the server and check that it was closed correctly
-		err = server.ListenerTCP.Close()
-		require.NoError(t, err)
-		if server2 != nil {
-			err = server2.ListenerTCP.Close()
-			require.Error(t, err)
+	t.Run("Invalid Port for TCP server", func(t *testing.T) {
+		servers := startmockserverservice.New()
+		cfg := &models.StartMockServerRequestBody{
+			Protocol: "tcp",
+			Port:     80000,
 		}
+
+		err := servers.StartMockServer(cfg)
+		require.Error(t, err)
 	})
 
 	t.Run("Start UDP server", func(t *testing.T) {
@@ -70,6 +68,18 @@ func TestStartMockServer(t *testing.T) {
 		require.NoError(t, err)
 	})
 
+	t.Run("Invalid Port for UDP server", func(t *testing.T) {
+		servers := startmockserverservice.New()
+		cfg := &models.StartMockServerRequestBody{
+			Protocol: "udp",
+			Port:     800000,
+		}
+
+		err := servers.StartMockServer(cfg)
+
+		require.Error(t, err)
+	})
+
 	t.Run("Start HTTPS server", func(t *testing.T) {
 		servers := startmockserverservice.New()
 		cfg := &models.StartMockServerRequestBody{
@@ -85,7 +95,6 @@ func TestStartMockServer(t *testing.T) {
 
 		// Check that the server is listening on the correct port
 		require.Equal(t, fmt.Sprintf(":%d", cfg.Port), server.ListenerHTTP.Addr)
-		// require.Equal(t, cfg.Protocol, server.ListenerHTTP.Addr)
 
 		// Stop the server and check that it was closed correctly
 		err = server.ListenerHTTP.Close()
@@ -110,7 +119,7 @@ func TestHandleTCPRequest(t *testing.T) {
 	// create a new StartMockServerService
 	service := &startmockserverservice.MockServerService{}
 
-	t.Run("For healthy connetion", func(t *testing.T) {
+	t.Run("For healthy connection", func(t *testing.T) {
 		// create a new TCP listener
 		listener, err := net.Listen("tcp", "localhost:8080")
 		if err != nil {
@@ -161,117 +170,5 @@ func TestHandleTCPRequest(t *testing.T) {
 
 		// close the connection and #listener
 		defer conn1.Close()
-		// defer listener.Close()
 	})
-
-	// t.Run("For unhealthy connetion", func(t *testing.T) {
-	// 	// create a new TCP listener
-	// 	listener, err := net.Listen("tcp", "localhost:8080")
-	// 	if err != nil {
-	// 		t.Errorf("Error creating TCP listener: %v", err)
-	// 		return
-	// 	}
-
-	// 	conn, err := listener.Accept()
-	// 	go func() {
-	// 		// for {
-	// 		if err != nil {
-	// 			t.Errorf("Error Listerning TCP connection: %v", err)
-	// 			return
-	// 		}
-	// 		service.HandleTCPRequest(conn)
-	// 		conn.Close()
-	// 		// }
-	// 	}()
-
-	// 	// service.HandleTCPRequest(wConn)
-
-	// 	// assert that the connection is closed
-	// 	if checkConnectionClosed(conn) {
-	// 		fmt.Printf("%v", checkConnectionClosed(conn))
-	// 		t.Errorf("Expected connection to be closed, but it was not")
-	// 	}
-
-	// })
-
 }
-
-func checkConnectionClosed(conn net.Conn) bool {
-	// Try to read 0 bytes from the connection
-	buf := make([]byte, 0)
-	_, err := conn.Read(buf)
-
-	if err != nil {
-		// If the error is "use of closed network connection",
-		// the connection is closed.
-		if strings.Contains(err.Error(), "use of closed network connection") {
-			return true
-		}
-		// Otherwise, there was a different error reading from the
-		// connection, so assume it is still open.
-		return false
-	}
-
-	// If there was no error, assume the connection is still open.
-	return false
-}
-
-// func TestHandleUDPRequest(t *testing.T) {
-// 	// create a new StartMockServerService
-// 	service := &startmockserverservice.StartMockServerService{}
-
-// 	// create a new UDP listener
-// 	addr, _ := net.ResolveUDPAddr("udp", ":8080")
-// 	udpServer, err := net.ListenUDP("udp", addr)
-// 	if err != nil {
-// 		t.Errorf("Error creating UDP listener: %v", err)
-// 		return
-// 	}
-
-// 	go func() {
-// 		for {
-// 			buf := make([]byte, 1024)
-// 			n, addr1, err := udpServer.ReadFromUDP(buf)
-
-// 			if err != nil {
-// 				t.Errorf("Error Listerning UDP connection: %v", err)
-// 				return
-// 			}
-// 			go service.HandleUDPRequest(udpServer, addr1, buf[:n])
-// 			// conn.Close()
-// 		}
-// 	}()
-
-// 	// create a new UDP connection
-// 	conn1, err := net.DialUDP("udp", nil, addr)
-// 	if err != nil {
-// 		t.Errorf("Error dialing UDP connection: %v", err)
-// 		return
-// 	}
-
-// 	// write a message to the connection
-// 	message := "test message"
-// 	_, err = conn1.Write([]byte(message))
-// 	if err != nil {
-// 		t.Errorf("Error writing message to connection: %v", err)
-// 		return
-// 	}
-
-// 	// read the response from the connection
-// 	responseBuf := make([]byte, 1024)
-// 	_, err = conn1.Read(responseBuf)
-// 	if err != nil {
-// 		t.Errorf("Error reading response from connection: %v", err)
-// 		return
-// 	}
-// 	response := string(responseBuf[:])
-
-// 	// verify that the response contains the message
-// 	if !strings.Contains(response, message) {
-// 		t.Errorf("Unexpected response. Expected message should contain \"%v\" \nActual message received: %v\n", message, response)
-// 	}
-
-// 	// close the connection and #listener
-// 	defer conn1.Close()
-// 	// defer listener.Close()
-// }

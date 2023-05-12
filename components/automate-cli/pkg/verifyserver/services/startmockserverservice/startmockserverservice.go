@@ -31,10 +31,6 @@ func (s *MockServerService) GetMockServers() []*models.Server {
 	return s.MockServers
 }
 
-// func (s *MockServerService) addServerToList(m *models.Server) {
-// 	s.MockServers = append(s.MockServers, m)
-// }
-
 // StartMockServer starts a mock server of the given type and port.
 func (servers *MockServerService) StartMockServer(cfg *models.StartMockServerRequestBody) error {
 	var myServer *models.Server
@@ -47,7 +43,7 @@ func (servers *MockServerService) StartMockServer(cfg *models.StartMockServerReq
 	case constants.HTTPS:
 		myServer, err = servers.StartHTTPSServer(cfg.Port, cfg.Cert, cfg.Key)
 	default:
-		return errors.New("unsupported protocol")
+		err = errors.New("unsupported protocol")
 	}
 	if err != nil {
 		return err
@@ -113,7 +109,7 @@ func (s *MockServerService) StartUDPServer(port int) (*models.Server, error) {
 
 	conn, err := net.ListenUDP(constants.UDP, addr)
 	if err != nil {
-		return nil, err
+		return nil, errors.New(err.Error())
 	}
 
 	log.Printf("UDP server started on port %d", port)
