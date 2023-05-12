@@ -64,7 +64,6 @@ func (s *MockServerService) StartTCPServer(port int) (*models.Server, error) {
 	if err != nil {
 		return nil, errors.New(err.Error())
 	}
-	// defer listener.Close()
 
 	log.Printf("TCP server started on port %d", port)
 
@@ -169,7 +168,6 @@ func (s *MockServerService) StartHTTPSServer(port int, cert string, key string) 
 
 	// Start the HTTPS server
 	go func() {
-		// err := http.ListenAndServeTLS(fmt.Sprintf(":%d", port), cert, key, nil)
 		err = server.ListenAndServeTLS("", "")
 		if err != nil && err != http.ErrServerClosed {
 			fmt.Println("Error starting HTTPS server: ", err)
