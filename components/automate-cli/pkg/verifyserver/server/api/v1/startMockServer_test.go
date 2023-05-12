@@ -2,10 +2,12 @@ package v1_test
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/constants"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/server"
 	v1 "github.com/chef/automate/components/automate-cli/pkg/verifyserver/server/api/v1"
@@ -19,7 +21,10 @@ import (
 func SetupMockStartMockServerService(protocol string) *startmockserverservice.MockServersService {
 	return &startmockserverservice.MockServersService{
 		StartMockServerFunc: func(cfg *models.StartMockServerRequestBody) error {
-			return nil
+			if protocol == constants.TCP || protocol == constants.UDP || protocol == constants.HTTPS {
+				return nil
+			}
+			return errors.New("unsupported protocol")
 		},
 		GetMockServersFunc: func() []*models.Server {
 			myServer := &models.Server{
@@ -60,10 +65,12 @@ func TestStartMockServer(t *testing.T) {
 		expectedCode int
 		expectedBody string
 		reqBody      string
+		protocol     string
 	}{
 		{
 			description:  "200:success status route",
 			expectedCode: 200,
+			protocol:     "udp",
 			reqBody: `{
 				"port": 3001,
 				"protocol": "udp",
@@ -72,20 +79,44 @@ func TestStartMockServer(t *testing.T) {
 		}`,
 		},
 		{
-			description:  "409:port alread in use",
-			expectedCode: 409,
+			description:  "400:invalid request body",
+			expectedCode: 400,
+			protocol:     "udp",
 			reqBody: `{
-				"port": 3000,
-				"protocol": "udp",
+				"port": true,
+				"proto": "udp",
 				"key": "",
 				"cert": ""
 		}`,
 		},
 		{
-			description:  "400:port alread in use",
-			expectedCode: 400,
+			description:  "409:port alread in use",
+			expectedCode: 409,
+			protocol:     "tcp",
 			reqBody: `{
-				"port": 3004¯,
+				"port": 3000,
+				"protocol": "tcp",
+				"key": "",
+				"cert": ""
+		}`,
+		},
+		{
+			description:  "400:port invalid",
+			expectedCode: 400,
+			protocol:     "udp",
+			reqBody: `{
+				"port": 300000,
+				"key": "",
+				"cert": ""
+		}`,
+		},
+		{
+			description:  "400:upsupported protocol",
+			expectedCode: 400,
+			protocol:     "dp",
+			reqBody: `{
+				"port": 4200,
+				"protocol": "dp",
 				"key": "",
 				"cert": ""
 		}`,
@@ -94,7 +125,7 @@ func TestStartMockServer(t *testing.T) {
 	statusEndpoint := "/api/v1/start/mock-server"
 
 	for _, test := range tests {
-		app, err := SetupMockServerHandlers(SetupMockStartMockServerService("tcp"))
+		app, err := SetupMockServerHandlers(SetupMockStartMockServerService(test.protocol))
 		assert.NoError(t, err)
 		reqBody := bytes.NewBufferString(test.reqBody)
 		req := httptest.NewRequest("POST", statusEndpoint, reqBody)
