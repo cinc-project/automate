@@ -12,6 +12,7 @@ func (vs *VerifyServer) SetupRoutes() {
 	apiV1Group := apiGroup.Group("/v1")
 	apiChecksGroup := apiV1Group.Group("/checks")
 	apiChecksGroup.Get("/fqdn", vs.Handler.CheckFqdn)
+	apiChecksGroup.Post("/aws-opensearch-s3-bucket-access", vs.Handler.CheckOSBackupS3)
 
 	fiberutils.LogResgisteredRoutes(vs.App.Stack(), vs.Log)
 }
