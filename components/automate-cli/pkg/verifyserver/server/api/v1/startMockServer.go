@@ -1,10 +1,11 @@
 package v1
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
-	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/gofiber/fiber"
 )
 
@@ -17,36 +18,53 @@ func (h *Handler) StartMockServer(c *fiber.Ctx) {
 	if err != nil {
 		errString := fmt.Sprintf("start mock-server request body parsing failed: %v", err.Error())
 		h.Logger.Error(fmt.Errorf(errString))
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid request body"})
+		c.Next(&fiber.Error{Code: http.StatusBadRequest, Message: "Invalid request body"})
 		return
 	}
 
 	// If port number is invalid
-	if reqBody.Port < 0 || reqBody.Port > 65535 {
-		errString := fmt.Sprintf("start mock-server request body contains invalid port number: %v", err.Error())
-		h.Logger.Error(fmt.Errorf(errString))
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid port number"})
+	err = validatePortRange(reqBody.Port, h)
+	// fmt.Println("My Error", err.Error())
+	if err != nil {
+		h.Logger.Error(err)
+		c.Next(&fiber.Error{Code: http.StatusBadRequest, Message: "Invalid port number"})
 		return
 	}
 
-	for _, s := range h.MockServerServices {
-		if s.Port == reqBody.Port {
-			// Server is already running in the port
-			errString := fmt.Sprintf("start mock-server request body contains unavailable port: %v", reqBody.Port)
-			h.Logger.Error(fmt.Errorf(errString))
-			c.Status(fiber.ErrConflict.Code).JSON(fiber.Map{"port": reqBody.Port, "message": fmt.Sprintf(`"%s" server is already running on port %d`, s.Protocol, reqBody.Port)})
-			return
-		}
+	// Server is already running in the port
+	if err = validatePortAlreadyInUse(reqBody.Port, h); err != nil {
+		h.Logger.Error(err)
+		c.Next(&fiber.Error{Code: http.StatusConflict, Message: fmt.Sprintf(`"%s" server is already running on port %d`, reqBody.Protocol, reqBody.Port)})
+		return
 	}
 
-	service := startmockserverservice.StartMockServerService{}
-	mockServer, err := service.StartMockServer(*reqBody)
+	err = h.MockServersService.StartMockServer(reqBody)
 
 	if err != nil {
 		errString := fmt.Sprintf("start mock-server request body contains unsupported protocol: %v", err.Error())
 		h.Logger.Error(fmt.Errorf(errString))
-		c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "UnSupported Protocol"})
+		c.Next(&fiber.Error{Code: http.StatusBadRequest, Message: "UnSupported Protocol"})
 		return
 	}
-	h.MockServerServices = append(h.MockServerServices, mockServer)
+	// h.MockServerServices = append(h.MockServerServices, mockServer)
+}
+
+func validatePortRange(requestBodyPort int, h *Handler) error {
+	if requestBodyPort < 0 || requestBodyPort > 65535 {
+		errString := "start mock-server request body contains invalid port number"
+		fmt.Print(errString)
+		return errors.New(errString)
+	}
+	return nil
+}
+
+func validatePortAlreadyInUse(port int, h *Handler) error {
+	fmt.Printf("Hnadle server value: %v\n", h.MockServersService.GetMockServers())
+	for _, s := range h.MockServersService.GetMockServers() {
+		if s.Port == port {
+			errString := fmt.Sprintf("start mock-server request body contains unavailable port: %v", port)
+			return errors.New(errString)
+		}
+	}
+	return nil
 }

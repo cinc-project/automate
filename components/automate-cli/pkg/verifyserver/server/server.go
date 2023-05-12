@@ -7,6 +7,7 @@ import (
 	v1 "github.com/chef/automate/components/automate-cli/pkg/verifyserver/server/api/v1"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/fiberutils"
 	"github.com/chef/automate/lib/logger"
@@ -61,7 +62,8 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 				trigger.NewSoftwareVersionCheck(),
 				trigger.NewSystemResourceCheck(),
 				trigger.NewSshUserAccessCheck(),
-			)))
+			))).
+		AddMockServerServices(startmockserverservice.New())
 	vs := &VerifyServer{
 		Port:    port,
 		Log:     l,
