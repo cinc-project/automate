@@ -20,6 +20,7 @@ type MockServerService struct {
 type IStartMockServersService interface {
 	StartMockServer(cfg *models.StartMockServerRequestBody) error
 	GetMockServers() []*models.Server
+	SetMockServers(servers []*models.Server)
 }
 
 func New() IStartMockServersService {
@@ -29,6 +30,10 @@ func New() IStartMockServersService {
 // func to get mock server list
 func (s *MockServerService) GetMockServers() []*models.Server {
 	return s.MockServers
+}
+
+func (s *MockServerService) SetMockServers(servers []*models.Server) {
+	s.MockServers = servers
 }
 
 // StartMockServer starts a mock server of the given type and port.
@@ -63,12 +68,20 @@ func (s *MockServerService) StartTCPServer(port int) (*models.Server, error) {
 
 	log.Printf("TCP server started on port %d", port)
 
+	//Create a channel to listen for close signal
+	signalChan := make(chan bool, 1)
+
 	go func() {
 		for {
 			conn, err := listener.Accept()
 			if err != nil {
-				log.Println("Error accepting connection:", err)
-				return
+				select {
+				case <-signalChan:
+					log.Println("Stopping accepting incoming connections....")
+					return
+				default:
+					log.Println("Error accepting connection:", err)
+				}
 			}
 			go s.HandleTCPRequest(conn)
 			conn.Close()
@@ -80,6 +93,7 @@ func (s *MockServerService) StartTCPServer(port int) (*models.Server, error) {
 		ListenerTCP: listener,
 		ListenerUDP: nil,
 		Protocol:    constants.TCP,
+		SignalChan:  signalChan,
 	}, nil
 }
 
@@ -112,6 +126,9 @@ func (s *MockServerService) StartUDPServer(port int) (*models.Server, error) {
 		return nil, errors.New(err.Error())
 	}
 
+	//Create a channel to listen for close signal
+	signalChan := make(chan bool, 1)
+
 	log.Printf("UDP server started on port %d", port)
 
 	go func() {
@@ -119,8 +136,13 @@ func (s *MockServerService) StartUDPServer(port int) (*models.Server, error) {
 			buf := make([]byte, 1024)
 			n, addr, err := conn.ReadFromUDP(buf)
 			if err != nil {
-				log.Println("Error receiving message:", err)
-				return
+				select {
+				case <-signalChan:
+					log.Println("Stopping UDP server....")
+					return
+				default:
+					log.Println("Error receiving message:", err)
+				}
 			}
 			go s.HandleUDPRequest(conn, addr, buf[:n])
 		}
@@ -131,6 +153,7 @@ func (s *MockServerService) StartUDPServer(port int) (*models.Server, error) {
 		ListenerTCP: nil,
 		ListenerUDP: conn,
 		Protocol:    constants.UDP,
+		SignalChan:  signalChan,
 	}, nil
 }
 

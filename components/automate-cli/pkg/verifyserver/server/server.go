@@ -9,6 +9,7 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/stopmockserverservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/fiberutils"
 	"github.com/chef/automate/lib/logger"
 	"github.com/gofiber/cors"
@@ -63,7 +64,8 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 				trigger.NewSystemResourceCheck(),
 				trigger.NewSshUserAccessCheck(),
 			))).
-		AddMockServerServices(startmockserverservice.New())
+		AddMockServerServices(startmockserverservice.New()).
+		AddStopMockServerService(stopmockserverservice.NewStopMockServerService(l))
 	vs := &VerifyServer{
 		Port:    port,
 		Log:     l,

@@ -4,14 +4,16 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/stopmockserverservice"
 	"github.com/chef/automate/lib/logger"
 )
 
 type Handler struct {
-	Logger             logger.Logger
-	StatusService      statusservice.IStatusService
-	BatchCheckService  batchcheckservice.IBatchCheckService
-	MockServersService startmockserverservice.IStartMockServersService
+	Logger                logger.Logger
+	StatusService         statusservice.IStatusService
+	BatchCheckService     batchcheckservice.IBatchCheckService
+	MockServersService    startmockserverservice.IStartMockServersService
+	StopMockServerService stopmockserverservice.IStopMockServerService
 }
 
 func NewHandler(logger logger.Logger) *Handler {
@@ -30,5 +32,10 @@ func (h *Handler) AddMockServerServices(mss startmockserverservice.IStartMockSer
 
 func (h *Handler) AddBatchCheckService(bc batchcheckservice.IBatchCheckService) *Handler {
 	h.BatchCheckService = bc
+	return h
+}
+
+func (h *Handler) AddStopMockServerService(sm stopmockserverservice.IStopMockServerService) *Handler {
+	h.StopMockServerService = sm
 	return h
 }
