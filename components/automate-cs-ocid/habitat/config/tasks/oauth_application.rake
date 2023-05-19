@@ -1,5 +1,11 @@
 require 'active_record/base'
 namespace :oauth_application do
+  desc "Task to register multiple oauth application"
+  task :register1, [:oauth_applications] => :environment do |t, args|
+    puts "oauth_applications:"
+    puts args.oauth_applications
+  end
+
   desc "Task to register a new oauth application"
   task :register, [:app_name, :redirect_uri] => :environment do |t, args|
     puts "Registering new application..."
