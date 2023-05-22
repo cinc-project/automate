@@ -4,11 +4,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/constants"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/hardwareresourcechecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/softwareversionchecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/systemresourcechecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/systemuserchecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/nfsmountservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/portreachableservice"
 
 	"github.com/ansrivas/fiberprometheus"
 	v1 "github.com/chef/automate/components/automate-cli/pkg/verifyserver/server/api/v1"
@@ -78,7 +80,8 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 				systemresourcechecktrigger.NewSystemResourceCheck(l, port),
 				systemuserchecktrigger.NewSystemUserCheck(l, port),
 			))).
-		AddNFSMountService(nfsmountservice.NewNFSMountService(l, port))
+		AddNFSMountService(nfsmountservice.NewNFSMountService(l, port, constants.TIMEOUT)).
+		AddPortReachableService(portreachableservice.NewPortReachableService(l, constants.TIMEOUT))
 
 	vs := &VerifyServer{
 		Port:    port,
