@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/fqdnservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/nfsmountservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
 	"github.com/chef/automate/lib/logger"
@@ -12,6 +13,7 @@ type Handler struct {
 	StatusService     statusservice.IStatusService
 	BatchCheckService batchcheckservice.IBatchCheckService
 	NFSMountService   nfsmountservice.INFSService
+	FqdnService       fqdnservice.IFqdnService
 }
 
 func NewHandler(logger logger.Logger) *Handler {
@@ -30,5 +32,10 @@ func (h *Handler) AddBatchCheckService(bc batchcheckservice.IBatchCheckService) 
 
 func (h *Handler) AddNFSMountService(nm nfsmountservice.INFSService) *Handler {
 	h.NFSMountService = nm
+	return h
+}
+
+func (h *Handler) AddFqdnService(fqdn fqdnservice.IFqdnService) *Handler {
+	h.FqdnService = fqdn
 	return h
 }

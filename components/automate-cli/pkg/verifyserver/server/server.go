@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/hardwareresourcechecktrigger"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/fqdnservice"
 
 	"github.com/ansrivas/fiberprometheus"
 	v1 "github.com/chef/automate/components/automate-cli/pkg/verifyserver/server/api/v1"
@@ -75,7 +76,8 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 				trigger.NewSystemResourceCheck(),
 				trigger.NewSshUserAccessCheck(),
 			))).
-		AddNFSMountService(nfsmountservice.NewNFSMountService(l, port))
+		AddNFSMountService(nfsmountservice.NewNFSMountService(l, port)).
+		AddFqdnService(fqdnservice.NewFqdnService(l))
 
 	vs := &VerifyServer{
 		Port:    port,
