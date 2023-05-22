@@ -16,6 +16,8 @@ const NFS_BACKUP_CONFIG = "nfs-backup-config"
 
 const HARDWARE_RESOURCE_COUNT_MSG = "Hardware Resource Count Check"
 
+const NFS_MOUNT_MSG = "NFS Mount Backup Check"
+
 func GetBastionChecks() []string {
 	var checks = []string{
 		HARDWARE_RESOURCE_COUNT,

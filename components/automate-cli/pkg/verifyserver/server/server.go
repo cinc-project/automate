@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/hardwareresourcechecktrigger"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/nfsmountbackupchecktrigger"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/s3backupchecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/softwareversionchecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/systemresourcechecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/systemuserchecktrigger"
@@ -71,9 +73,9 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 				trigger.NewExternalPostgresCheck(),
 				trigger.NewFirewallCheck(),
 				trigger.NewFqdnCheck(),
-				trigger.NewNfsBackupConfigCheck(),
-				trigger.NewOpensearchS3BucketAccessCheck(),
-				trigger.NewS3BackupConfigCheck(),
+				nfsmountbackupchecktrigger.NewNfsBackupConfigCheck(),
+				opensearchs3bucketaccesscheck.NewOpensearchS3BucketAccessCheck(),
+				s3backupchecktrigger.NewS3BackupConfigCheck(l, port),
 				softwareversionchecktrigger.NewSoftwareVersionCheck(l, port),
 				systemresourcechecktrigger.NewSystemResourceCheck(l, port),
 				systemuserchecktrigger.NewSystemUserCheck(l, port),
