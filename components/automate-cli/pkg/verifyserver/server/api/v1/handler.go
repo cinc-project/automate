@@ -6,6 +6,7 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/nfsmountservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/softwareversionservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemresourceservice"
 	"github.com/chef/automate/lib/logger"
 )
 
@@ -16,6 +17,7 @@ type Handler struct {
 	NFSMountService              nfsmountservice.INFSService
 	HardwareResourceCountService hardwareresourcecount.IHardwareResourceCountService
 	SoftwareVersionService       softwareversionservice.ISoftwareVersionService
+	SystemResourceService        systemresourceservice.ISystemResourcesService
 }
 
 func NewHandler(logger logger.Logger) *Handler {
@@ -43,5 +45,10 @@ func (h *Handler) AddSoftwareVersionService(sv softwareversionservice.ISoftwareV
 
 func (h *Handler) AddHardwareResourceCountService(hrc hardwareresourcecount.IHardwareResourceCountService) *Handler {
 	h.HardwareResourceCountService = hrc
+	return h
+}
+
+func (h *Handler) AddSystemResourceService(srs systemresourceservice.ISystemResourcesService) *Handler {
+	h.SystemResourceService = srs
 	return h
 }
