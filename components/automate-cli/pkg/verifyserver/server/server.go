@@ -80,7 +80,7 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 				systemresourcechecktrigger.NewSystemResourceCheck(l, port),
 				systemuserchecktrigger.NewSystemUserCheck(l, port),
 			))).
-		AddNFSMountService(nfsmountservice.NewNFSMountService(l, port, constants.TIMEOUT)).
+		AddNFSMountService(nfsmountservice.NewNFSMountService(l, port)).
 		AddPortReachableService(portreachableservice.NewPortReachableService(l, constants.TIMEOUT))
 
 	vs := &VerifyServer{
