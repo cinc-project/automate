@@ -8,6 +8,7 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
 	"github.com/chef/automate/lib/logger"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemuserservice"
 )
 
 type Handler struct {
@@ -18,6 +19,7 @@ type Handler struct {
 	MockServersService           startmockserverservice.IStartMockServersService
 	HardwareResourceCountService hardwareresourcecount.IHardwareResourceCountService
 	SoftwareVersionService       softwareversionservice.ISoftwareVersionService
+	SystemUserService systemuserservice.SystemUser
 }
 
 func NewHandler(logger logger.Logger) *Handler {
@@ -50,5 +52,10 @@ func (h *Handler) AddSoftwareVersionService(sv softwareversionservice.ISoftwareV
 
 func (h *Handler) AddHardwareResourceCountService(hrc hardwareresourcecount.IHardwareResourceCountService) *Handler {
 	h.HardwareResourceCountService = hrc
+	return h
+}
+
+func (h *Handler) AddSystemUserService(su systemuserservice.SystemUser) *Handler {
+	h.SystemUserService = su
 	return h
 }
