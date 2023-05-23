@@ -15,17 +15,8 @@ import (
 const VERIFY_SERVER_PORT = "VERIFY_SERVER_PORT"
 
 type verifyCmdFlags struct {
-	file                      string
-	haAWSProvision            bool
-	haAWSManagedProvision     bool
-	haOnpremDeploy            bool
-	haOnPremAWSManagedDeploy  bool
-	haOnPremCustManagedDeploy bool
-	haAWSDeploy               bool
-	haAWSManagedDeploy        bool
-	standaloneDeploy          bool
-	certificates              bool
-	debug                     bool
+	certificates bool
+	debug        bool
 }
 
 type verifyCmdFlow struct {
