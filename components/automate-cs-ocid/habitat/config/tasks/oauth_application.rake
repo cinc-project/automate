@@ -13,7 +13,9 @@ namespace :oauth_application do
         # Making sure the iteration doesn't execute in case of empty value for app name
         next if oauth_application['name'].blank?
         app = Doorkeeper::Application.find_or_create_by(:name => oauth_application['name'])
-        app.update!(:redirect_uri => oauth_application['redirect_uri'])
+        # Updating redirect_uri of the app record only if it's different
+        # from the existing value in case it's an existing record
+        app.update!(:redirect_uri => oauth_application['redirect_uri']) if (app.redirect_uri != oauth_application['redirect_uri'])
       end
     end
   end

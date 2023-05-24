@@ -1,0 +1,6 @@
+[[ocid.v1.sys.ocid.oauth_applications]]
+  name = "supermarket4"
+  redirect_uri = "https://localhost:3004/1"
+[[ocid.v1.sys.ocid.oauth_applications]]
+  name = "supermarket6"
+  redirect_uri = "https://localhost:3006/1"
