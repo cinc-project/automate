@@ -647,11 +647,11 @@ func runOcIdShowAppCommand(cmd *cobra.Command, args []string) error {
 	} else {
 		oauthAppDetailsFilePath := "/hab/svc/automate-cs-ocid/config/registered_oauth_applications.yaml"
 		content, err := ioutil.ReadFile(oauthAppDetailsFilePath)
-    if err != nil {
-    	printErr := "Could not find the file with the registered application details. Pls restart OC-ID to generate it."
-      writer.Errorln(printErr)
-      return err
-    }
+		if err != nil {
+			printErr := "Could not find the file with the registered application details. Pls restart OC-ID to generate it."
+			writer.Errorln(printErr)
+			return err
+		}
 		registeredAppDetails := string(content)
 		writer.Println(registeredAppDetails)
 	}
