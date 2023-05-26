@@ -52,6 +52,7 @@ do_build() {
 
 do_install() {
   cp "habitat/config/tasks/oauth_application.rake" $(hab pkg path "chef/oc_id")/oc_id/lib/tasks
+  source habitat/config/scripts/set_file_permissions.sh
 
   cd "$(hab pkg path 'chef/oc_id')/oc_id"
 
@@ -63,10 +64,6 @@ do_install() {
   # TODO :: Remove following line once new ocid hab package is used
   echo "gem 'tzinfo-data'" >> Gemfile
   bundle install
-
-  # This is required so that 'db:migrate' can be executed from the run hook
-  chmod 766 -R "db/schema.rb"
-  chmod 777 -R "config"
 
   # tmp directory is required for storage of sessions
   mkdir -p tmp && chmod 777 -R tmp

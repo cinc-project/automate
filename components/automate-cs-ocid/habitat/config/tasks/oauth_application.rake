@@ -9,6 +9,11 @@ namespace :oauth_application do
     oauth_applications_json = ENV['OAUTH_APPLICATIONS_JSON']
     oauth_applications = JSON.parse(oauth_applications_json)
     ActiveRecord::Base.transaction do
+      # This will make sure a write lock is enabled while running this transaction
+      # so that no other write operation can happen on this table during this transaction is in process.
+      # Read operations will be allowed even during the lock as it has applied a "SHARE" lock.
+      # Only when the current transaction is completed the lock will be revoked and writes will be allowed.
+      ActiveRecord::Base.connection.execute('LOCK oauth_applications IN SHARE MODE')
       oauth_applications.each do |oauth_application|
         # Making sure the iteration doesn't execute in case of empty value for app name
         next if oauth_application['name'].blank?
@@ -25,13 +30,15 @@ namespace :oauth_application do
     registered_apps = Doorkeeper::Application.select(:name, :redirect_uri, :uid, :secret).group_by(&:name).as_json
     yaml_file_content = registered_apps.to_yaml
     file_path = ENV['REGISTERED_OAUTH_APPS_FILE_PATH']
-
-    # Making sure the directory is created before writing in the file
-    dir = File.dirname(file_path)
-    unless File.directory?(dir)
-      FileUtils.mkdir_p(dir)
+    begin
+      # Making sure the directory is created before writing in the file
+      dir = File.dirname(file_path)
+      unless File.directory?(dir)
+        FileUtils.mkdir_p(dir)
+      end
+      File.write(file_path, yaml_file_content)  
+    rescue StandardError => e
+      puts e.inspect
     end
-    
-    File.write(file_path, yaml_file_content)
   end
 end
