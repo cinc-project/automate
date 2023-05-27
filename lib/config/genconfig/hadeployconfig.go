@@ -126,10 +126,6 @@ func (c *HaDeployConfig) Prompts() (err error) {
 	if err != nil {
 		return
 	}
-	err = c.PromptBackup()
-	if err != nil {
-		return
-	}
 	return
 }
 
@@ -158,7 +154,7 @@ func (c *HaDeployConfig) PromptSsh() (err error) {
 	}
 	c.Architecture.ExistingInfra.SSHPort = sshPort
 
-	sshKeyFile, err := c.Prompt.InputWordDefault("SSH Key File [eg. \"~/.ssh/A2HA.pem\"]", "")
+	sshKeyFile, err := c.Prompt.InputStringRegxDefault("SSH Key File [eg. \"~/.ssh/A2HA.pem\"]", "^[~]{0,1}(\\/[\\w^\\. ]+)+\\/?$", "")
 	if err != nil {
 		return
 	}
@@ -185,11 +181,8 @@ func (c *HaDeployConfig) PromptBackup() (err error) {
 		if c.Architecture.ExistingInfra == nil {
 			c.Architecture.ExistingInfra = &ExistingInfraArch{}
 		}
-		backupMountLoc, err1 := c.Prompt.InputStringRegxDefault("Backup Mount Location", "^[a-zA-Z0-9-_/.]+$", "/mnt/automate_backups")
-		if err1 != nil {
-			return err1
-		}
-		c.Architecture.ExistingInfra.BackupMount = backupMountLoc
+
+		c.Architecture.ExistingInfra.BackupMount = "/mnt/automate_backups"
 
 		backupOption, err1 := c.Prompt.Select("Which backup option will you use", "AWS S3", "Minio", "Object Store", "File System", "NFS", "EFS")
 		if err1 != nil {
@@ -209,6 +202,12 @@ func (c *HaDeployConfig) PromptBackup() (err error) {
 			if err1 != nil {
 				return err1
 			}
+		} else if backupConfig == "file_system" {
+			backupMountLoc, err1 := c.Prompt.InputStringRegxDefault("Backup Mount Location", "^[~]{0,1}(\\/[\\w^\\. ]+)+\\/?$", "/mnt/automate_backups")
+			if err1 != nil {
+				return err1
+			}
+			c.Architecture.ExistingInfra.BackupMount = backupMountLoc
 		}
 	}
 	return
@@ -248,13 +247,12 @@ func (c *HaDeployConfig) PromptObjectStorageSettings(backupOption string) (err e
 		c.ObjectStorage.Config.SecretKey = secretKey
 		c.ObjectStorage.Config.Endpoint = "https://s3.amazonaws.com"
 
-		bucketRegion, err1 := c.Prompt.Select("AWS Region of bucket", AwsRegions()...)
+		bucketRegion, err1 := GetAwsRegion(c.Prompt)
 		if err1 != nil {
 			return err1
 		}
 		c.ObjectStorage.Config.Endpoint = bucketRegion
 	} else {
-
 		accessKey, err1 := c.Prompt.InputStringRegx("Access key for bucket", "^[A-Za-z0-9/+=]+$")
 		if err1 != nil {
 			return err1

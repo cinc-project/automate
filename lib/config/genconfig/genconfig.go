@@ -91,7 +91,7 @@ func (g *GenConfigImp) HaFlow() (err error) {
 func (g *GenConfigImp) OnPremFlow() (err error) {
 	configType, err := g.Prompt.Select("Choose config type",
 		string(CONFIG_TYPE_DEPLOY), string(CONFIG_TYPE_AUTOMATE),
-		string(CONFIG_TYPE_INFRA), string(CONFIG_TYPE_PG), string(CONFIG_TYPE_PG))
+		string(CONFIG_TYPE_INFRA), string(CONFIG_TYPE_PG), string(CONFIG_TYPE_OS))
 	if err != nil {
 		return
 	}
