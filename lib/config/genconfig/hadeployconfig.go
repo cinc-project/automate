@@ -247,7 +247,8 @@ func (c *HaDeployConfig) PromptObjectStorageSettings(backupOption string) (err e
 		c.ObjectStorage.Config.SecretKey = secretKey
 		c.ObjectStorage.Config.Endpoint = "https://s3.amazonaws.com"
 
-		bucketRegion, err1 := GetAwsRegion(c.Prompt)
+		awsRegions := AwsRegionsImpFactory(c.Prompt)
+		bucketRegion, err1 := awsRegions.Choose()
 		if err1 != nil {
 			return err1
 		}
