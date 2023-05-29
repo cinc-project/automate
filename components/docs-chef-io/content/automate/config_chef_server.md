@@ -14,7 +14,7 @@ gh_repo = "automate"
 {{% automate/ha-warn %}}
 {{< /warning >}}
 
-## Configure chef-server to swend data to Automate
+## Configure chef-server to send data to Automate
 
 ```toml
 [global.v1.external.automate]
@@ -33,12 +33,9 @@ a1_data_collector_token = "<data-collector token>"
 enabled = true
 ```
 
-
 ### Chef Infra Configuration In Chef Automate
 
 Click [here](/automate/chef_infra_in_chef_automate) for more information
-
-
 
 ## Patching Automate FQDN (Fully Qualified Domain Name)
 
@@ -48,25 +45,22 @@ Click [here](/automate/configuration/#chef-automate-fqdn) to learn more.
 
 Click [here](/automate/configuration/#upgrade-strategy) to learn more.
 
-
 ## Configure External Opensearch
 
 To know about OpenSearch configuration click [here](automate/install/#configuring-external-opensearch)
 
-
-
-## ADDING RESOLVERS FOR External OPENSEARCH
+## Adding resolvers for external OpenSearch
 To know about adding OpenSearch resolvers click [here](automate/install/#adding-resolvers-for-opensearch)
 
-## BACKUP EXTERNALLY-DEPLOYED OPENSEARCH TO LOCAL FILESYSTEM
+## Backup externally deployed OpenSearch to local filesystem
 
 Click [here](automate/install/#backup-externally-deployed-opensearch-to-local-filesystem) for more information.
 
-## BACKUP EXTERNALLY-DEPLOYED OPENSEARCH TO AWS S3
+## Backup externally deployed OpenSearch to AWS S3
 
 Click [here](automate/install/#backup-externally-deployed-opensearch-to-aws-s3) for more information.
 
-## BACKUP EXTERNALLY-DEPLOYED OPENSEARCH TO GCS
+## Backup externally deployed OpenSearch TO GCS
 
 Click [here](automate/install/#backup-externally-deployed-opensearch-to-gcs) for more information.
 
@@ -74,7 +68,7 @@ Click [here](automate/install/#backup-externally-deployed-opensearch-to-gcs) for
 
 Click [here](automate/install/#configuring-an-external-postgresql-database) for more information on external PostgreSQL configuration.
 
-## ADDING RESOLVERS FOR POSTGRESQL DATABASE
+## Adding resolvers for PostgreSQl database
 
 Click [here](automate/install/#adding-resolvers-for-postgresql-database) for more information on external PostgreSQL configuration.
 
@@ -82,11 +76,9 @@ Click [here](automate/install/#adding-resolvers-for-postgresql-database) for mor
 
 Click [here](/automate/configuration/#load-balancer-certificate-and-private-key) for more information
 
-
 #### Proxy Settings
 
 Click [here](/automate/configuration/#proxy-settings) for more information
-
 
 #### Global Log Level
 
@@ -94,7 +86,6 @@ Click [here](/automate/configuration/#global-log-level) for more information
 
 #### Load Balancer
 Click [here](/automate/configuration/#load-balancer) for more information
-
 
 ### Troubleshooting
 
