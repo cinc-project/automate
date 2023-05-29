@@ -14,7 +14,7 @@ gh_repo = "automate"
 {{% automate/ha-warn %}}
 {{< /warning >}}
 
-The below configurations can be patched for PostgreSQL. Please add the values you want to patch to a `config.toml` file nd run `chef-automate config patch config.toml --pg` from bastion.
+The below configurations can be patched for PostgreSQL. Please add the values you want to patch to a `config.toml` file and run `chef-automate config patch config.toml --pg` from bastion.
 
 
 ## Sample config for PostgreSQL node
