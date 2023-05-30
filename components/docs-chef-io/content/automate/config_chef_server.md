@@ -28,11 +28,8 @@ token = "<data-collector token>"
 server_name = "<server name from the automate server ssl cert>"
 root_cert = """<pem format root CA cert>
 """
-[auth_n.v1.sys.service]
-# It is fine to use an A2 data collector token.
-a1_data_collector_token = "<data-collector token>"
-[erchef.v1.sys.data_collector]
-enabled = true
+[cs_nginx.v1.sys.ngx.http]
+ssl_verify_depth = 6
 ```
 
 ### Chef Infra Configuration In Chef Automate
