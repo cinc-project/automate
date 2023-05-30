@@ -1,0 +1,5 @@
+#!{{pkgPathFor "core/bash"}}/bin/bash -e
+
+export OCID_CONFIG_FOLDER_PATH="{{pkgPathFor "chef/oc_id"}}/oc_id/config"
+export SECRET_KEY_BASE_FILE_PATH="$OCID_CONFIG_FOLDER_PATH/secret_key_base.txt"
+ruby "{{pkg.svc_config_path}}/tasks/generate_secret_key_base.rb"

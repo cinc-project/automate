@@ -8,5 +8,6 @@ override_configs = {
 }
 env_config['chef'] ||= {}
 env_config['chef'].merge!(override_configs)
+env_config['secret_key_base'] = ENV['SECRET_KEY_BASE'] if ENV['SECRET_KEY_BASE'].present?
 env_config_yml = env_config.to_yaml
 File.write(env_config_file_path, env_config_yml)
