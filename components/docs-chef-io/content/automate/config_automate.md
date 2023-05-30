@@ -19,7 +19,8 @@ Automate provides various configuration options that can be patched to customize
 The below configurations can be patched to Automate nodes. Please add the values you want to patch to a `config.toml` file and run `chef-automate config patch config.toml --a2` from bastion node.
 
 ### General Automate Configuration
-### Patching Automate FQDN (Fully Qualified Domain Name)
+
+#### Patching Automate FQDN (Fully Qualified Domain Name)
 
 Click [here](/automate/configuration/#chef-automate-fqdn) to learn more.
 
