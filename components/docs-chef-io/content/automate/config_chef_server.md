@@ -14,6 +14,8 @@ gh_repo = "automate"
 {{% automate/ha-warn %}}
 {{< /warning >}}
 
+## General Chef Server Configuration
+
 ### Configure chef-server to send data to Automate
 
 ```toml
@@ -45,6 +47,33 @@ Click [here](/automate/configuration/#chef-automate-fqdn) to learn more.
 
 Click [here](/automate/configuration/#upgrade-strategy) to learn more.
 
+### Proxy Settings
+
+Click [here](/automate/configuration/#proxy-settings) for more information
+
+### Global Log Level
+
+Click [here](/automate/configuration/#global-log-level) for more information
+
+### Centralised Logs
+
+Click [here](/automate/centralizing_log/) for more information
+
+### Load Balancer
+Click [here](/automate/configuration/#load-balancer) for more information
+
+## Backups
+
+### Backup to a Filesystem
+
+Click [here](/automate/backup/#backup-to-a-filesystem) for more information
+
+### Backup to AWS S3
+
+Click [here](/automate/backup/#backup-to-aws-s3) for more information
+
+## Configuring External OpenSearch in Automate
+
 ### Configure External Opensearch
 
 To know about OpenSearch configuration click [here](automate/install/#configuring-external-opensearch)
@@ -60,9 +89,7 @@ Click [here](automate/install/#backup-externally-deployed-opensearch-to-local-fi
 
 Click [here](automate/install/#backup-externally-deployed-opensearch-to-aws-s3) for more information.
 
-### Backup externally deployed OpenSearch TO GCS
-
-Click [here](automate/install/#backup-externally-deployed-opensearch-to-gcs) for more information.
+## Configuring External PostgreSQL in Automate
 
 ### Configuring External PostgresSQL
 
@@ -72,21 +99,6 @@ Click [here](automate/install/#configuring-an-external-postgresql-database) for 
 
 Click [here](automate/install/#adding-resolvers-for-postgresql-database) for more information on external PostgreSQL configuration.
 
-### Load Balancer Certificate and Private Key
-
-Click [here](/automate/configuration/#load-balancer-certificate-and-private-key) for more information
-
-### Proxy Settings
-
-Click [here](/automate/configuration/#proxy-settings) for more information
-
-### Global Log Level
-
-Click [here](/automate/configuration/#global-log-level) for more information
-
-### Load Balancer
-Click [here](/automate/configuration/#load-balancer) for more information
-
-### Troubleshooting
+## Troubleshooting
 
 Click [here](/automate/configuration/#troubleshooting) for more information

@@ -18,61 +18,38 @@ Automate provides various configuration options that can be patched to customize
 The config.toml file is the main configuration file for Chef Automate. It allows you to customize various aspects of the Chef Automate server. Below are some important configuration options that you can patch in the config.toml file:
 To check all available automate config please run `chef-automate dev default-config`.
 
+## General Automate Configuration
 ### Patching Automate FQDN (Fully Qualified Domain Name)
 
 Click [here](/automate/configuration/#chef-automate-fqdn) to learn more.
-
-### Configure Data Feed
-
-Click [here](/automate/datafeed/#configuring-global-data-feed-behavior) to learn more.
 
 ### Auto Upgrade ON/OFF
 
 Click [here](/automate/configuration/#upgrade-strategy) to learn more.
 
-### Configure External Opensearch
+### Global Log Level
 
-To know about OpenSearch configuration click [here](automate/install/#configuring-external-opensearch)
+Click [here](/automate/log_management/) for more information
 
-### Adding resolvers for external OpenSearch
-To know about adding OpenSearch resolvers click [here](automate/install/#adding-resolvers-for-opensearch)
+### Centralised Logs
 
-### Backup externally-deployed OpenSearch to local filesystem
+Click [here](/automate/centralizing_log/) for more information
 
+### Load Balancer
 
-Click [here](automate/install/#backup-externally-deployed-opensearch-to-local-filesystem) for more information.
+Click [here](/automate/configuration/#load-balancer) for more information
 
-### Backup externally deployed OpenSearch to AWS S3
+### Content Security Policy Header
 
+Click [here](/automate/configuration/#content-security-policy-header) for more information
 
-Click [here](automate/install/#backup-externally-deployed-opensearch-to-aws-s3) for more information.
+### Configure Data Feed
 
-### Backup externally deployed OpenSearch to GCS
-
-Click [here](automate/install/#backup-externally-deployed-opensearch-to-gcs) for more information.
-
-### Configuring External PostgresSQL
-
-Click [here](automate/install/#configuring-an-external-postgresql-database) for more information on external PostgreSQL configuration.
-
-### Adding resolvers for PostgreSQL database
-
-Click [here](automate/install/#adding-resolvers-for-postgresql-database) for more information on external PostgreSQL configuration.
-
-### Load Balancer Certificate and Private Key
-
-Click [here](/automate/configuration/#load-balancer-certificate-and-private-key) for more information
+Click [here](/automate/datafeed/#configuring-global-data-feed-behavior) for more information
 
 ### Proxy Settings
 
 Click [here](/automate/configuration/#proxy-settings) for more information
-
-### Global Log Level
-
-Click [here](/automate/configuration/#global-log-level) for more information
-
-### Load Balancer
-Click [here](/automate/configuration/#load-balancer) for more information
 
 ### Buffer Size
 
@@ -88,6 +65,44 @@ Click [here](/automate/configuration/#compliance-configuration) for more informa
 
 Click [here](/automate/configuration/#configure-inflight-data-collector-request-maximum) for more information
 
+## Backups
+
+### Backup to a Filesystem
+
+Click [here](/automate/backup/#backup-to-a-filesystem) for more information
+
+### Backup to AWS S3
+
+Click [here](/automate/backup/#backup-to-aws-s3) for more information
+
+## Configuring External OpenSearch in Automate
+
+### Configure External Opensearch
+
+To know about OpenSearch configuration click [here](automate/install/#configuring-external-opensearch)
+
+### Adding resolvers for external OpenSearch
+To know about adding OpenSearch resolvers click [here](automate/install/#adding-resolvers-for-opensearch)
+
+### Backup externally-deployed OpenSearch to local filesystem
+
+Click [here](automate/install/#backup-externally-deployed-opensearch-to-local-filesystem) for more information.
+
+### Backup externally deployed OpenSearch to AWS S3
+
+Click [here](automate/install/#backup-externally-deployed-opensearch-to-aws-s3) for more information.
+
+## Configuring External PostgresSQL in Automate
+### Configure External PostgresSQL
+
+Click [here](automate/install/#configuring-an-external-postgresql-database) for more information on external PostgreSQL configuration.
+
+### Adding resolvers for PostgreSQL database
+
+Click [here](automate/install/#adding-resolvers-for-postgresql-database) for more information on external PostgreSQL configuration.
+
+## Automate UI Configurations
+
 ### Sign-out on Browser Close
 Click [here](/automate/configuration/#sign-out-on-browser-close) for more information
 
@@ -98,10 +113,6 @@ Click [here](/automate/configuration/#disclosure-banner) for more information
 ### Disclosure Panel
 
 Click [here](/automate/configuration/#disclosure-panel) for more information
-
-### Content Security Policy Header
-
-Click [here](/automate/configuration/#content-security-policy-header) for more information
 
 ### Session Timeout
 
@@ -115,6 +126,6 @@ Click [here](/automate/telemetry/) for more information
 
 Click [here](/automate/invalid_login_attempts/) for more information
 
-### Troubleshooting
+## Troubleshooting
 
 Click [here](/automate/configuration/#troubleshooting) for more information

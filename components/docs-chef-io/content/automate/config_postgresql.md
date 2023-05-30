@@ -62,3 +62,7 @@ To increase log level to DEBUG:
   log_level = "DEBUG"
   ```
 - Run patch command `chef-automate config patch log.toml --pg` to apply the patch.
+
+### Centralised Logs
+
+Click [here](/automate/centralizing_log/) for more information
