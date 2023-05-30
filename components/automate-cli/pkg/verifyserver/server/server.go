@@ -10,6 +10,8 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/certificatechecktrigger"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/externalopensearchchecktrigger"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/externalpostgresqlchecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/firewallchecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/hardwareresourcechecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/softwareversionchecktrigger"
@@ -26,12 +28,12 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/stopmockserverservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemuserservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/awsutils"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/db"
-	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemuserservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/fiberutils"
-	"github.com/chef/automate/lib/io/fileutils"
 	"github.com/chef/automate/lib/executil"
+	"github.com/chef/automate/lib/io/fileutils"
 	"github.com/chef/automate/lib/logger"
 	"github.com/chef/automate/lib/userutils"
 	"github.com/gofiber/fiber/v2"
@@ -84,8 +86,8 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 				hardwareresourcechecktrigger.NewHardwareResourceCountCheck(l, port),
 				sshuseraccesschecktrigger.NewSshUserAccessCheck(l, port),
 				certificatechecktrigger.NewCertificateCheck(l, port),
-				trigger.NewExternalOpensearchCheck(),
-				trigger.NewExternalPostgresCheck(),
+				externalopensearchchecktrigger.NewExternalOpensearchCheck(l, port),
+				externalpostgresqlchecktrigger.NewExternalPostgresCheck(l, port),
 				firewallchecktrigger.NewFirewallCheck(l, port),
 				trigger.NewFqdnCheck(),
 				trigger.NewNfsBackupConfigCheck(),
@@ -103,7 +105,7 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 		AddStopMockServerService(stopmockserverservice.NewStopMockServerService(l)).
 		AddOSS3BackupService(opensearchbackupservice.NewOSS3BackupService(l)).
 		AddPortReachableService(portreachableservice.NewPortReachableService(l, constants.TIMEOUT)).
-		AddExternalPostgresqlService(externalpostgresqlservice.NewExternalPostgresqlService(db.NewDBImpl(),fileutils.NewFileSystemUtils(),l)).
+		AddExternalPostgresqlService(externalpostgresqlservice.NewExternalPostgresqlService(db.NewDBImpl(), fileutils.NewFileSystemUtils(), l)).
 		AddSystemUserService(systemuserservice.NewSystemUserService(l, executil.NewExecCmdServiceImp(), userutils.NewUserUtilImp()))
 	vs := &VerifyServer{
 		Port:    port,

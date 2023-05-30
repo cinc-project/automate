@@ -1,9 +1,15 @@
 package checkutils
 
 import (
+	"fmt"
+
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
 	"github.com/gofiber/fiber/v2"
 )
+
+func PrepareEndPoint(ip, port, path string) string {
+	return fmt.Sprintf("http://%s:%s%s", ip, port, path)
+}
 
 func PrepareTriggerResponse(resp *models.CheckTriggerResponse, host, nodeType, errorString, check, msg string, isError bool) models.CheckTriggerResponse {
 	if isError {

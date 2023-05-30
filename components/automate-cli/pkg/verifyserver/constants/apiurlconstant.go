@@ -15,4 +15,6 @@ const (
 	SSH_USER_CHECK_API_PATH          = "/api/v1/checks/ssh-users"
 	CERTIFICATE_CHECK_API_PATH       = "/api/v1/checks/certificate"
 	PORT_REACHABLE_API_PATH          = "/api/v1/checks/port-reachable"
+	EXTERNAL_OPENSEARCH_API_PATH     = "/api/v1/checks/external-opensearch"
+	EXTERNAL_POSTGRESQL_API_PATH     = "/api/v1/checks/external-postgresql"
 )

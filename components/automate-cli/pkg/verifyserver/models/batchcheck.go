@@ -54,6 +54,7 @@ type ExternalOS struct {
 
 type ExternalPG struct {
 	PGInstanceURL       string `json:"postgresql_instance_url"`
+	PGPort              string `json:"postgresql_instance_port"`
 	PGSuperuserName     string `json:"postgresql_superuser_username"`
 	PGSuperuserPassword string `json:"postgresql_superuser_password"`
 	PGDbUserName        string `json:"postgresql_dbuser_username"`
@@ -147,4 +148,13 @@ type FirewallRequest struct {
 	Cert                       string `json:"cert"`
 	Key                        string `json:"key"`
 	RootCert                   string `json:"root_cert"`
+}
+
+type ExternalOSCheckRequest struct {
+	IP             string `json:"ip"`
+	OSDomainName   string `json:"opensearch_domain_name"`
+	OSDomainURL    string `json:"opensearch_domain_url"`
+	OSUsername     string `json:"opensearch_usename"`
+	OSUserPassword string `json:"opensearch_user_password"`
+	OSCert         string `json:"opensearch_cert"`
 }
