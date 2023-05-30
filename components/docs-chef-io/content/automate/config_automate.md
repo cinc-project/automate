@@ -15,8 +15,8 @@ gh_repo = "automate"
 {{< /warning >}}
 
 Automate provides various configuration options that can be patched to customize its behavior and meet specific requirements. This guide outlines some out of all the available configurations that you can modify.
-The config.toml file is the main configuration file for Chef Automate. It allows you to customize various aspects of the Chef Automate server. Below are some important configuration options that you can patch in the config.toml file:
-To check all available automate config please run `chef-automate dev default-config`.
+
+The below configurations can be patched to Automate nodes. Please add the values you want to patch to a `config.toml` file and run `chef-automate config patch config.toml --a2` from bastion node.
 
 ## General Automate Configuration
 ### Patching Automate FQDN (Fully Qualified Domain Name)

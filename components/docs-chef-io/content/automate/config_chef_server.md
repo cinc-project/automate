@@ -14,6 +14,8 @@ gh_repo = "automate"
 {{% automate/ha-warn %}}
 {{< /warning >}}
 
+The below configurations can be patched to Chef Server nodes. Please add the values you want to patch to a `config.toml` file and run `chef-automate config patch config.toml --cs` from bastion node.
+
 ## General Chef Server Configuration
 
 ### Configure chef-server to send data to Automate

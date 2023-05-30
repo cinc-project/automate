@@ -14,7 +14,7 @@ gh_repo = "automate"
 {{% automate/ha-warn %}}
 {{< /warning >}}
 
-The below configurations can be patched for OpenSearch. Please add the values you want to patch to a `config.toml` file and run `chef-automate config patch config.toml --os` from bastion node.
+The below configurations can be patched to OpenSearch nodes. Please add the values you want to patch to a `config.toml` file and run `chef-automate config patch config.toml --os` from bastion node.
 
 ## Sample Config for OpenSearch node
 
