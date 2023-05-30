@@ -1,12 +1,12 @@
 +++
-title = "OpenSearch Node config for HA"
+title = "HA OpenSearch Node config"
 draft = false
 gh_repo = "automate"
 [menu]
   [menu.automate]
-    title = "OpenSearch Node config for HA"
+    title = "HA OpenSearch Node config"
     parent = "automate/deploy_high_availability/configuration"
-    identifier = "automate/deploy_high_availability/configuration/config_opensearch.md OpenSearch Node config for HA"
+    identifier = "automate/deploy_high_availability/configuration/config_opensearch.md HA OpenSearch Node config"
     weight = 210
 +++
 

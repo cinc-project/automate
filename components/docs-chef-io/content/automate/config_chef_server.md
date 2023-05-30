@@ -1,12 +1,12 @@
 +++
-title = "Chef Server Node config for HA"
+title = "HA Chef Server Node config"
 draft = false
 gh_repo = "automate"
 [menu]
   [menu.automate]
-    title = "Chef Server Node config for HA"
+    title = "HA Chef Server Node config"
     parent = "automate/deploy_high_availability/configuration"
-    identifier = "automate/deploy_high_availability/configuration/config_chef_server.md Chef Server Node config for HA"
+    identifier = "automate/deploy_high_availability/configuration/config_chef_server.md HA Chef Server Node config"
     weight = 210
 +++
 

@@ -1,12 +1,12 @@
 +++
-title = "Automate Node config for HA"
+title = "HA Automate Node config"
 draft = false
 gh_repo = "automate"
 [menu]
   [menu.automate]
-    title = "Automate Node config for HA"
+    title = "HA Automate Node config"
     parent = "automate/deploy_high_availability/configuration"
-    identifier = "automate/deploy_high_availability/configuration/config_automate.md Automate Node config for HA"
+    identifier = "automate/deploy_high_availability/configuration/config_automate.md HA Automate Node config"
     weight = 210
 +++
 
