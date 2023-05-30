@@ -16,9 +16,9 @@ gh_repo = "automate"
 
 The below configurations can be patched to Chef Server nodes. Please add the values you want to patch to a `config.toml` file and run `chef-automate config patch config.toml --cs` from bastion node.
 
-## General Chef Server Configuration
+### General Chef Server Configuration
 
-### Configure chef-server to send data to Automate
+#### Configure chef-server to send data to Automate
 
 ```toml
 [global.v1.external.automate]
@@ -34,70 +34,70 @@ root_cert = """<pem format root CA cert>
 ssl_verify_depth = 6
 ```
 
-### Chef Infra Configuration In Chef Automate
+#### Chef Infra Configuration In Chef Automate
 
 Click [here](/automate/chef_infra_in_chef_automate) for more information
 
-### Patching Automate FQDN (Fully Qualified Domain Name)
+#### Patching Automate FQDN (Fully Qualified Domain Name)
 
 Click [here](/automate/configuration/#chef-automate-fqdn) to learn more.
 
-### Auto Upgrade ON/OFF
+#### Auto Upgrade ON/OFF
 
 Click [here](/automate/configuration/#upgrade-strategy) to learn more.
 
-### Proxy Settings
+#### Proxy Settings
 
 Click [here](/automate/configuration/#proxy-settings) for more information
 
-### Global Log Level
+#### Global Log Level
 
 Click [here](/automate/configuration/#global-log-level) for more information
 
-### Centralised Logs
+#### Centralised Logs
 
 Click [here](/automate/centralizing_log/) for more information
 
-### Load Balancer
+#### Load Balancer
 Click [here](/automate/configuration/#load-balancer) for more information
 
-## Backups
+### Backups
 
-### Backup to a Filesystem
+#### Backup to a Filesystem
 
 Click [here](/automate/backup/#backup-to-a-filesystem) for more information
 
-### Backup to AWS S3
+#### Backup to AWS S3
 
 Click [here](/automate/backup/#backup-to-aws-s3) for more information
 
-## Configuring External OpenSearch in Automate
+### Configuring External OpenSearch in Automate
 
-### Configure External Opensearch
+#### Configure External Opensearch
 
-To know about OpenSearch configuration click [here](automate/install/#configuring-external-opensearch)
+To know about OpenSearch configuration click [here](/automate/install/#configuring-external-opensearch)
 
-### Adding resolvers for external OpenSearch
-To know about adding OpenSearch resolvers click [here](automate/install/#adding-resolvers-for-opensearch)
+#### Adding resolvers for external OpenSearch
+To know about adding OpenSearch resolvers click [here](/automate/install/#adding-resolvers-for-opensearch)
 
-### Backup externally deployed OpenSearch to local filesystem
+#### Backup externally deployed OpenSearch to local filesystem
 
-Click [here](automate/install/#backup-externally-deployed-opensearch-to-local-filesystem) for more information.
+Click [here](/automate/install/#backup-externally-deployed-opensearch-to-local-filesystem) for more information.
 
-### Backup externally deployed OpenSearch to AWS S3
+#### Backup externally deployed OpenSearch to AWS S3
 
-Click [here](automate/install/#backup-externally-deployed-opensearch-to-aws-s3) for more information.
+Click [here](/automate/install/#backup-externally-deployed-opensearch-to-aws-s3) for more information.
 
-## Configuring External PostgreSQL in Automate
+### Configuring External PostgreSQL in Automate
 
-### Configuring External PostgresSQL
+#### Configuring External PostgresSQL
 
-Click [here](automate/install/#configuring-an-external-postgresql-database) for more information on external PostgreSQL configuration.
+Click [here](/automate/install/#configuring-an-external-postgresql-database) for more information on external PostgreSQL configuration.
 
-### Adding resolvers for PostgreSQl database
+#### Adding resolvers for PostgreSQl database
 
-Click [here](automate/install/#adding-resolvers-for-postgresql-database) for more information on external PostgreSQL configuration.
+Click [here](/automate/install/#adding-resolvers-for-postgresql-database) for more information on external PostgreSQL configuration.
 
-## Troubleshooting
+### Troubleshooting
 
 Click [here](/automate/configuration/#troubleshooting) for more information

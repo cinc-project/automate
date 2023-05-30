@@ -16,7 +16,7 @@ gh_repo = "automate"
 
 The below configurations can be patched to OpenSearch nodes. Please add the values you want to patch to a `config.toml` file and run `chef-automate config patch config.toml --os` from bastion node.
 
-## Sample Config for OpenSearch node
+### Sample Config for OpenSearch node
 
 ```toml
 destructive_requires_name = "true"
@@ -126,7 +126,7 @@ ssl_key = "Enter Private Key----"
 port = 9300
 ```
 
-## Example
+#### Example
 
 To increase max heap size:
 - Create a heap.toml file with below contents on bastion:
@@ -136,6 +136,6 @@ To increase max heap size:
   ```
 - Run patch command `chef-automate config patch log.toml --os` to apply the patch.
 
-### Centralised Logs
+#### Centralised Logs
 
 Click [here](/automate/centralizing_log/) for more information
