@@ -14,3 +14,8 @@ func (eosc *ExternalOpensearchCheck) Run(config models.Config) []models.CheckTri
 	}
 	return m
 }
+
+func (ss *ExternalOpensearchCheck) GetPortsForMockServer() map[string]map[string][]int {
+	nodeTypePortMap := make(map[string]map[string][]int)
+	return nodeTypePortMap
+}

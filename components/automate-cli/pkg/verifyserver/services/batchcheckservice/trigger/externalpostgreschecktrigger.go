@@ -14,3 +14,8 @@ func (epc *ExternalPostgresCheck) Run(config models.Config) []models.CheckTrigge
 	}
 	return m
 }
+
+func (ss *ExternalPostgresCheck) GetPortsForMockServer() map[string]map[string][]int {
+	nodeTypePortMap := make(map[string]map[string][]int)
+	return nodeTypePortMap
+}
