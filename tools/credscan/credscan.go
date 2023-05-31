@@ -143,6 +143,9 @@ var a2Config = config{
 
 		// Exclude test file for portreachableservice with uses RSA KEY for test cases
 		{regex: `components/automate-cli/pkg/verifyserver/services/portreachableservice/portreachable_test.go`},
+
+		// Exclude test file for externalopensearchservice with uses RSA KEY for test cases
+		{regex: `components/automate-cli/pkg/verifyserver/services/externalopensearchservice/externalopensearchservice_test.go`},
 	},
 	contentInclude: []pattern{
 		{
