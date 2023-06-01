@@ -151,8 +151,3 @@ type FirewallRequest struct {
 	RootCert                   string `json:"root_cert"`
 }
 
-type CheckAndType struct {
-	CheckType string `json:"check_type"`
-	CheckName string `json:"check_name"`
-	CheckMsg  string `json:"check_msg"`
-}
