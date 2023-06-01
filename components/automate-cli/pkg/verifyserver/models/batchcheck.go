@@ -7,6 +7,21 @@ type BatchCheckRequest struct {
 	Config Config   `json:"config"`
 }
 
+type StartMockServerFromBatchServiceResponse struct {
+	Host       string `json:"host"`
+	Protocol   string `json:"protocol"`
+	Port       int    `json:"port"`
+	Error      error  `json:"error"`
+	StatusCode int    `json:"status_code"`
+}
+
+type MockServerRequestBody struct {
+	Port     int
+	Protocol string
+	Cert     string
+	Key      string
+}
+
 type Hardware struct {
 	AutomateNodeCount        int      `json:"automate_node_count"`
 	AutomateNodeIps          []string `json:"automate_node_ips"`
