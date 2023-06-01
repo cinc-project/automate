@@ -19,4 +19,5 @@ const (
 	AWS_OPENSEARCH_S3_BUCKET_ACCESS_API_PATH = "/api/v1/checks/aws-opensearch-s3-bucket-access"
 	PORT_REACHABLE_API_PATH                  = "/api/v1/checks/port-reachable"
 	STATUS_API_PATH                          = "/status"
+	START_MOCK_SERVER                        = "/api/v1/start/mock-server"
 )
