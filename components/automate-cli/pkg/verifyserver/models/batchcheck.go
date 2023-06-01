@@ -1,6 +1,8 @@
 package models
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+)
 
 type BatchCheckRequest struct {
 	Checks []string `json:"checks"`
@@ -147,4 +149,10 @@ type FirewallRequest struct {
 	Cert                       string `json:"cert"`
 	Key                        string `json:"key"`
 	RootCert                   string `json:"root_cert"`
+}
+
+type CheckAndType struct {
+	CheckType string `json:"check_type"`
+	CheckName string `json:"check_name"`
+	CheckMsg  string `json:"check_msg"`
 }
