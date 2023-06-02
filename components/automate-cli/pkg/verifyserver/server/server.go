@@ -17,6 +17,7 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/systemresourcechecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice/trigger/systemuserchecktrigger"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/externalpostgresqlservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/firewallservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/hardwareresourcecount"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/nfsmountservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/opensearchbackupservice"
@@ -26,16 +27,16 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/stopmockserverservice"
-	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/db"
-	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemuserservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemresourceservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemuserservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/awsutils"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/db"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/utils/fiberutils"
-	"github.com/chef/automate/lib/io/fileutils"
 	"github.com/chef/automate/lib/executil"
+	"github.com/chef/automate/lib/io/fileutils"
 	"github.com/chef/automate/lib/logger"
-	"github.com/chef/automate/lib/userutils"
 	"github.com/chef/automate/lib/systemresource"
+	"github.com/chef/automate/lib/userutils"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	fiberlogger "github.com/gofiber/fiber/v2/middleware/logger"
@@ -106,8 +107,10 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 		AddStopMockServerService(stopmockserverservice.NewStopMockServerService(l)).
 		AddOSS3BackupService(opensearchbackupservice.NewOSS3BackupService(l)).
 		AddPortReachableService(portreachableservice.NewPortReachableService(l, constants.TIMEOUT)).
-		AddExternalPostgresqlService(externalpostgresqlservice.NewExternalPostgresqlService(db.NewDBImpl(),fileutils.NewFileSystemUtils(),l)).
-		AddSystemUserService(systemuserservice.NewSystemUserService(l, executil.NewExecCmdServiceImp(), userutils.NewUserUtilImp()))
+		AddExternalPostgresqlService(externalpostgresqlservice.NewExternalPostgresqlService(db.NewDBImpl(), fileutils.NewFileSystemUtils(), l)).
+		AddSystemUserService(systemuserservice.NewSystemUserService(l, executil.NewExecCmdServiceImp(), userutils.NewUserUtilImp())).
+		AddFirewallService(firewallservice.NewFirewallService(l, constants.TIMEOUT, port))
+
 	vs := &VerifyServer{
 		Port:    port,
 		Log:     l,

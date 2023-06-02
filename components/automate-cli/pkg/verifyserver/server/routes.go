@@ -19,10 +19,9 @@ func (vs *VerifyServer) SetupRoutes() {
 	apiChecksGroup.Post("/s3-config", vs.Handler.GetS3Config)
 	apiChecksGroup.Post("/port-reachable", vs.Handler.PortReachable)
 	apiChecksGroup.Post("/external-postgresql", vs.Handler.CheckExternalPostgresql)
-	
 	apiChecksGroup.Get("/system-user", vs.Handler.CheckSystemUser)
-
 	apiChecksGroup.Get("/system-resource", vs.Handler.GetSystemResource)
+	apiChecksGroup.Post("/firewall", vs.Handler.FirewallCheck)
 
 	apiStartGroup := apiV1Group.Group("/start")
 	apiStartGroup.Post("/mock-server", vs.Handler.StartMockServer)
@@ -30,6 +29,6 @@ func (vs *VerifyServer) SetupRoutes() {
 
 	apiStopGroup := apiV1Group.Group("/stop")
 	apiStopGroup.Post("/mock-server", vs.Handler.StopMockServer)
-	
+
 	fiberutils.LogResgisteredRoutes(vs.App.Stack(), vs.Log)
 }

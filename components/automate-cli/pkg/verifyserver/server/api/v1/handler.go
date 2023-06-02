@@ -3,6 +3,7 @@ package v1
 import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/batchcheckservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/externalpostgresqlservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/firewallservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/hardwareresourcecount"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/nfsmountservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/opensearchbackupservice"
@@ -12,8 +13,8 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/stopmockserverservice"
-	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemuserservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemresourceservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemuserservice"
 	"github.com/chef/automate/lib/logger"
 )
 
@@ -32,6 +33,7 @@ type Handler struct {
 	ExternalPostgresqlService    externalpostgresqlservice.ExternalPostgresqlService
 	SystemUserService            systemuserservice.SystemUserService
 	SystemResourceService        systemresourceservice.SystemResourcesService
+	FirewallService              firewallservice.IFirewallService
 }
 
 func NewHandler(logger logger.Logger) *Handler {
@@ -99,5 +101,10 @@ func (h *Handler) AddExternalPostgresqlService(pg externalpostgresqlservice.Exte
 
 func (h *Handler) AddSystemResourceService(srs systemresourceservice.SystemResourcesService) *Handler {
 	h.SystemResourceService = srs
+	return h
+}
+
+func (h *Handler) AddFirewallService(fw firewallservice.IFirewallService) *Handler {
+	h.FirewallService = fw
 	return h
 }
