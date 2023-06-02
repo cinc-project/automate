@@ -20,5 +20,5 @@ const (
 	PORT_REACHABLE_API_PATH                  = "/api/v1/checks/port-reachable"
 	STATUS_API_PATH                          = "/status"
 	START_MOCK_SERVER                        = "/api/v1/start/mock-server"
-	STOP_MOCK_SERVER                = "/api/v1/stop/mock-server"
+	STOP_MOCK_SERVER                         = "/api/v1/stop/mock-server"
 )
