@@ -9,11 +9,12 @@ import (
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/portreachableservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/s3configservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/softwareversionservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/sshusercheckservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/statusservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/stopmockserverservice"
-	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemuserservice"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemresourceservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/systemuserservice"
 	"github.com/chef/automate/lib/logger"
 )
 
@@ -32,6 +33,7 @@ type Handler struct {
 	ExternalPostgresqlService    externalpostgresqlservice.ExternalPostgresqlService
 	SystemUserService            systemuserservice.SystemUserService
 	SystemResourceService        systemresourceservice.SystemResourcesService
+	SshUserCheckService          sshusercheckservice.SshUsercheckService
 }
 
 func NewHandler(logger logger.Logger) *Handler {
@@ -99,5 +101,10 @@ func (h *Handler) AddExternalPostgresqlService(pg externalpostgresqlservice.Exte
 
 func (h *Handler) AddSystemResourceService(srs systemresourceservice.SystemResourcesService) *Handler {
 	h.SystemResourceService = srs
+	return h
+}
+
+func (h *Handler) AddSshUserCheckService(ssu sshusercheckservice.SshUsercheckService) *Handler {
+	h.SshUserCheckService = ssu
 	return h
 }

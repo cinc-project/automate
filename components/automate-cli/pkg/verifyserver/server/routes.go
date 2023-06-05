@@ -19,6 +19,7 @@ func (vs *VerifyServer) SetupRoutes() {
 	apiChecksGroup.Post("/s3-config", vs.Handler.GetS3Config)
 	apiChecksGroup.Post("/port-reachable", vs.Handler.PortReachable)
 	apiChecksGroup.Post("/external-postgresql", vs.Handler.CheckExternalPostgresql)
+	apiChecksGroup.Post("/ssh-users", vs.Handler.CheckSshUser)
 	
 	apiChecksGroup.Get("/system-user", vs.Handler.CheckSystemUser)
 
