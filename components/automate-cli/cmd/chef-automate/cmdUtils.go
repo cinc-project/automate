@@ -135,6 +135,7 @@ func (c *remoteCmdExecutor) execute(nodeMap *NodeTypeAndCmd) (map[string][]*CmdR
 		if err != nil {
 			return cmdResult, err
 		}
+
 		output := c.executeCmdOnGivenNodes(nodeMap.Frontend.CmdInputs, nodeIps, remoteService, nodeMap.Frontend.CmdInputs.InputFilesPrefix, writer)
 		return output, nil
 	case nodeMap.Automate.CmdInputs.NodeType:
