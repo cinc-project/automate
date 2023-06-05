@@ -73,6 +73,10 @@ enable_custom_certs = false
 # private_key = """private_key_contents"""
 # public_key = """public_key_contents"""
 
+# [[automate.config.certs_by_ip]]
+# ip = ""
+# private_key = """private_key_contents"""
+# public_key = """public_key_contents"""
 
 [chef_server.config]
 ## === INPUT NEEDED ===
@@ -84,6 +88,11 @@ instance_count = ""
 enable_custom_certs = false
 
 # Add Chef Server node internal public and private keys
+# private_key = """private_key_contents"""
+# public_key = """public_key_contents"""
+
+# [[chef_server.config.certs_by_ip]]
+# ip = ""
 # private_key = """private_key_contents"""
 # public_key = """public_key_contents"""
 
@@ -105,6 +114,10 @@ enable_custom_certs = false
 # admin_cert = """admin_public_key_contents"""
 # private_key = """private_key_contents"""
 # public_key = """public_key_contents"""
+# [[opensearch.config.certs_by_ip]]
+# ip = ""
+# private_key = """private_key_contents"""
+# public_key = """public_key_contents"""
 
 ## === ===
 
@@ -119,6 +132,10 @@ enable_custom_certs = false
 
 # Add Postgresql root-ca and keys
 # root_ca = """root_ca_contents"""
+# private_key = """private_key_contents"""
+# public_key = """public_key_contents"""
+# [[postgresql.config.certs_by_ip]]
+# ip = ""
 # private_key = """private_key_contents"""
 # public_key = """public_key_contents"""
 
