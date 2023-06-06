@@ -1,19 +1,18 @@
-package startmockserverservice_test
+package mockserverservice_test
 
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
-	"reflect"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/constants"
 	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/models"
-	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/startmockserverservice"
+	"github.com/chef/automate/components/automate-cli/pkg/verifyserver/services/mockserverservice"
 	"github.com/chef/automate/lib/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,20 +29,17 @@ func TestStartMockServer(t *testing.T) {
 	assert.NoError(t, err)
 	t.Run("Start TCP server and check response", func(t *testing.T) {
 		const PORT = 3000
-		servers := startmockserverservice.New(log)
+		servers := mockserverservice.NewMockServersServiceImp(log)
 		cfg := &models.StartMockServerRequestBody{
 			Protocol: constants.TCP,
 			Port:     PORT,
 		}
 
-		err = servers.StartMockServer(cfg)
-		server := servers.GetMockServers()[0]
+		err = servers.Start(cfg)
 		require.NoError(t, err)
-		require.NotNil(t, server)
 
-		// Check that the server is listening on the correct port
-		require.Equal(t, cfg.Protocol, server.ListenerTCP.Addr().Network())
-		require.Equal(t, cfg.Port, server.ListenerTCP.Addr().(*net.TCPAddr).Port)
+		// Check that the server is running on the correct port and protocol
+		require.Equal(t, true, servers.IsMockServerRunningOnGivenPortAndProctocol(cfg.Port, cfg.Protocol))
 		// create a new TCP connection
 		conn1, err := net.Dial(constants.TCP, fmt.Sprintf(":%d", cfg.Port))
 		if err != nil {
@@ -75,38 +71,37 @@ func TestStartMockServer(t *testing.T) {
 
 		// close the connection and #listener
 		defer conn1.Close()
-		server.SignalChan <- true
-		err = server.ListenerTCP.Close()
+		err = servers.Stop(&models.StopMockServerRequestBody{
+			Port:     cfg.Port,
+			Protocol: cfg.Protocol,
+		})
 		require.NoError(t, err)
 	})
 
 	t.Run("Invalid Port for TCP server", func(t *testing.T) {
-		servers := startmockserverservice.New(log)
+		servers := mockserverservice.NewMockServersServiceImp(log)
 		cfg := &models.StartMockServerRequestBody{
 			Protocol: constants.TCP,
 			Port:     80000,
 		}
 
-		err := servers.StartMockServer(cfg)
+		err := servers.Start(cfg)
 		require.Error(t, err)
 	})
 
 	t.Run("Start UDP server", func(t *testing.T) {
 		const PORT = 3001
-		servers := startmockserverservice.New(log)
+		servers := mockserverservice.NewMockServersServiceImp(log)
 		cfg := &models.StartMockServerRequestBody{
 			Protocol: constants.UDP,
 			Port:     PORT,
 		}
-		err := servers.StartMockServer(cfg)
+		err := servers.Start(cfg)
 
-		server := servers.GetMockServers()[0]
 		require.NoError(t, err)
-		require.NotNil(t, server)
 
-		// Check that the server is listening on the correct port
-		require.Equal(t, cfg.Protocol, server.ListenerUDP.LocalAddr().Network())
-		require.Equal(t, cfg.Port, server.ListenerUDP.LocalAddr().(*net.UDPAddr).Port)
+		// Check that the server is running on the correct port and protocol
+		require.Equal(t, true, servers.IsMockServerRunningOnGivenPortAndProctocol(cfg.Port, cfg.Protocol))
 
 		conn1, err := net.Dial(constants.UDP, fmt.Sprintf(":%d", cfg.Port))
 		if err != nil {
@@ -140,36 +135,35 @@ func TestStartMockServer(t *testing.T) {
 		defer conn1.Close()
 
 		// Stop the server and check that it was closed correctly
-		server.SignalChan <- true
-		err = server.ListenerUDP.Close()
+		err = servers.Stop(&models.StopMockServerRequestBody{
+			Port:     cfg.Port,
+			Protocol: cfg.Protocol,
+		})
 		require.NoError(t, err)
 	})
 
 	t.Run("Invalid Port for UDP server", func(t *testing.T) {
-		servers := startmockserverservice.New(log)
+		servers := mockserverservice.NewMockServersServiceImp(log)
 		cfg := &models.StartMockServerRequestBody{
 			Protocol: constants.UDP,
 			Port:     800000,
 		}
 
-		err := servers.StartMockServer(cfg)
-
+		err := servers.Start(cfg)
 		require.Error(t, err)
 	})
 
 	t.Run("Start HTTPS server", func(t *testing.T) {
 		const PORT = 3002
-		servers := startmockserverservice.New(log)
+		servers := mockserverservice.NewMockServersServiceImp(log)
 		cfg := &models.StartMockServerRequestBody{
 			Protocol: constants.HTTPS,
 			Port:     PORT,
 			Cert:     SERVER_CERT,
 			Key:      SERVER_KEY,
 		}
-		err := servers.StartMockServer(cfg)
+		err := servers.Start(cfg)
 		require.NoError(t, err)
-		server := servers.GetMockServers()[0]
-		require.NotNil(t, server)
 
 		tr := &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
 
@@ -188,34 +182,37 @@ func TestStartMockServer(t *testing.T) {
 		defer resp.Body.Close()
 
 		// Read the response body
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			t.Error("Error reading response body:", err)
 			return
 		}
 
 		headerContent := resp.Header.Get("x-server-ip")
-		require.Contains(t, headerContent, startmockserverservice.GetPrivateIP())
+		require.Contains(t, headerContent, mockserverservice.GetPrivateIP())
 		require.Contains(t, string(body), "ok")
 
-		// Check that the server is listening on the correct port
-		require.Equal(t, fmt.Sprintf(":%d", cfg.Port), server.ListenerHTTP.(*http.Server).Addr)
+		// Check that the server is running on the correct port and protocol
+		require.Equal(t, true, servers.IsMockServerRunningOnGivenPortAndProctocol(cfg.Port, cfg.Protocol))
 
 		// Stop the server and check that it was closed correctly
-		err = server.ListenerHTTP.(*http.Server).Close()
+		err = servers.Stop(&models.StopMockServerRequestBody{
+			Port:     cfg.Port,
+			Protocol: cfg.Protocol,
+		})
 		require.NoError(t, err)
 	})
 
 	t.Run("HTTPS server with invalid cert values", func(t *testing.T) {
 		const PORT = 3002
-		servers := startmockserverservice.New(log)
+		servers := mockserverservice.NewMockServersServiceImp(log)
 		cfg := &models.StartMockServerRequestBody{
 			Protocol: constants.HTTPS,
 			Port:     PORT,
 			Cert:     "",
 			Key:      SERVER_KEY,
 		}
-		err := servers.StartMockServer(cfg)
+		err := servers.Start(cfg)
 		require.Error(t, err)
 
 		// Check that the server is listening on the correct port
@@ -224,14 +221,14 @@ func TestStartMockServer(t *testing.T) {
 
 	t.Run("HTTPS server with invalid key values", func(t *testing.T) {
 		const PORT = 3002
-		servers := startmockserverservice.New(log)
+		servers := mockserverservice.NewMockServersServiceImp(log)
 		cfg := &models.StartMockServerRequestBody{
 			Protocol: constants.HTTPS,
 			Port:     PORT,
 			Cert:     SERVER_CERT,
 			Key:      "",
 		}
-		err := servers.StartMockServer(cfg)
+		err := servers.Start(cfg)
 		require.Error(t, err)
 
 		// Check that the server is listening on the correct port
@@ -241,35 +238,132 @@ func TestStartMockServer(t *testing.T) {
 	t.Run("HTTPS server with busy port", func(t *testing.T) {
 		const PORT = 3003
 
+		server := &http.Server{
+			Addr: fmt.Sprintf(":%d", PORT),
+		}
 		// Starting a server in port to be checked
 		go func() {
-			err := http.ListenAndServe(fmt.Sprintf(":%d", PORT), nil)
-			if err != nil {
+			err := server.ListenAndServe()
+			if err != nil && err != http.ErrServerClosed {
 				t.Error("Error starting the server:", err)
 			}
 		}()
 
 		time.Sleep(100 * time.Millisecond)
-		servers := startmockserverservice.New(log)
+		servers := mockserverservice.NewMockServersServiceImp(log)
 		cfg := &models.StartMockServerRequestBody{
 			Protocol: constants.HTTPS,
 			Port:     PORT,
 			Cert:     SERVER_CERT,
 			Key:      SERVER_KEY,
 		}
-		err = servers.StartMockServer(cfg)
+		err = servers.Start(cfg)
 		require.Error(t, err)
 
 		// Check that the server is listening on the correct port
 		require.Contains(t, err.Error(), "address already in use")
+		server.Close()
+	})
+
+	t.Run("Start HTTP server", func(t *testing.T) {
+		const PORT = 3002
+		servers := mockserverservice.NewMockServersServiceImp(log)
+		cfg := &models.StartMockServerRequestBody{
+			Protocol: constants.HTTP,
+			Port:     PORT,
+		}
+		err := servers.Start(cfg)
+		require.NoError(t, err)
+
+		client := &http.Client{}
+
+		httpReq, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d", cfg.Port), nil)
+
+		require.NoError(t, err)
+
+		// Perform the request
+		resp, err := client.Do(httpReq)
+		if err != nil {
+			t.Error("Error sending request:", err)
+			return
+		}
+		defer resp.Body.Close()
+
+		// Read the response body
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			t.Error("Error reading response body:", err)
+			return
+		}
+
+		headerContent := resp.Header.Get("x-server-ip")
+		require.Contains(t, headerContent, mockserverservice.GetPrivateIP())
+		require.Contains(t, string(body), "ok")
+
+		// Check that the server is running on the correct port and protocol
+		require.Equal(t, true, servers.IsMockServerRunningOnGivenPortAndProctocol(cfg.Port, cfg.Protocol))
+
+		// Stop the server and check that it was closed correctly
+		err = servers.Stop(&models.StopMockServerRequestBody{
+			Port:     cfg.Port,
+			Protocol: cfg.Protocol,
+		})
+		require.NoError(t, err)
+	})
+
+	t.Run("HTTP server with busy port", func(t *testing.T) {
+		const PORT = 3003
+		const PORT1 = 3001
+
+		// Start first HTTP server
+		servers := mockserverservice.NewMockServersServiceImp(log)
+		cfg := &models.StartMockServerRequestBody{
+			Protocol: constants.HTTP,
+			Port:     PORT,
+		}
+		err = servers.Start(cfg)
+		require.NoError(t, err)
+
+		// Start second HTTP server
+		cfg = &models.StartMockServerRequestBody{
+			Protocol: constants.HTTP,
+			Port:     PORT1,
+		}
+		err = servers.Start(cfg)
+		require.NoError(t, err)
+
+		time.Sleep(100 * time.Millisecond)
+		cfg = &models.StartMockServerRequestBody{
+			Protocol: constants.HTTP,
+			Port:     PORT,
+		}
+		err = servers.Start(cfg)
+		require.Error(t, err)
+
+		// Check that the server is listening on the correct port
+		require.Contains(t, err.Error(), "address already in use")
+
+		// Stop the server and check that it was closed correctly
+		err = servers.Stop(&models.StopMockServerRequestBody{
+			Port:     PORT,
+			Protocol: "http",
+		})
+		require.NoError(t, err)
+
+		// Stop the server and check that it was closed correctly
+		err = servers.Stop(&models.StopMockServerRequestBody{
+			Port:     PORT1,
+			Protocol: "http",
+		})
+		require.NoError(t, err)
 	})
 
 	t.Run("Unsupported protocol", func(t *testing.T) {
 		const PORT = 3004
-		servers := startmockserverservice.New(log)
-		err := servers.StartMockServer(&models.StartMockServerRequestBody{
+		servers := mockserverservice.NewMockServersServiceImp(log)
+		err := servers.Start(&models.StartMockServerRequestBody{
 			Port:     PORT,
-			Protocol: "http",
+			Protocol: "htt",
 			Cert:     "",
 			Key:      "",
 		})
@@ -277,36 +371,4 @@ func TestStartMockServer(t *testing.T) {
 		require.Error(t, err)
 		require.Equal(t, "unsupported protocol", err.Error())
 	})
-}
-
-func TestSetMockServers(t *testing.T) {
-	log, err := logger.NewLogger("text", "debug")
-	assert.NoError(t, err)
-	servers := startmockserverservice.New(log)
-
-	tests := []struct {
-		name    string
-		servers []*models.Server
-	}{
-		{
-			name: "Test SetMockServes function",
-			servers: []*models.Server{
-				{
-					Port:         0,
-					ListenerTCP:  nil,
-					ListenerUDP:  nil,
-					ListenerHTTP: &http.Server{},
-					SignalChan:   make(chan bool),
-					Protocol:     "tcp",
-				},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			servers.SetMockServers(tt.servers)
-			serverArr := servers.GetMockServers()
-			assert.True(t, reflect.DeepEqual(tt.servers, serverArr))
-		})
-	}
 }

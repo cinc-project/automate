@@ -4,4 +4,5 @@ const (
 	TCP   = "tcp"
 	UDP   = "udp"
 	HTTPS = "https"
+	HTTP  = "http"
 )
