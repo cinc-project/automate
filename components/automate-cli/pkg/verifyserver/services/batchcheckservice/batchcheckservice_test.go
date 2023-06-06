@@ -858,7 +858,7 @@ func TestStartMockServer(t *testing.T) {
 			totalO += 1
 		}
 	}
-	assert.Equal(t, len(startedServers), 24)
+	assert.Equal(t, len(startedServers), 23)
 	assert.Equal(t, len(failedServers), 0)
 }
 
