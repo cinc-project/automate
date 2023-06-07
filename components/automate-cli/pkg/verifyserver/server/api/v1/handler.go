@@ -33,7 +33,7 @@ type Handler struct {
 	ExternalPostgresqlService    externalpostgresqlservice.ExternalPostgresqlService
 	SystemUserService            systemuserservice.SystemUserService
 	SystemResourceService        systemresourceservice.SystemResourcesService
-	SshUserCheckService          sshusercheckservice.SshUsercheckService
+	SshUserCheckService          sshusercheckservice.SshUserCheckService
 }
 
 func NewHandler(logger logger.Logger) *Handler {
@@ -104,7 +104,7 @@ func (h *Handler) AddSystemResourceService(srs systemresourceservice.SystemResou
 	return h
 }
 
-func (h *Handler) AddSshUserCheckService(ssu sshusercheckservice.SshUsercheckService) *Handler {
+func (h *Handler) AddSshUserCheckService(ssu sshusercheckservice.SshUserCheckService) *Handler {
 	h.SshUserCheckService = ssu
 	return h
 }

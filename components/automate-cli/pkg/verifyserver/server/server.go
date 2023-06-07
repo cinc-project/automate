@@ -114,7 +114,7 @@ func NewVerifyServer(port string, debug bool) (*VerifyServer, error) {
 		AddPortReachableService(portreachableservice.NewPortReachableService(l, constants.TIMEOUT)).
 		AddExternalPostgresqlService(externalpostgresqlservice.NewExternalPostgresqlService(db.NewDBImpl(), fileutils.NewFileSystemUtils(), l)).
 		AddSystemUserService(systemuserservice.NewSystemUserService(l, executil.NewExecCmdServiceImp(), userutils.NewUserUtilImp())).
-		AddSshUserCheckService(sshusercheckservice.NewSshUserCheckService(l, fileutils.NewFileSystemUtils(), sshutils.NewSSHUtil(&sshutils.SSHConfig{}, sshutils.NewSshPkgDeps(), l)))
+		AddSshUserCheckService(sshusercheckservice.NewSshUserCheckService(l, fileutils.NewFileSystemUtils(), sshutils.NewSSHUtil(&sshutils.SSHConfig{}, sshutils.NewSshClient(),l)))
 	vs := &VerifyServer{
 		Port:    port,
 		Log:     l,
