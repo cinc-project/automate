@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	certificate = models.Certificate{
+	certificate = &models.Certificate{
 		AutomateFqdn:   "www.example.com",
 		ChefServerFqdn: "www.example.com",
 		RootCert:       "rootcert",
@@ -290,7 +290,7 @@ const (
 func TestFqdnCheck_Run(t *testing.T) {
 
 	type args struct {
-		config models.Config
+		config *models.Config
 	}
 	tests := []struct {
 		name       string
@@ -303,8 +303,8 @@ func TestFqdnCheck_Run(t *testing.T) {
 		{
 			// 	name: "Passed Automate Node Check",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						AutomateNodeCount: 1,
 						AutomateNodeIps:   []string{"1.2.3.4"},
 					},
@@ -320,8 +320,8 @@ func TestFqdnCheck_Run(t *testing.T) {
 		{
 			name: "Failure Check Automate Nodes",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						AutomateNodeCount: 1,
 						AutomateNodeIps:   []string{"1.2.3.4"},
 					},
@@ -337,8 +337,8 @@ func TestFqdnCheck_Run(t *testing.T) {
 		{
 			name: "Failure Chef server fqn node Nodes",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						ChefInfraServerNodeCount: 1,
 						ChefInfraServerNodeIps:   []string{"5.6.7.8"},
 					},
@@ -354,8 +354,8 @@ func TestFqdnCheck_Run(t *testing.T) {
 		{
 			name: "Passed Chef server Node Check",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						ChefInfraServerNodeCount: 1,
 						ChefInfraServerNodeIps:   []string{"5.6.7.8"},
 					},
@@ -371,8 +371,8 @@ func TestFqdnCheck_Run(t *testing.T) {
 		{
 			name: "Failed Chef server Node Check for more than one node",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						ChefInfraServerNodeCount: 1,
 						ChefInfraServerNodeIps:   []string{"5.6.7.8", "5.6.7.8"},
 					},
@@ -388,8 +388,8 @@ func TestFqdnCheck_Run(t *testing.T) {
 		{
 			name: "Couldn't call API for chef server nodes",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						ChefInfraServerNodeCount: 1,
 						ChefInfraServerNodeIps:   []string{"5.6.7.8"},
 					},
@@ -405,8 +405,8 @@ func TestFqdnCheck_Run(t *testing.T) {
 		{
 			name: "400 Bad Reqest",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						ChefInfraServerNodeCount: 1,
 						ChefInfraServerNodeIps:   []string{"5.6.7.8"},
 					},
@@ -422,8 +422,8 @@ func TestFqdnCheck_Run(t *testing.T) {
 		{
 			name: "Passed Automate Node Check Post Deployment",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						AutomateNodeCount: 1,
 						AutomateNodeIps:   []string{"1.2.3.4"},
 					},

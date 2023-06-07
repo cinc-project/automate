@@ -559,8 +559,8 @@ func TestBatchCheckService(t *testing.T) {
 				constants.SOFTWARE_VERSIONS,
 				constants.SYSTEM_RESOURCES,
 				constants.SYSTEM_USER,
-				constants.AWS_OPENSEARCH_S3_BUCKET_ACCESS}, models.Config{
-				Hardware: models.Hardware{
+				constants.AWS_OPENSEARCH_S3_BUCKET_ACCESS}, &models.Config{
+				Hardware: &models.Hardware{
 					AutomateNodeCount:        1,
 					AutomateNodeIps:          []string{"1.2.3.4"},
 					ChefInfraServerNodeCount: 1,

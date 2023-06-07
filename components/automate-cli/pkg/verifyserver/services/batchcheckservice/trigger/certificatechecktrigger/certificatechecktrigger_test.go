@@ -162,7 +162,7 @@ func GetRequestJsonWithSameFrontEnd() models.Config {
 	return ipConfig
 }
 
-func GetRequestJson() models.Config {
+func GetRequestJson() *models.Config {
 	ipConfig := models.Config{}
 
 	json.Unmarshal([]byte(`{
@@ -230,7 +230,7 @@ func GetRequestJson() models.Config {
 			]
 		  }
 		}`), &ipConfig)
-	return ipConfig
+	return &ipConfig
 }
 
 func GetCertificateRequest() models.CertificateCheckRequest {

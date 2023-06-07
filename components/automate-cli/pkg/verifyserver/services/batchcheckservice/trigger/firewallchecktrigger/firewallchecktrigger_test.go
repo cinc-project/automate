@@ -17,19 +17,19 @@ import (
 )
 
 var (
-	hardware = models.Hardware{
+	hardware = &models.Hardware{
 		AutomateNodeIps:        []string{"10.0.0.1"},
 		PostgresqlNodeIps:      []string{"10.0.0.3", "10.0.0.6"},
 		OpenSearchNodeIps:      []string{"10.0.0.5", "10.0.0.10"},
 		ChefInfraServerNodeIps: []string{"10.0.0.7"},
 	}
 
-	nodeCert = models.NodeCert{
+	nodeCert = &models.NodeCert{
 		IP:  "10.0.0.1",
 		Key: "test-key",
 	}
 
-	nodes = []models.NodeCert{nodeCert}
+	nodes = []*models.NodeCert{nodeCert}
 )
 
 const (
@@ -364,11 +364,11 @@ const (
 
 func TestMakeRequests(t *testing.T) {
 	// Create a sample configuration
-	config := models.Config{
+	config := &models.Config{
 		Hardware: hardware,
-		Certificate: models.Certificate{
+		Certificate: &models.Certificate{
 
-			Nodes: []models.NodeCert{
+			Nodes: []*models.NodeCert{
 				{IP: "10.0.0.1",
 					Cert: "cert",
 					Key:  "key",
@@ -485,7 +485,7 @@ func createDummyServer(t *testing.T, requiredStatusCode int, invalidParseRespons
 func TestFirewallCheck_Run(t *testing.T) {
 
 	type args struct {
-		config models.Config
+		config *models.Config
 	}
 	tests := []struct {
 		name                 string
@@ -499,12 +499,12 @@ func TestFirewallCheck_Run(t *testing.T) {
 		{
 			name: "Automate Pg Passed",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						AutomateNodeIps:   []string{"10.0.0.1"},
 						PostgresqlNodeIps: []string{"10.0.0.3"},
 					},
-					Certificate: models.Certificate{
+					Certificate: &models.Certificate{
 						RootCert: "test-cert",
 						Nodes:    nodes,
 					},
@@ -516,12 +516,12 @@ func TestFirewallCheck_Run(t *testing.T) {
 		{
 			name: "Automate Pg failure",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						AutomateNodeIps:   []string{"10.0.0.1"},
 						PostgresqlNodeIps: []string{"10.0.0.3"},
 					},
-					Certificate: models.Certificate{
+					Certificate: &models.Certificate{
 						RootCert: "test-cert",
 						Nodes:    nodes,
 					},
@@ -534,12 +534,12 @@ func TestFirewallCheck_Run(t *testing.T) {
 		{
 			name: "Internal Server Error For automate and other nodes",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						AutomateNodeIps:   []string{"10.0.0.1"},
 						PostgresqlNodeIps: []string{"10.0.0.3"},
 					},
-					Certificate: models.Certificate{
+					Certificate: &models.Certificate{
 						RootCert: "test-cert",
 						Nodes:    nodes,
 					},
@@ -553,12 +553,12 @@ func TestFirewallCheck_Run(t *testing.T) {
 		{
 			name: "Error in parsing the response",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						AutomateNodeIps:   []string{"10.0.0.1"},
 						PostgresqlNodeIps: []string{"10.0.0.3"},
 					},
-					Certificate: models.Certificate{
+					Certificate: &models.Certificate{
 						RootCert: "test-cert",
 						Nodes:    nodes,
 					},
@@ -571,12 +571,12 @@ func TestFirewallCheck_Run(t *testing.T) {
 		}, {
 			name: "Status Bad Request",
 			args: args{
-				config: models.Config{
-					Hardware: models.Hardware{
+				config: &models.Config{
+					Hardware: &models.Hardware{
 						AutomateNodeIps:   []string{"10.0.0.1"},
 						PostgresqlNodeIps: []string{"10.0.0.3"},
 					},
-					Certificate: models.Certificate{
+					Certificate: &models.Certificate{
 						RootCert: "test-cert",
 						Nodes:    nodes,
 					},

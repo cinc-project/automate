@@ -8,7 +8,7 @@ import (
 )
 
 type IBatchCheckService interface {
-	BatchCheck(checks []string, config models.Config) models.BatchCheckResponse
+	BatchCheck(checks []string, config *models.Config) models.BatchCheckResponse
 }
 
 type BatchCheckService struct {
@@ -21,7 +21,7 @@ func NewBatchCheckService(trigger trigger.CheckTrigger) *BatchCheckService {
 	}
 }
 
-func (ss *BatchCheckService) BatchCheck(checks []string, config models.Config) models.BatchCheckResponse {
+func (ss *BatchCheckService) BatchCheck(checks []string, config *models.Config) models.BatchCheckResponse {
 	//batchApisResultMap := make(map[string][]models.ApiResult)
 	var bastionChecks = stringutils.SliceIntersection(checks, constants.GetBastionChecks())
 	var remoteChecks = stringutils.SliceIntersection(checks, constants.GetRemoteChecks())
@@ -45,7 +45,7 @@ func getIndexOfCheck(checks []string, check string) (int, error) {
 	return stringutils.IndexOf(checks, check)
 }
 
-func (ss *BatchCheckService) RunBastionCheck(check string, config models.Config, resultChan chan []models.CheckTriggerResponse) {
+func (ss *BatchCheckService) RunBastionCheck(check string, config *models.Config, resultChan chan []models.CheckTriggerResponse) {
 	resp := ss.getCheckInstance(check).Run(config)
 	for i, _ := range resp {
 		resp[i].CheckType = check
@@ -54,7 +54,7 @@ func (ss *BatchCheckService) RunBastionCheck(check string, config models.Config,
 
 }
 
-func (ss *BatchCheckService) RunRemoteCheck(check string, config models.Config) []models.CheckTriggerResponse {
+func (ss *BatchCheckService) RunRemoteCheck(check string, config *models.Config) []models.CheckTriggerResponse {
 	return ss.getCheckInstance(check).Run(config)
 }
 
@@ -153,7 +153,7 @@ func constructResult(ipMap map[string][]models.CheckTriggerResponse) []models.Ba
 	return result
 }
 
-func getBastionCheckResp(ss *BatchCheckService, bastionChecks []string, config models.Config) map[string][]models.CheckTriggerResponse {
+func getBastionCheckResp(ss *BatchCheckService, bastionChecks []string, config *models.Config) map[string][]models.CheckTriggerResponse {
 
 	checkTriggerRespMap := make(map[string][]models.CheckTriggerResponse)
 	bastionCheckResultChan := make(chan []models.CheckTriggerResponse, len(bastionChecks))
@@ -187,7 +187,7 @@ func getBastionCheckResp(ss *BatchCheckService, bastionChecks []string, config m
 	return checkTriggerRespMap
 }
 
-func getRemoteCheckResp(ss *BatchCheckService, remoteChecks []string, config models.Config) map[string][]models.CheckTriggerResponse {
+func getRemoteCheckResp(ss *BatchCheckService, remoteChecks []string, config *models.Config) map[string][]models.CheckTriggerResponse {
 	checkTriggerRespMap := make(map[string][]models.CheckTriggerResponse)
 	for _, check := range remoteChecks {
 		resp := ss.RunRemoteCheck(check, config)
