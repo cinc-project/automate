@@ -42,10 +42,10 @@ type Backup struct {
 }
 
 type Certificate struct {
-	AutomateFqdn   string     `json:"automate_fqdn"`
-	ChefServerFqdn string     `json:"cs_fqdn"`
-	RootCert       string     `json:"root_cert"`
-	Nodes          []NodeCert `json:"nodes"`
+	Fqdn         string     `json:"automate_fqdn"`
+	FqdnRootCert string     `json:"fqdn_root_ca"`
+	NodeType     string     `json:"node_type"`
+	Nodes        []NodeCert `json:"nodes"`
 }
 
 type ExternalOS struct {
@@ -67,15 +67,15 @@ type ExternalPG struct {
 }
 
 type Config struct {
-	SSHUser         SSHUser     `json:"ssh_user"`
-	Arch            string      `json:"arch"`
-	Backup          Backup      `json:"backup"`
-	Hardware        Hardware    `json:"hardware"`
-	Certificate     Certificate `json:"certificate"`
-	ExternalOS      ExternalOS  `json:"external_opensearch"`
-	ExternalPG      ExternalPG  `json:"external_postgresql"`
-	DeploymentState string      `json:"deployment_state"`
-	APIToken        string      `json:"api_token"`
+	SSHUser         SSHUser       `json:"ssh_user"`
+	Arch            string        `json:"arch"`
+	Backup          Backup        `json:"backup"`
+	Hardware        Hardware      `json:"hardware"`
+	Certificate     []Certificate `json:"certificate"`
+	ExternalOS      ExternalOS    `json:"external_opensearch"`
+	ExternalPG      ExternalPG    `json:"external_postgresql"`
+	DeploymentState string        `json:"deployment_state"`
+	APIToken        string        `json:"api_token"`
 }
 
 type BatchCheckResponse struct {
@@ -113,6 +113,7 @@ type Checks struct {
 
 type NodeCert struct {
 	IP        string `json:"ip"`
+	RootCert  string `json:"root_cert"`
 	Cert      string `json:"cert"`
 	Key       string `json:"key"`
 	AdminKey  string `json:"admin_key"`
