@@ -101,6 +101,7 @@ type ApiResult struct {
 	Check   string       `json:"check"`
 	Checks  []Checks     `json:"checks"`
 	Error   *fiber.Error `json:"error,omitempty"`
+	Skipped bool         `json:"skipped"`
 }
 
 type Checks struct {
@@ -109,6 +110,7 @@ type Checks struct {
 	SuccessMsg    string `json:"success_msg"`
 	ErrorMsg      string `json:"error_msg"`
 	ResolutionMsg string `json:"resolution_msg"`
+	Skipped       bool   `json:"skipped"`
 }
 
 type NodeCert struct {
