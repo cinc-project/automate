@@ -229,6 +229,10 @@ func (client *Client) Close() error {
 
 // CreateDB takes a database name and role and creates a database
 func (client *Client) CreateDB(db, role string) error {
+	fmt.Println("I am in client.go")
+	fmt.Println(role)
+	fmt.Println(db)
+	
 	log := client.log().WithFields(logrus.Fields{
 		"action": "create_db",
 		"db":     db,
