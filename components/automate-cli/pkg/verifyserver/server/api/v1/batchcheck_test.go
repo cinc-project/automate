@@ -2,6 +2,7 @@ package v1_test
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http/httptest"
 	"strings"
@@ -26,42 +27,45 @@ func SetupMockBatchCheckService(errorFromBatchCheck bool) batchcheckservice.IBat
 			}
 			return models.BatchCheckResponse{
 				Status: "SUCCESS",
-				Result: []models.BatchCheckResult{
-					{
-						NodeType: "automate",
-						Ip:       "1.2.3.4",
-						Tests: []models.ApiResult{
-							{
-								Passed:  true,
-								Message: "success",
-								Check:   "hardware-resource-count",
-								Checks: []models.Checks{
-									{
-										Title:      "hardware-resource-count-1",
-										Passed:     true,
-										SuccessMsg: "success",
-									},
-									{
-										Title:      "hardware-resource-count-2",
-										Passed:     true,
-										SuccessMsg: "success",
+				Result: models.BatchCheckResultResponse{
+					Passed: true,
+					NodeResult: []models.BatchCheckResult{
+						{
+							NodeType: "automate",
+							Ip:       "1.2.3.4",
+							Tests: []models.ApiResult{
+								{
+									Passed:  true,
+									Message: "success",
+									Check:   "hardware-resource-count",
+									Checks: []models.Checks{
+										{
+											Title:      "hardware-resource-count-1",
+											Passed:     true,
+											SuccessMsg: "success",
+										},
+										{
+											Title:      "hardware-resource-count-2",
+											Passed:     true,
+											SuccessMsg: "success",
+										},
 									},
 								},
-							},
-							{
-								Passed:  true,
-								Message: "success",
-								Check:   "ssh-user",
-								Checks: []models.Checks{
-									{
-										Title:      "ssh-user-1",
-										Passed:     true,
-										SuccessMsg: "success",
-									},
-									{
-										Title:      "ssh-user-2",
-										Passed:     true,
-										SuccessMsg: "success",
+								{
+									Passed:  true,
+									Message: "success",
+									Check:   "ssh-user",
+									Checks: []models.Checks{
+										{
+											Title:      "ssh-user-1",
+											Passed:     true,
+											SuccessMsg: "success",
+										},
+										{
+											Title:      "ssh-user-2",
+											Passed:     true,
+											SuccessMsg: "success",
+										},
 									},
 								},
 							},
@@ -117,7 +121,7 @@ func TestBatchCheckAPI(t *testing.T) {
 				}
 			}`,
 			expectedCode: 200,
-			expectedBody: "{\"status\":\"SUCCESS\",\"result\":[{\"node_type\":\"automate\",\"ip\":\"1.2.3.4\",\"tests\":[{\"passed\":true,\"msg\":\"success\",\"check\":\"hardware-resource-count\",\"checks\":[{\"title\":\"hardware-resource-count-1\",\"passed\":true,\"success_msg\":\"success\",\"error_msg\":\"\",\"resolution_msg\":\"\",\"skipped\":false},{\"title\":\"hardware-resource-count-2\",\"passed\":true,\"success_msg\":\"success\",\"error_msg\":\"\",\"resolution_msg\":\"\",\"skipped\":false}],\"skipped\":false},{\"passed\":true,\"msg\":\"success\",\"check\":\"ssh-user\",\"checks\":[{\"title\":\"ssh-user-1\",\"passed\":true,\"success_msg\":\"success\",\"error_msg\":\"\",\"resolution_msg\":\"\",\"skipped\":false},{\"title\":\"ssh-user-2\",\"passed\":true,\"success_msg\":\"success\",\"error_msg\":\"\",\"resolution_msg\":\"\",\"skipped\":false}],\"skipped\":false}]}]}",
+			expectedBody: `{"status":"SUCCESS","result":{"passed":true,"node_result":[{"node_type":"automate","ip":"1.2.3.4","tests":[{"passed":true,"msg":"success","check":"hardware-resource-count","checks":[{"title":"hardware-resource-count-1","passed":true,"success_msg":"success","error_msg":"","resolution_msg":""},{"title":"hardware-resource-count-2","passed":true,"success_msg":"success","error_msg":"","resolution_msg":""}]},{"passed":true,"msg":"success","check":"ssh-user","checks":[{"title":"ssh-user-1","passed":true,"success_msg":"success","error_msg":"","resolution_msg":""},{"title":"ssh-user-2","passed":true,"success_msg":"success","error_msg":"","resolution_msg":""}]}]}]}}`,
 		},
 		{
 			description: "400:failure batch check route",
@@ -193,6 +197,7 @@ func TestBatchCheckAPI(t *testing.T) {
 			body, err := io.ReadAll(res.Body)
 			assert.NoError(t, err, test.description)
 			assert.Contains(t, string(body), test.expectedBody)
+			fmt.Println(string(body))
 			assert.Equal(t, test.expectedCode, res.StatusCode)
 		})
 	}

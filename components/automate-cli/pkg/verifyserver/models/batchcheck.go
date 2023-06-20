@@ -375,9 +375,14 @@ func (c *Config) populateNonExternalDbConfig(haConfig *config.HaDeployConfig) {
 }
 
 type BatchCheckResponse struct {
-	Status string             `json:"status"`
-	Result []BatchCheckResult `json:"result"`
+	Status string                   `json:"status"`
+	Result BatchCheckResultResponse `json:"result"`
 }
+type BatchCheckResultResponse struct {
+	Passed     bool               `json:"passed"`
+	NodeResult []BatchCheckResult `json:"node_result"`
+}
+
 type BatchCheckResult struct {
 	NodeType string      `json:"node_type"`
 	Ip       string      `json:"ip"`
