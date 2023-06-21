@@ -130,7 +130,12 @@ func NewConfig() *Config {
 			FileSystem:    &FileSystem{},
 			ObjectStorage: &ObjectStorage{},
 		},
-		Hardware:   &Hardware{},
+		Hardware: &Hardware{},
+		Certificate: []*Certificate{
+			{
+				Nodes: []*NodeCert{},
+			},
+		},
 		ExternalOS: &ExternalOS{},
 		ExternalPG: &ExternalPG{},
 	}
