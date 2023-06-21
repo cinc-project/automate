@@ -240,14 +240,7 @@ func (v *verifyCmdFlow) RunVerify(config string) error {
 	}
 
 	// Get config required for batch-check API call
-	batchCheckConfig := &models.Config{
-		Hardware: &models.Hardware{},
-		SSHUser:  &models.SSHUser{},
-		Backup: &models.Backup{
-			FileSystem:    &models.FileSystem{},
-			ObjectStorage: &models.ObjectStorage{},
-		},
-	}
+	batchCheckConfig := models.NewConfig()
 	err = batchCheckConfig.PopulateWith(v.Config)
 	if err != nil {
 		return err
