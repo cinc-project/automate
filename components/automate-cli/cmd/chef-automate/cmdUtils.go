@@ -18,6 +18,10 @@ type Cmd struct {
 	CmdInputs *CmdInputs
 }
 
+func NewCmd() *Cmd {
+	return &Cmd{CmdInputs: &CmdInputs{NodeType: false}}
+}
+
 type CmdInputs struct {
 	Cmd                      string
 	Args                     []string
@@ -41,6 +45,16 @@ type NodeTypeAndCmd struct {
 	Postgresql *Cmd
 	Opensearch *Cmd
 	Infra      *AutomateHAInfraDetails
+}
+
+func NewNodeTypeAndCmd() *NodeTypeAndCmd {
+	return &NodeTypeAndCmd{
+		Frontend:   NewCmd(),
+		Automate:   NewCmd(),
+		ChefServer: NewCmd(),
+		Opensearch: NewCmd(),
+		Postgresql: NewCmd(),
+	}
 }
 
 type CmdResult struct {
@@ -127,47 +141,47 @@ func (c *remoteCmdExecutor) execute(nodeMap *NodeTypeAndCmd) (map[string][]*CmdR
 	switch true {
 	case nodeMap.Frontend.CmdInputs.NodeType:
 		const remoteService string = FRONTEND
-		nodeIps, err := preCmdExecCheck(nodeMap.Frontend, c.SshUtil, nodeMap.Infra, remoteService, writer)
+		nodeIps, err := preCmdExecCheck(nodeMap.Frontend, c.SshUtil, nodeMap.Infra, remoteService, c.Output)
 		if err != nil {
 			return cmdResult, err
 		}
-		output := c.executeCmdOnGivenNodes(nodeMap.Frontend.CmdInputs, nodeIps, remoteService, nodeMap.Frontend.CmdInputs.InputFilesPrefix, writer)
+		output := c.executeCmdOnGivenNodes(nodeMap.Frontend.CmdInputs, nodeIps, remoteService, nodeMap.Frontend.CmdInputs.InputFilesPrefix, c.Output)
 		return output, nil
 	case nodeMap.Automate.CmdInputs.NodeType:
 		const remoteService string = AUTOMATE
-		nodeIps, err := preCmdExecCheck(nodeMap.Automate, c.SshUtil, nodeMap.Infra, remoteService, writer)
+		nodeIps, err := preCmdExecCheck(nodeMap.Automate, c.SshUtil, nodeMap.Infra, remoteService, c.Output)
 		if err != nil {
 			return cmdResult, err
 		}
 
-		output := c.executeCmdOnGivenNodes(nodeMap.Automate.CmdInputs, nodeIps, remoteService, nodeMap.Automate.CmdInputs.InputFilesPrefix, writer)
+		output := c.executeCmdOnGivenNodes(nodeMap.Automate.CmdInputs, nodeIps, remoteService, nodeMap.Automate.CmdInputs.InputFilesPrefix, c.Output)
 		return output, nil
 	case nodeMap.ChefServer.CmdInputs.NodeType:
 		const remoteService string = CHEF_SERVER
-		nodeIps, err := preCmdExecCheck(nodeMap.ChefServer, c.SshUtil, nodeMap.Infra, remoteService, writer)
+		nodeIps, err := preCmdExecCheck(nodeMap.ChefServer, c.SshUtil, nodeMap.Infra, remoteService, c.Output)
 		if err != nil {
 			return cmdResult, err
 		}
 
-		output := c.executeCmdOnGivenNodes(nodeMap.ChefServer.CmdInputs, nodeIps, remoteService, nodeMap.ChefServer.CmdInputs.InputFilesPrefix, writer)
+		output := c.executeCmdOnGivenNodes(nodeMap.ChefServer.CmdInputs, nodeIps, remoteService, nodeMap.ChefServer.CmdInputs.InputFilesPrefix, c.Output)
 		return output, nil
 	case nodeMap.Postgresql.CmdInputs.NodeType:
 		const remoteService string = POSTGRESQL
-		nodeIps, err := preCmdExecCheck(nodeMap.Postgresql, c.SshUtil, nodeMap.Infra, remoteService, writer)
+		nodeIps, err := preCmdExecCheck(nodeMap.Postgresql, c.SshUtil, nodeMap.Infra, remoteService, c.Output)
 		if err != nil {
 			return cmdResult, err
 		}
 
-		output := c.executeCmdOnGivenNodes(nodeMap.Postgresql.CmdInputs, nodeIps, remoteService, nodeMap.Postgresql.CmdInputs.InputFilesPrefix, writer)
+		output := c.executeCmdOnGivenNodes(nodeMap.Postgresql.CmdInputs, nodeIps, remoteService, nodeMap.Postgresql.CmdInputs.InputFilesPrefix, c.Output)
 		return output, nil
 	case nodeMap.Opensearch.CmdInputs.NodeType:
 		const remoteService string = OPENSEARCH
-		nodeIps, err := preCmdExecCheck(nodeMap.Opensearch, c.SshUtil, nodeMap.Infra, remoteService, writer)
+		nodeIps, err := preCmdExecCheck(nodeMap.Opensearch, c.SshUtil, nodeMap.Infra, remoteService, c.Output)
 		if err != nil {
 			return cmdResult, err
 		}
 
-		output := c.executeCmdOnGivenNodes(nodeMap.Opensearch.CmdInputs, nodeIps, remoteService, nodeMap.Opensearch.CmdInputs.InputFilesPrefix, writer)
+		output := c.executeCmdOnGivenNodes(nodeMap.Opensearch.CmdInputs, nodeIps, remoteService, nodeMap.Opensearch.CmdInputs.InputFilesPrefix, c.Output)
 		return output, nil
 	default:
 		return cmdResult, errors.New("Missing or Unsupported flag")
