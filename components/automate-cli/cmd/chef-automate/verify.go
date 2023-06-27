@@ -606,6 +606,18 @@ func buildReports(batchCheckResults []models.BatchCheckResult) []reporting.Verif
 	for _, batchCheckResult := range batchCheckResults {
 
 		for _, test := range batchCheckResult.Tests {
+
+			var errorMsgs, resolutionMsgs []string
+			var successfulCount, failedCount int
+
+			if test.Skipped {
+				continue
+			}
+
+			if test.Checks == nil {
+				resolutionMsgs = append(resolutionMsgs, test.Error.Message)
+				failedCount++
+			}
 			report := reporting.VerificationReport{}
 			report.TableKey = batchCheckResult.NodeType
 			info := reporting.Info{}
@@ -621,8 +633,6 @@ func buildReports(batchCheckResults []models.BatchCheckResult) []reporting.Verif
 				info.Status = "Failed"
 			}
 
-			var errorMsgs, resolutionMsgs []string
-			var successfulCount, failedCount int
 			for _, check := range test.Checks {
 				if check.Passed {
 					successfulCount++
@@ -650,7 +660,6 @@ func buildReports(batchCheckResults []models.BatchCheckResult) []reporting.Verif
 		}
 
 	}
-
 	return reports
 }
 
