@@ -99,7 +99,7 @@ func (c *HaDeployConfig) verifyConfigInitials(configInitials *ConfigInitials) er
 	if err := validateRequiredString(configInitials.SecretsStoreFile, "secrets_store_file"); err != nil {
 		errorList.PushBack(err)
 	}
-	if err := validateRequiredString(configInitials.Architecture, "architecture", "aws", "existing_nodes", "deployment"); err != nil {
+	if err := validateRequiredString(configInitials.Architecture, "architecture", "aws", "existing_nodes"); err != nil {
 		errorList.PushBack(err)
 	}
 	if err := validateRequiredString(configInitials.WorkspacePath, "workspace_path", "/hab/a2_deploy_workspace"); err != nil {
@@ -490,6 +490,10 @@ func (c *HaDeployConfig) IsExternalDbSelfManaged() bool {
 func validateAwsOsPgConfig(aws *ConfigAwsSettings) error {
 	errorList := list.New()
 
+	if err := validateAwsDbInstanceType(aws); err != nil {
+		errorList.PushBack(err)
+	}
+
 	err := validateNumberField(aws.OpensearchEbsVolumeIops, "aws opensearch_ebs_volume_iops", true)
 	if err != nil {
 		errorList.PushBack(err)
@@ -593,10 +597,6 @@ func validateCommonAwsSettings(aws *ConfigAwsSettings) error {
 	}
 
 	if err := awsChefSettings(aws); err != nil {
-		errorList.PushBack(err)
-	}
-
-	if err := validateAwsDbInstanceType(aws); err != nil {
 		errorList.PushBack(err)
 	}
 
