@@ -262,10 +262,6 @@ func (v *verifyCmdFlow) RunVerify(config string) error {
 	batchCheckConfig := &models.Config{
 		Hardware: &models.Hardware{},
 		SSHUser:  &models.SSHUser{},
-		Backup: &models.Backup{
-			FileSystem:    &models.FileSystem{},
-			ObjectStorage: &models.ObjectStorage{},
-		},
 	}
 
 	err = batchCheckConfig.PopulateWith(v.Config)

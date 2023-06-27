@@ -94,7 +94,7 @@ type Config struct {
 func appendCertsByIpToNodeCerts(certsByIP *[]config.CertByIP, ipList []string, privateKey, publicKey, adminKey, adminCert, nodeRootCa string) []*NodeCert {
 	nodeCertsList := make([]*NodeCert, 0)
 	certByIpMap := createMapforCertByIp(certsByIP)
-	
+
 	for _, ip := range ipList {
 		certByIP, ok := certByIpMap[ip]
 		var nodeCert *NodeCert
@@ -152,7 +152,15 @@ func (c *Config) PopulateWith(haConfig *config.HaDeployConfig) error {
 		c.populateConfigInitials(haConfig)
 	}
 
-	if haConfig.GetObjectStorageConfig() != nil {
+	if haConfig.GetConfigInitials().BackupConfig == "file_system" {
+		c.Backup = &Backup{
+			FileSystem: &FileSystem{
+				MountLocation: haConfig.GetConfigInitials().BackupMount,
+			},
+		}
+	}
+
+	if haConfig.GetObjectStorageConfig() != nil && haConfig.GetConfigInitials().BackupConfig == "object_storage" {
 		c.populateObjectStorageConfig(haConfig)
 	}
 
@@ -222,11 +230,15 @@ func (c *Config) populateCommonConfig(haConfig *config.HaDeployConfig) error {
 
 func (c *Config) populateObjectStorageConfig(haConfig *config.HaDeployConfig) {
 	objectStorageConfig := haConfig.GetObjectStorageConfig()
-	c.Backup.ObjectStorage.BucketName = objectStorageConfig.BucketName
-	c.Backup.ObjectStorage.AWSRegion = objectStorageConfig.Region
-	c.Backup.ObjectStorage.AccessKey = objectStorageConfig.AccessKey
-	c.Backup.ObjectStorage.SecretKey = objectStorageConfig.SecretKey
-	c.Backup.ObjectStorage.Endpoint = objectStorageConfig.Endpoint
+	c.Backup = &Backup{
+		ObjectStorage: &ObjectStorage{
+			BucketName: objectStorageConfig.BucketName,
+			AWSRegion:  objectStorageConfig.Region,
+			AccessKey:  objectStorageConfig.AccessKey,
+			SecretKey:  objectStorageConfig.SecretKey,
+			Endpoint:   objectStorageConfig.Endpoint,
+		},
+	}
 }
 
 func (c *Config) populateConfigInitials(haConfig *config.HaDeployConfig) {
@@ -236,12 +248,15 @@ func (c *Config) populateConfigInitials(haConfig *config.HaDeployConfig) {
 	c.SSHUser.PrivateKey = configInitials.SSHKeyFile
 	c.SSHUser.SudoPassword = configInitials.SudoPassword
 	c.Arch = configInitials.Architecture
-	c.Backup.FileSystem.MountLocation = configInitials.BackupMount
 }
 
 func (c *Config) populateAwsS3BucketName(haConfig *config.HaDeployConfig) {
 	if haConfig.Architecture.Aws.BackupConfig == "s3" {
-		c.Backup.ObjectStorage.BucketName = haConfig.Architecture.Aws.S3BucketName
+		c.Backup = &Backup{
+			ObjectStorage: &ObjectStorage{
+				BucketName: haConfig.Architecture.Aws.S3BucketName,
+			},
+		}
 	}
 }
 
