@@ -142,7 +142,6 @@ func init() {
 	ocIdShowAppCmd.PersistentFlags().IntVar(&configCmdFlags.waitTimeout, waitTimeout, DEFAULT_TIMEOUT, "This flag sets the operation timeout duration (in seconds) for each individual node during the config oc-id-show-app process")
 	ocIdShowAppCmd.PersistentFlags().SetAnnotation(waitTimeout, docs.Compatibility, []string{docs.CompatiblewithHA})
 
-
 	configCmd.PersistentFlags().BoolVarP(&configCmdFlags.acceptMLSA, "auto-approve", "y", false, "Do not prompt for confirmation; accept defaults and continue")
 	configCmd.PersistentFlags().Int64VarP(&configCmdFlags.timeout, "timeout", "t", 10, "Request timeout in seconds")
 	configCmd.PersistentFlags().SetAnnotation("timeout", docs.Compatibility, []string{docs.CompatiblewithStandalone})
@@ -671,64 +670,64 @@ func runOcIdShowAppCommand(cmd *cobra.Command, args []string) error {
 	if isA2HARBFileExist() {
 		infra, err := getAutomateHAInfraDetails()
 		if err != nil {
-		  return err
+			return err
 		}
 		if configCmdFlags.waitTimeout < DEFAULT_TIMEOUT {
-		  return errors.Errorf("The operation timeout duration for each individual node during the config oc-id-show-app process should be set to a value greater than %v seconds.", DEFAULT_TIMEOUT)
+			return errors.Errorf("The operation timeout duration for each individual node during the config oc-id-show-app process should be set to a value greater than %v seconds.", DEFAULT_TIMEOUT)
 		}
 
 		frontendCmd := fmt.Sprintf(CONF_PREFIX_FOR_SHOW_APPS_CMD, OCID_SHOW_APP)
 		frontend := &Cmd{
-		  CmdInputs: &CmdInputs{
-		    Cmd:                      frontendCmd,
-		    WaitTimeout:              configCmdFlags.waitTimeout,
-		    Single:                   false,
-		    Args:                     args,
-		    ErrorCheckEnableInOutput: true,
-		    NodeType:                 configCmdFlags.frontend,
-		  },
+			CmdInputs: &CmdInputs{
+				Cmd:                      frontendCmd,
+				WaitTimeout:              configCmdFlags.waitTimeout,
+				Single:                   false,
+				Args:                     args,
+				ErrorCheckEnableInOutput: true,
+				NodeType:                 configCmdFlags.frontend,
+			},
 		}
 		automateCmd := fmt.Sprintf(CONF_PREFIX_FOR_SHOW_APPS_CMD, OCID_SHOW_APP)
 		automate := &Cmd{
-		  CmdInputs: &CmdInputs{
-		    Cmd:                      automateCmd,
-		    WaitTimeout:              configCmdFlags.waitTimeout,
-		    Single:                   false,
-		    Args:                     args,
-		    ErrorCheckEnableInOutput: true,
-		    NodeType:                 configCmdFlags.automate,
-		  },
+			CmdInputs: &CmdInputs{
+				Cmd:                      automateCmd,
+				WaitTimeout:              configCmdFlags.waitTimeout,
+				Single:                   false,
+				Args:                     args,
+				ErrorCheckEnableInOutput: true,
+				NodeType:                 configCmdFlags.automate,
+			},
 		}
 
 		chefServerCmd := fmt.Sprintf(CONF_PREFIX_FOR_SHOW_APPS_CMD, OCID_SHOW_APP)
 		chefServer := &Cmd{
-		  CmdInputs: &CmdInputs{
-		    Cmd:                      chefServerCmd,
-		    WaitTimeout:              configCmdFlags.waitTimeout,
-		    Single:                   false,
-		    Args:                     args,
-		    ErrorCheckEnableInOutput: true,
-		    NodeType:                 configCmdFlags.chef_server,
-		  },
+			CmdInputs: &CmdInputs{
+				Cmd:                      chefServerCmd,
+				WaitTimeout:              configCmdFlags.waitTimeout,
+				Single:                   false,
+				Args:                     args,
+				ErrorCheckEnableInOutput: true,
+				NodeType:                 configCmdFlags.chef_server,
+			},
 		}
 
 		nodeMap := &NodeTypeAndCmd{
-		  Frontend:   frontend,
-		  Automate:   automate,
-		  ChefServer: chefServer,
-		  Infra:      infra,
+			Frontend:   frontend,
+			Automate:   automate,
+			ChefServer: chefServer,
+			Infra:      infra,
 		}
 		sshUtil := NewSSHUtil(&SSHConfig{})
 		cmdUtil := NewRemoteCmdExecutor(nodeMap, sshUtil, writer)
 
 		if configCmdFlags.frontend || configCmdFlags.automate || configCmdFlags.chef_server {
-		  _, err := cmdUtil.Execute()
+			_, err := cmdUtil.Execute()
 
-		  if err != nil {
-		    return err
-		  }
+			if err != nil {
+				return err
+			}
 		} else {
-		  writer.Println(cmd.UsageString())
+			writer.Println(cmd.UsageString())
 		}
 	} else {
 		oauthAppDetailsFilePath := "/hab/svc/automate-cs-ocid/config/registered_oauth_applications.yaml"
