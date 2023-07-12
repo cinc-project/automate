@@ -132,7 +132,6 @@ chef-automate config patch path/to/postgresql-config.toml --pg
 ```
 
 ### Patch Configuration for OpenSearch cluster
-automate-ha-opensearch
 To patch the configuration for the OpenSearch cluster, run the following command:
 
 ```bash
