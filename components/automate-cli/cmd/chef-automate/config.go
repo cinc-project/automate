@@ -559,7 +559,7 @@ func runPatchCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		// keep chefserver fqdn same as automate fqdn in case of standalone automate
-		if !checkIfFileExist(automateHaPath) {
+		if !checkIfFileExist(automateHaPath) && cfg.Global.V1.ChefServer != nil && cfg.Global.V1.ChefServer.Fqdn != nil {
 			res, err := client.GetAutomateConfig(configCmdFlags.timeout)
 			if err != nil {
 				return err
@@ -567,7 +567,9 @@ func runPatchCommand(cmd *cobra.Command, args []string) error {
 
 			if cfg.Global.V1.ChefServer.Fqdn.GetValue() != res.Config.Global.V1.Fqdn.GetValue() {
 				cfg.Global.V1.ChefServer.Fqdn.Value = res.Config.Global.V1.Fqdn.GetValue()
-				cfg.Global.V1.ChefServer.RootCa.Value = ""
+				if cfg.Global.V1.ChefServer.RootCa != nil {
+					cfg.Global.V1.ChefServer.RootCa.Value = ""
+				}
 			}
 		}
 
