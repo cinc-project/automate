@@ -554,7 +554,11 @@ func runPatchCommand(cmd *cobra.Command, args []string) error {
 
 	} else {
 		cfg, err := dc.LoadUserOverrideConfigFile(args[0])
+		if err != nil {
+			return status.Annotate(err, status.ConfigError)
+		}
 
+		// keep chefserver fqdn same as automate fqdn in case of standalone automate
 		if !checkIfFileExist(automateHaPath) {
 			res, err := client.GetAutomateConfig(configCmdFlags.timeout)
 			if err != nil {
@@ -567,9 +571,6 @@ func runPatchCommand(cmd *cobra.Command, args []string) error {
 			}
 		}
 
-		if err != nil {
-			return status.Annotate(err, status.ConfigError)
-		}
 		if err = client.PatchAutomateConfig(configCmdFlags.timeout, cfg, writer); err != nil {
 			return err
 		}
