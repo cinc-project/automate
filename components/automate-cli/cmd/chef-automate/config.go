@@ -54,6 +54,7 @@ const (
 	patching                        = "Config Patch"
 	setting                         = "Config Set"
 	waitTimeout                     = "wait-timeout"
+	automateHaPath                  = "/hab/var/automate-ha"
 )
 
 var configValid = "Config file must be a valid %s config"
@@ -553,6 +554,19 @@ func runPatchCommand(cmd *cobra.Command, args []string) error {
 
 	} else {
 		cfg, err := dc.LoadUserOverrideConfigFile(args[0])
+
+		if !checkIfFileExist(automateHaPath) {
+			res, err := client.GetAutomateConfig(configCmdFlags.timeout)
+			if err != nil {
+				return err
+			}
+
+			if cfg.Global.V1.ChefServer.Fqdn.GetValue() != res.Config.Global.V1.Fqdn.GetValue() {
+				cfg.Global.V1.ChefServer.Fqdn.Value = res.Config.Global.V1.Fqdn.GetValue()
+				cfg.Global.V1.ChefServer.RootCa.Value = ""
+			}
+		}
+
 		if err != nil {
 			return status.Annotate(err, status.ConfigError)
 		}
