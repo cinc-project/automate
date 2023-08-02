@@ -54,7 +54,7 @@ const (
 	patching                        = "Config Patch"
 	setting                         = "Config Set"
 	waitTimeout                     = "wait-timeout"
-	automateHaPath                  = "/hab/var/automate-ha"
+	automateHaPath                  = "/hab/var/automate-ha/"
 )
 
 var configValid = "Config file must be a valid %s config"
