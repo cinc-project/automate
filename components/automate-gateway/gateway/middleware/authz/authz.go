@@ -67,13 +67,13 @@ func (c *client) Handle(ctx context.Context, subjects []string, projectsToFilter
 		}
 		log.WithError(err).Error("error authorizing request")
 		return nil, status.Errorf(codes.PermissionDenied,
-			"error authorizing request")
+			"error authorizing action %q on resource %q filtered by projects %q for members %q: %s",
+			action, resource, projectsToFilter, subjects, err.Error())
 	}
 	if len(filteredResp.Projects) == 0 {
-		log.Warnf("unauthorized: members %q cannot perform action %q on resource %q filtered by projects %q",
-			subjects, action, resource, projectsToFilter)
 		return nil, status.Errorf(codes.PermissionDenied,
-			"unauthorized members")
+			"unauthorized: members %q cannot perform action %q on resource %q filtered by projects %q",
+			subjects, action, resource, projectsToFilter)
 	}
 	projects := filteredResp.Projects
 
