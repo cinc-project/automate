@@ -46,11 +46,11 @@ func newAwsDeployemnt(configPath string) *awsDeployment {
 func (a *awsDeployment) doDeployWork(args []string) error {
 	if isA2HARBFileExist() {
 		if !deployCmdFlags.skipVerify {
-			//_, configFile := getConfigFileFromArgs(args)
-			//err := executeConfigVerifyAndPromptConfirmationOnError(configFile)
-			//if err != nil {
-			//	return err
-			//}
+			_, configFile := getConfigFileFromArgs(args)
+			err := executeConfigVerifyAndPromptConfirmationOnError(configFile)
+			if err != nil {
+				return err
+			}
 		}
 		err := a.generateConfig(DEPLOY)
 		if err != nil {
