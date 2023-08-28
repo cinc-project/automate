@@ -17,7 +17,7 @@ import (
 	"github.com/chef/automate/lib/logger"
 )
 
-type GCPCloudStorageConfig interface {
+type IGCPCloudStorageConfig interface {
 	GetGCPConnection(*models.GCPCloudStorageConfigRequest) *models.Checks
 	GetBucketAccess(*models.GCPCloudStorageConfigRequest) *models.Checks
 }
@@ -28,7 +28,7 @@ type GCPConfigService struct {
 	GcpUtils gcputils.GCPUtils
 }
 
-func NewGCPCloudStorageConfig(logger logger.Logger) GCPCloudStorageConfig {
+func NewGCPCloudStorageConfig(logger logger.Logger) IGCPCloudStorageConfig {
 	return &GCPConfigService{
 		Logger: logger,
 	}
