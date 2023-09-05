@@ -12,9 +12,9 @@ gh_repo = "automate"
     weight = 208
 +++
 
-{{< warning >}}
+{{< note >}}
 {{% automate/ha-warn %}}
-{{< /warning >}}
+{{< /note >}}
 
 You can follow the AWS documentation directly for detailed steps on [how to create an Amazon RDS PostgreSQL Instance](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/createupdatedomains.html).
 

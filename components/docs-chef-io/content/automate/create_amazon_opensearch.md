@@ -12,9 +12,9 @@ gh_repo = "automate"
     weight = 204
 +++
 
-{{< warning >}}
+{{< note >}}
 {{% automate/ha-warn %}}
-{{< /warning >}}
+{{< /note >}}
 
 You can follow the AWS documentation directly for detailed steps on [how to create an Amazon OpenSearch Cluster](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_GettingStarted.CreatingConnecting.PostgreSQL.html).
 
