@@ -9,7 +9,6 @@ import (
 	"github.com/chef/automate/components/user-settings-service/pkg/config"
 	libdb "github.com/chef/automate/lib/db"
 	"github.com/chef/automate/lib/db/migrator"
-	"github.com/chef/automate/lib/logger"
 )
 
 // Postgres is a wrapping struct that will hold the database mapping object
@@ -29,7 +28,14 @@ func ConnectAndMigrate(dbConf *config.Postgres) (*DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.WithFields(log.Fields{
+
+	service := config.Service{}
+	err = service.SetLogConfig()
+	if err != nil {
+		return pg, errors.WithMessage(err, "error setting logs config")
+	}
+
+	service.Logger.WithFields(log.Fields{
 		"uri":    pg.URI,
 		"schema": pg.SchemaPath,
 	}).Debug("Initializing database")
@@ -41,10 +47,15 @@ func ConnectAndMigrate(dbConf *config.Postgres) (*DB, error) {
 func Connect(dbConf *config.Postgres) (*DB, error) {
 	pg := &DB{Postgres: dbConf}
 
-	log.WithFields(log.Fields{
+	service := config.Service{}
+	err := service.SetLogConfig()
+	if err != nil {
+		return pg, errors.WithMessage(err, "error setting logs config")
+	}
+	service.Logger.WithFields(log.Fields{
 		"uri": pg.URI,
 	}).Debug("Connecting to PostgreSQL")
-	err := pg.connect()
+	err = pg.connect()
 	return pg, err
 }
 
@@ -56,7 +67,12 @@ func Connect(dbConf *config.Postgres) (*DB, error) {
 // Obviously you don't want this for production, but you should use it instead
 // of the plain Migrate function in your tests if you can.
 func (db *DB) DestructiveMigrateForTests() error {
-	if err := migrator.DestructiveMigrateForTests(db.URI, db.SchemaPath, logger.NewLogrusStandardLogger(), false); err != nil {
+	service := config.Service{}
+	err := service.SetLogConfig()
+	if err != nil {
+		return errors.WithMessage(err, "error setting logs config")
+	}
+	if err := migrator.DestructiveMigrateForTests(db.URI, db.SchemaPath, service.Logger, false); err != nil {
 		return errors.Wrapf(err, "Unable to create database schema. [path:%s]", db.SchemaPath)
 	}
 	return nil
@@ -97,7 +113,10 @@ func (db *DB) initDB() error {
 	// Create the schema
 	// @afiune Can we rename this library?
 	// @sr Just do it ;)
-	if err := migrator.Migrate(db.URI, db.SchemaPath, logger.NewLogrusStandardLogger(), false); err != nil {
+	service := config.Service{}
+	service.SetLogConfig()
+
+	if err := migrator.Migrate(db.URI, db.SchemaPath, service.Logger, false); err != nil {
 		return errors.Wrapf(err, "Unable to create database schema. [path:%s]", db.SchemaPath)
 	}
 

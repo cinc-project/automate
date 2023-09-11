@@ -2,9 +2,8 @@ package config
 
 import (
 	"github.com/chef/automate/components/user-settings-service/pkg/storage"
+	"github.com/chef/automate/lib/logger"
 	"github.com/chef/automate/lib/tls/certs"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var ServiceName = "user-settings-service"
@@ -22,6 +21,8 @@ type Service struct {
 	Port        int    `mapstructure:"port"`
 	MetricsPort int    `mapstructure:"metrics_port"`
 	LogLevel    string `mapstructure:"log_level"`
+	LogFormat   string `mapstructure:"log-format"`
+	Logger      logger.Logger
 }
 
 type Postgres struct {
@@ -42,21 +43,12 @@ func (s *UserSettings) GetStorage() storage.Client {
 	return s.storageClient
 }
 
-// SetLogLevel sets the log level for the service
-func (s *Service) SetLogLevel() {
-	if s.LogLevel == "" {
-		return
-	}
-
-	log.WithFields(log.Fields{
-		"level": s.LogLevel,
-	}).Info("Setting log level")
-
-	level, err := log.ParseLevel(s.LogLevel)
+// SetLogLevel sets the log level and format for the service
+func (s *Service) SetLogConfig() error {
+	l, err := logger.NewLogger(s.LogFormat, s.LogLevel)
 	if err != nil {
-		log.WithField("level", s.LogLevel).WithError(err).Error("Using default level 'info'")
-		return
+		return err
 	}
-
-	log.SetLevel(level)
+	s.Logger = l
+	return nil
 }
