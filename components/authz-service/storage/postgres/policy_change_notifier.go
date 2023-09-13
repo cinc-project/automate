@@ -52,6 +52,7 @@ func (p *policyChangeNotifier) Close() error {
 
 func (p *policyChangeNotifier) run(ctx context.Context, listener *pq.Listener) {
 RUNLOOP:
+	// nosemgrep
 	for {
 		select {
 		case <-ctx.Done():
@@ -66,7 +67,7 @@ RUNLOOP:
 			default:
 				p.log.Debug("Notification listener mailbox full")
 			}
-		case <-time.After(p.pingInterval): // nosemgrep
+		case <-time.After(p.pingInterval):
 			err := listener.Ping()
 			if err != nil {
 				p.log.WithError(err).Warn("Notification listener failed to ping database")
