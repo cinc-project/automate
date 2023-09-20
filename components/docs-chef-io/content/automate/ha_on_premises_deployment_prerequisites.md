@@ -49,7 +49,7 @@ To Deploy On-Premises Infra user needs to provision the resources manually that 
     - Google Cloud Platform
       - Using above infrastructure types, make sure you have the following resources created:
       - All Vm's should be up and running with minimum count as in this [table](/automate/ha_on_premises_deployment_prerequisites/#chef-automate-architecture)
-      - Load Balancers should be configured for both Automate and ChefServer. One for each and two in total as depicted in [Chef Automate HA Architecture](/automate/ha/). In case of using `NGINX` or `HA Proxy`, check out the sample configuration guide in our [Load Balancer Configuration page](/automate/loadbalancer_configuration/).
+      - Two Load Balancers should be configured for Automate and ChefServer, one for each as depicted in Images in the [Chef Automate HA Architecture](/automate/ha/) page. In case of using `NGINX` or `HA Proxy`, check out the sample configuration guide in our [Load Balancer Configuration page](/automate/loadbalancer_configuration/).
   - In On-premises deployment of Automate HA, we support File System (FS) or Object Storage (S3/MinIO/Google Cloud Storage) for taking backup.
 
 ## Software Requirements
