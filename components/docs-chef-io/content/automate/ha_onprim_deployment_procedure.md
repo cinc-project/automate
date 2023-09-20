@@ -30,8 +30,8 @@ and move ahead with the following sections of this page.
 ## Provisioning
 
 - Make sure to provision all the resources that are needed before performing the steps mentioned in following sections.
-- Make sure you have all resources either on Existing Infrastructure or on Existing cloud Infrastructure(AWS/Google Cloud Platform).
-- If you have provisioned in Google cloud Platform, make sure you have provisioned these [resources](/automate/ha_on_premises_deployment_prerequisites/#provisioning).
+- Resources can either be on Existing Infrastructure or on Existing cloud Infrastructure(AWS/Google Cloud Platform).
+- To know more about provisioning, checkout the [On-Premise Deployment Prerequisites](/automate/ha_on_premises_deployment_prerequisites/#provisioning).
 
 ## Steps to run on Bastion Host Machine
 
