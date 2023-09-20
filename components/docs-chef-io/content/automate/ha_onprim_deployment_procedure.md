@@ -54,7 +54,8 @@ and move ahead with the following sections of this page.
     Chef Automate bundles are available for 365 days from the release of a version. However, the milestone release bundles are available for download forever.
     {{< /note >}}
 
-    {{< note >}} If the Airgapped Bastion machine differs, transfer the Bundle file (`latest.aib`) and Chef Automate CLI binary (`chef-automate`) to the Airgapped Bastion Machine using the `scp` command. {{< /note >}}
+    {{< note >}} 
+    If the Airgapped Bastion machine differs, transfer the Bundle file (`latest.aib`) and Chef Automate CLI binary (`chef-automate`) to the Airgapped Bastion Machine using the `scp` command. 
 
     After transferring, in Airgapped Bastion, run the below commands:
 
@@ -65,6 +66,7 @@ and move ahead with the following sections of this page.
     cp -f chef-automate /usr/bin/chef-automate
     "
     ```
+    {{< /note >}}
 
 ## Steps to Generate Config
 
