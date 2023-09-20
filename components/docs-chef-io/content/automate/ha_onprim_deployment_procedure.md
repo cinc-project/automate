@@ -55,9 +55,9 @@ and move ahead with the following sections of this page.
     {{< /note >}}
 
     {{< note >}} 
-    If the Airgapped Bastion machine differs, transfer the Bundle file (`latest.aib`) and Chef Automate CLI binary (`chef-automate`) to the Airgapped Bastion Machine using the `scp` command. 
+    If incase of Airgapped Bastion machine, transfer the Bundle file (`latest.aib` or `automate.aib`) and Chef Automate CLI binary (`chef-automate`) to the Airgapped Bastion Machine with the `scp` command. 
 
-    After transferring, in Airgapped Bastion, run the below commands:
+    After transferring, in the Airgapped Bastion, run the below commands:
 
     ```bash
     #Run commands as sudo.
