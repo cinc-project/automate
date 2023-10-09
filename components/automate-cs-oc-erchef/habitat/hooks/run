@@ -8,6 +8,7 @@ exec 2>&1
 mkdir -p {{pkg.svc_var_path}}/logs
 source "{{pkg.svc_config_path}}/elasticsearch-init.sh"
 
+export PATH={{pkgPathFor "core/ruby30"}}/bin:${PATH}
 export HOME={{pkg.svc_var_path}}
 export RUNNER_LOG_DIR="{{pkg.svc_var_path}}/logs"
 export RELX_CONFIG_PATH="{{pkg.svc_config_path}}/sys.config"
@@ -46,7 +47,6 @@ HOME="{{pkg.svc_data_path}}" BUNDLE_GEMFILE="{{pkgPathFor "chef/oc_erchef"}}/Gem
     bundle exec ruby "{{pkg.svc_config_path}}/chef_server_data_bootstrap.rb"
 
 # ruby vars are needed in order to make depselector start up
-export PATH={{pkgPathFor "core/ruby27"}}/bin:${PATH}
 export LD_LIBRARY_PATH={{pkgPathFor "core/libffi"}}/lib:${LD_LIBRARY_PATH}
 export GEM_HOME={{pkgPathFor "chef/oc_erchef"}}/vendor/bundle
 export GEM_PATH={{pkgPathFor "chef/oc_erchef"}}/vendor/bundle
