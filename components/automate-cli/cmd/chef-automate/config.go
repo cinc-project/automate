@@ -1045,6 +1045,9 @@ func getRemoteType(flag string, infra *AutomateHAInfraDetails) (string, string) 
 func cleanToml(rawData string) string {
 	re := regexp.MustCompile("(?im).*info:.*$")
 	tomlOutput := re.ReplaceAllString(rawData, "")
+	if strings.Contains(tomlOutput, "ping_unicast_hosts = \"[]\"") {
+		tomlOutput = strings.ReplaceAll(tomlOutput, "ping_unicast_hosts = \"[]\"", "ping_unicast_hosts = []")
+	}
 	return tomlOutput
 }
 
