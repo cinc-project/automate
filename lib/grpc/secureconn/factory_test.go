@@ -60,9 +60,12 @@ func TestSecureConnFactory(t *testing.T) {
 		conn, err := connFactoryRootA.Dial("root-a-service", testServer.Listener.Addr().String())
 		defer conn.Close() // nolint: megacheck
 		require.NoError(t, err)
+
 		client := pb.NewGreeterClient(conn)
 		resp, err := client.SayHello(context.Background(), &pb.HelloRequest{})
 		require.NoError(t, err)
+
+		/* assert.Equal(t, "Hello", "Hello") */
 		assert.Equal(t, "Hello", resp.Message)
 	})
 
