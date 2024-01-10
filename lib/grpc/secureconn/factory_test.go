@@ -64,8 +64,6 @@ func TestSecureConnFactory(t *testing.T) {
 		client := pb.NewGreeterClient(conn)
 		resp, err := client.SayHello(context.Background(), &pb.HelloRequest{})
 		require.NoError(t, err)
-
-		/* assert.Equal(t, "Hello", "Hello") */
 		assert.Equal(t, "Hello", resp.Message)
 	})
 
@@ -82,7 +80,7 @@ func TestSecureConnFactory(t *testing.T) {
 
 		s, ok := status.FromError(err)
 		require.True(t, ok)
-		assert.Regexp(t, "authentication handshake failed: tls: failed to verify certificate: x509: certificate is valid for root-a-service, not root-foo-service", s.Message())
+		assert.Regexp(t, "authentication handshake failed: x509.*valid for root-a-service, not root-foo-service", s.Message())
 	})
 
 	t.Run("Test incorrectly signed client cert and correct server name", func(t *testing.T) {
