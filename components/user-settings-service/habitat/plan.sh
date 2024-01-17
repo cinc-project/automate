@@ -40,6 +40,5 @@ do_install() {
 
 do_strip() {
   return 0
-}
-
+}s
 

@@ -15,7 +15,7 @@ pkg_deps=(
   "${vendor_origin}/automate-workflow-web"
   chef/mlsa/1.0.1/20200421170200
   core/bash/5.0.16/20200305233030
-  core/curl/7.68.0/20200601114640
+  core/curl
   core/coreutils
   core/libossp-uuid/1.6.2/20200319193820
 )
