@@ -13,7 +13,7 @@ pkg_deps=(
   core/bash
   core/glibc
   core/libevent
-  core/openssl11
+  core/openssl
 )
 
 pkg_build_deps=(
