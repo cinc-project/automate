@@ -271,7 +271,7 @@ export class TelemetryService {
           "periods_summary_services_targets": parseInt(totalService, 10)
         }
       }
-      console.log('chefTelemetryTrackerInitData ',chefTelemetryTrackerInitData);
+      // console.log('chefTelemetryTrackerInitData ',chefTelemetryTrackerInitData);
       chefTelemetryTracker.initialize(chefTelemetryTrackerInitData);
       localStorage.setItem('chefTelemetryTrackerInitData', JSON.stringify(chefTelemetryTrackerInitData));
     } catch(e) {
