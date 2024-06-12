@@ -98,14 +98,14 @@ func checkLicenseExpiry(licenseResult *LicenseResult) error {
 			if gracePeriodEnd.After(time.Now()) {
 				// if the condition is true make the grace_period as true
 				licenseResult.Result.GracePeriod = true
-				licenseValidDate = gracePeriodEnd
 			}
 
 		}
 
 	}
+	gracelicenseValidDate := licenseValidDate.AddDate(0, 0, 30)
 	// Check if the license (including the grace period) is expired
-	if licenseValidDate.Before(time.Now()) {
+	if gracelicenseValidDate.Before(time.Now()) {
 		return status.New(
 			status.LicenseError,
 			"This license and grace period have expired. Please contact sales@chef.io to renew your Chef Automate license.",
@@ -116,27 +116,28 @@ func checkLicenseExpiry(licenseResult *LicenseResult) error {
 }
 
 func WarnIfLicenseNearExpiry(licenseResult *LicenseResult) {
-	// Calculate the license valid date, which includes the grace period also
-	licenseValidDate := time.Unix(licenseResult.Result.ExpirationDate.Seconds, 0)
-
-	// Check if the license is expired
-	if licenseValidDate.Before(time.Now()) {
-
-		daysAgo := int(time.Since(licenseValidDate).Hours() / 24)
-
-		// If the license is expired, check if it's within the grace period
-		if licenseResult.Result.GracePeriod {
-			// Calculate days left until the grace period ends
-			daysLeft := int(time.Until(licenseValidDate).Hours() / 24)
-
-			if daysLeft > 0 {
-				// Warning during the grace period
-				daysIntoGracePeriod := 30 - daysLeft
-				cli.NewWriter(os.Stdout, os.Stderr, os.Stdin).Warn(fmt.Sprintf("Your license expired %d days ago, but you are now in the grace period of %d. Please apply a new license.\n", daysAgo, daysIntoGracePeriod))
-			} else {
-				// Warning if the grace period has ended
-				cli.NewWriter(os.Stdout, os.Stderr, os.Stdin).Warn(fmt.Sprintf("Your license expired %d ago and you are out of 30 days of grace period . Please apply a new license to continue using the software.", daysAgo))
-			}
-		}
-	}
+    // Calculate the license valid date
+    licenseValidDate := time.Unix(licenseResult.Result.ExpirationDate.Seconds, 0)
+    // Calculate the license valid date, which includes the grace period also
+    gracelicenseValidDate := licenseValidDate.AddDate(0, 0, 30)
+ 
+    // Check if the license is expired
+    if licenseValidDate.Before(time.Now()) {
+ 
+        daysAgo := int(time.Since(licenseValidDate).Hours() / 24)
+ 
+        // If the license is expired, check if it's within the grace period
+        if licenseResult.Result.GracePeriod {
+            // Calculate days left until the new expiry date i.e which includes grace period
+            daysLeft := int(time.Until(gracelicenseValidDate).Hours() / 24)
+ 
+            if daysLeft > 0 {
+                // Warning during the grace period
+                cli.NewWriter(os.Stdout, os.Stderr, os.Stdin).Warn(fmt.Sprintf("Your license expired %d days ago, now you are left with the grace period of %d days. Please apply a new license.\n", daysAgo, daysLeft))
+            } else {
+                // Warning if the grace period has ended
+                cli.NewWriter(os.Stdout, os.Stderr, os.Stdin).Warn(fmt.Sprintf("Your license expired %d ago and you are out of 30 days of grace period . Please apply a new license to continue using the software.", daysAgo))
+            }
+        }
+    }
 }
