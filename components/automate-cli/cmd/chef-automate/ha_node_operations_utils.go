@@ -937,9 +937,21 @@ func (nu *NodeUtilsImpl) restartHabSupOnBackend(service string) error {
 	if err != nil {
 		return err
 	}
-	flags := &RestartCmdFlags{
-		postgresql: true,
+
+	var flags *RestartCmdFlags
+	switch service {
+	case POSTGRESQL:
+		flags = &RestartCmdFlags{
+			postgresql: true,
+		}
+	case OPENSEARCH:
+		flags = &RestartCmdFlags{
+			opensearch: true,
+		}
+	default:
+		return fmt.Errorf("wrong service, accepting only PostgreSQL and OpenSearch. Current service: %s", service)
 	}
+
 	restartCmdResults := make(chan restartCmdResult, 4)
 	runRestartCmdForBackend(infra, flags, remoteExcecutor, restartCmdResults)
 
