@@ -7,7 +7,6 @@ pkg_version="0.1.0"
 pkg_maintainer="Chef Software Inc. <support@chef.io>"
 pkg_license=('Chef-MLSA')
 pkg_upstream_url="https://www.chef.io/automate"
-
 pkg_exports=(
   [port]=service.port
   [host]=service.host
@@ -21,7 +20,7 @@ pkg_binds=(
 pkg_bin_dirs=(bin)
 
 pkg_deps=(
-  core/glibc/2.35/20240105171810
+  core/glibc
   chef/mlsa
   ${local_platform_tools_origin:-chef}/automate-platform-tools
   core/bash
