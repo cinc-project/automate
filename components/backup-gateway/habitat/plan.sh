@@ -18,6 +18,7 @@ pkg_deps=(
 pkg_exports=(
   [port]=service.port
 )
+
 pkg_exposes=(port)
 
 do_before() {
