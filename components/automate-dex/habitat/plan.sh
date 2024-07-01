@@ -21,7 +21,7 @@ pkg_binds=(
 pkg_bin_dirs=(bin)
 
 pkg_deps=(
-  core/glibc
+  core/glibc/2.35/20240105171810
   chef/mlsa
   ${local_platform_tools_origin:-chef}/automate-platform-tools
   core/bash
