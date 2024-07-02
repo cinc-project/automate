@@ -28,7 +28,6 @@ pkg_deps=(
   core/glibc/2.35/20240105171810
   core/libedit/20210910-3.1/20240106023704
   core/zlib/1.3/20240105173710
-  core/bzip2
   core/openssl
   core/pcre
   chef/mlsa
