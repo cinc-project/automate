@@ -27,7 +27,6 @@ pkg_shasum=760729901acbaa517996e681ee6ea259032985e37c2768beef80df3a877deed9
 pkg_deps=(
   core/glibc/2.35/20240105171810
   core/libedit/20210910-3.1/20240106023704
-  core/ncurses
   core/zlib/1.3/20240105173710
   core/bzip2
   core/openssl
