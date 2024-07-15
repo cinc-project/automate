@@ -12,7 +12,7 @@ vendor_origin=${vendor_origin:-"chef"}
 
 pkg_deps=(
   # WARNING: Version pin managed by .expeditor/update_chef_server.sh
-  "${vendor_origin}/openresty-noroot"
+  "${vendor_origin}/openresty-noroot/1.21.4.1rc1/20240711125916"
   # "${vendor_origin}/automate-workflow-web"
   chef/mlsa
   core/bash
