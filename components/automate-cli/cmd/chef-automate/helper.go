@@ -280,10 +280,10 @@ func warnIfLicenseNearExpiry(licenseResult *LicenseResult) {
 	licenseDate := licenseValidDate.Format("02-01-2006")
 	graceDate := gracePeriodDate.Format("02-01-2006")
 
-	// if daysUntilExpiration > aboutToExpire {
-	// 	// If the license is not about to expire within 60 days, do nothing.
-	// 	//return nil
-	// }
+	if daysUntilExpiration > aboutToExpire {
+		// If the license is not about to expire within 60 days, do nothing.
+		return
+	}
 	// If the license type is commercial, adding grace period of 60 days
 	if licenseResult.Result.LicenseType == commercial {
 		if !licenseResult.Result.GracePeriod {
