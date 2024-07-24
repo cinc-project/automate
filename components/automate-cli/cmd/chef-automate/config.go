@@ -158,12 +158,12 @@ var configCmd = &cobra.Command{
 }
 
 var showConfigCmd = &cobra.Command{
-	Use:               "show [/path/to/write/config.toml]",
-	Short:             "show the Chef Automate configuration",
-	Long:              "Show the Chef Automate configuration. When given a filepath, the output will be written to the file instead of printed to STDOUT",
-	PersistentPreRunE: checkLicenseStatusForExpiry,
-	RunE:              runShowCmd,
-	Args:              cobra.RangeArgs(0, 2),
+	Use:   "show [/path/to/write/config.toml]",
+	Short: "show the Chef Automate configuration",
+	Long:  "Show the Chef Automate configuration. When given a filepath, the output will be written to the file instead of printed to STDOUT",
+	// PersistentPreRunE: checkLicenseStatusForExpiry,
+	RunE: runShowCmd,
+	Args: cobra.RangeArgs(0, 2),
 	Annotations: map[string]string{
 		docs.Tag: docs.BastionHost,
 	},
@@ -278,11 +278,11 @@ func checkConfigGenFileExist(outFile string, fsu fileutils.FileUtils) error {
 }
 
 var ocIdShowAppCmd = &cobra.Command{
-	Use:               "oc-id-show-app",
-	Short:             "Get the details of the oauth applications registered with OC-ID",
-	Long:              "Get the details of the oauth applications registered with OC-ID",
-	PersistentPreRunE: checkLicenseStatusForExpiry,
-	RunE:              runOcIdShowAppCommand,
+	Use:   "oc-id-show-app",
+	Short: "Get the details of the oauth applications registered with OC-ID",
+	Long:  "Get the details of the oauth applications registered with OC-ID",
+	// PersistentPreRunE: checkLicenseStatusForExpiry,
+	RunE: runOcIdShowAppCommand,
 	Annotations: map[string]string{
 		docs.Tag: docs.BastionHost,
 	},
