@@ -2,6 +2,7 @@ git-rebase:
   stage: build
   before_script:
     - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client git -y )'
+    - 'which git || ( apt-get update -y && apt-get install git -y )'
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$GIT_SSH_PRIV_KEY")
     - git config --global user.email "gitlab@cinc.sh"
