@@ -60,7 +60,7 @@ type migrateCmdFlagSet struct {
 	// migration.
 	airgapPreflight  bool
 	enableChefServer bool
-	enableWorkflow   bool
+	// enableWorkflow   bool
 }
 
 var migrateCmdFlags = migrateCmdFlagSet{}
@@ -197,12 +197,6 @@ func init() {
 		"enable-chef-server",
 		false,
 		"Enable integrated Chef Server migration and deployment; only valid for all-in-one topology")
-
-	migrateFrom1Cmd.PersistentFlags().BoolVar(
-		&migrateCmdFlags.enableWorkflow,
-		"enable-workflow",
-		false,
-		"Enable integrated Workflow migration and deployment; only valid for all-in-one topology")
 
 	// passwords are not validated until the end of the migration, which makes this
 	// feature dangerous. But we still want to have it in Ci, so we mark it as
@@ -469,8 +463,6 @@ func newLocalMigration() (*a1upgrade.A1Upgrade, error) {
 		a1upgrade.SkipWorkflowConfiguredCheck(migrateCmdFlags.skipWorkflowCheck),
 
 		a1upgrade.WithChefServerEnabled(migrateCmdFlags.enableChefServer),
-
-		a1upgrade.WithWorkflowEnabled(migrateCmdFlags.enableWorkflow),
 	)
 
 	if err != nil {
