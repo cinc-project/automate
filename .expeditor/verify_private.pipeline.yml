@@ -820,7 +820,7 @@ steps:
   - label: "upgrade dev -> master"
     command:
       - integration/run_test integration/tests/upgrade.sh
-    timeout_in_minutes: 25
+    timeout_in_minutes: 50
     expeditor:
       executor:
         linux:

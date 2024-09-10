@@ -64,7 +64,7 @@ func (suite *GatewayTestSuite) TestDataLifecycleConfigure() {
 			&data_lifecycle.JobSettings{
 				Name:       compliancePurgeJobName,
 				Disabled:   true,
-				Recurrence: testRecurrence,
+				Recurrence: "P1D", // ISO 8601 for 1 day (example)
 				PurgePolicies: &data_lifecycle.PurgePolicyUpdate{
 					Elasticsearch: []*data_lifecycle.EsPolicyUpdate{
 						&data_lifecycle.EsPolicyUpdate{
