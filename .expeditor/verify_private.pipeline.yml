@@ -57,6 +57,7 @@ steps:
 # integration tests.
 - label: build
   command:
+  - git config --global --add safe.directory /go/src/github.com/chef/automate
   - scripts/verify_build.sh
   timeout_in_minutes: 120
   env:
