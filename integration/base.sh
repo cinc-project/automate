@@ -241,6 +241,8 @@ do_test_deploy() {
 }
 
 do_test_deploy_default() {
+    echo "sleeping for 60 seconds"
+    sleep 60
     if [ $test_skip_diagnostics = false ]; then
         run_diagnostics_pre_upgrade $test_loadbalancer_url "$test_diagnostics_filters" "$test_diagnostics_pre_upgrade_filters" \
             "$test_diagnostics_opts"
