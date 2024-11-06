@@ -209,6 +209,13 @@ do_deploy() {
     do_deploy_default
     do_apply_license
     sleep 60
+    test_json
+}
+
+test_json(){
+    echo $(chef-automate license status)
+    echo "json file"
+    cat /tmp/lic
 }
 
 do_apply_license(){
