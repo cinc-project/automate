@@ -358,8 +358,6 @@ func handleBackupCommands(cmd *cobra.Command, args []string, commandString strin
 	}
 	if strings.Contains(cmd.CommandPath(), "restore") {
 		if isA2HARBFileExist() {
-			writer.Println("Response from handleBackupCommands:")
-			writer.Printf("%t\n", isA2HARBFileExist())
 			var allowRestore bool
 			var er error
 			if backupCmdFlags.verifyRestoreConfig {
@@ -375,7 +373,7 @@ func handleBackupCommands(cmd *cobra.Command, args []string, commandString strin
 					return er
 				}
 				if !allowRestore {
-					return errors.New("There is discrepancy in the config paths. Restore operation will fail. Please correct the backup paths before proceeding to restore the back")
+					return errors.New("There is discrepancy in the config paths. Restore operation will fail. Please correct the backup paths before proceeding to restore the backup")
 				}
 				fmt.Println("Configuration looks good. Please proceed to restore the backup without passing --verify-restore-config")
 				return nil
@@ -1011,35 +1009,6 @@ func checkFlags(f *flag.Flag) {
 
 // nolint: gocyclo
 func runRestoreBackupCmd(cmd *cobra.Command, args []string) error {
-	if isA2HARBFileExist() {
-		writer.Println("Response from runRestoreBackupCmd:")
-		writer.Printf("%t\n", isA2HARBFileExist())
-		var allowRestore bool
-		var error error
-		if backupCmdFlags.verifyRestoreConfig {
-			infra, err := getAutomateHAInfraDetails()
-			if err != nil {
-				writer.Errorf("error in getting infra details of HA, %s\n", err.Error())
-				return err
-			}
-			sshConfig := &SSHConfig{
-				sshUser:    infra.Outputs.SSHUser.Value,
-				sshKeyFile: infra.Outputs.SSHKeyFile.Value,
-				sshPort:    infra.Outputs.SSHPort.Value,
-			}
-			sshUtil := NewSSHUtil(sshConfig)
-			pullConfig := NewPullConfigs(infra, sshUtil)
-			allowRestore, error = compareBackupPaths(infra, sshUtil, pullConfig)
-			if error != nil {
-				return error
-			}
-			if !allowRestore {
-				return errors.New("There is discrepancy in the config paths. Restore operation will fail. Please correct the backup paths before proceeding to restore the back")
-			}
-			fmt.Println("Configuration looks good. Please proceed to restore the backup without passing --verify-restore-config")
-			return nil
-		}
-	}
 	if !backupCmdFlags.yes && !backupCmdFlags.skipPreflight {
 		deployed, err := isA2Deployed()
 		if err != nil {
@@ -1466,22 +1435,17 @@ func getBackupStatusAsCompletedOrFailed(backup *api.BackupTask) bool {
 
 }
 
-func compareBackupPaths(infra *AutomateHAInfraDetails, sshUtil SSHUtil, pullConfigs PullConfigs)  (bool, error) {
+func compareBackupPaths(infra *AutomateHAInfraDetails, sshUtil SSHUtil, pullConfig PullConfigs)  (bool, error) {
 	automateIps := infra.Outputs.AutomatePrivateIps.Value
-
 	if automateIps == nil || len(automateIps) < 1 {
 		return false, errors.New("Automate private IPs are empty")
 	}
-
-	
 	sshUtil.getSSHConfig().hostIP = automateIps[0]
 
-	
 	a2ConfigMap, _, err := pullConfig.pullAutomateConfigs(false)
 	if err != nil {
 		return false, err
 	}
-
 	if len(a2ConfigMap) == 0 {
 		return false, errors.New("no automate configs found")
 	}
@@ -1518,7 +1482,7 @@ func compareBackupPaths(infra *AutomateHAInfraDetails, sshUtil SSHUtil, pullConf
 		writer.Printf("osPath: %s\n", osPath)
 
 		if automateBackupPath != osPath {
-			err := fmt.Errorf("discrepancy in the backup paths. All backup paths should point to the same location.backup path configured in automade nodes: %s, path_repo configured in opensearch nodes: %s. Please check the paths listed above and ensure to configure all backup paths to point to the same destination:", automateBackupPath, osPath)
+			err := fmt.Errorf("discrepancy in the backup paths. All backup paths should point to the same location.Backup path configured in automade nodes: %s, path_repo configured in opensearch nodes: %s. Please check the paths listed above and ensure to configure all backup paths to point to the same destination: ", automateBackupPath, osPath)
 			return false, err
 		}
 	}
@@ -1526,7 +1490,7 @@ func compareBackupPaths(infra *AutomateHAInfraDetails, sshUtil SSHUtil, pullConf
 		return true, nil
 	}
 	if automateBackupPath != snapshotServiceBackupPath {
-		err := fmt.Errorf("discrepancy in the backup paths. All backup paths should point to the same location: backup path configured in automade nodes: %s, snapshot location of services: %s. Please check the paths listed above and ensure to configure all backup paths to point to the same destination:", automateBackupPath, snapshotServiceBackupPath)
+		err := fmt.Errorf("discrepancy in the backup paths. All backup paths should point to the same location: Backup path configured in automade nodes: %s, snapshot location of services: %s. Please check the paths listed above and ensure to configure all backup paths to point to the same destination: ", automateBackupPath, snapshotServiceBackupPath)
 		return false, err
 	}
 	return true, nil
@@ -1567,7 +1531,7 @@ func compareSnapshotLocationOfServices(backupLocation string, sshUtil SSHUtil) (
 						snapshotEs6ServicePath = complianceServicePath
 					}
 				} else {
-					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer the documents to do a clean up of the snapshot repo", backupLocation)
+					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer `https://docs.chef.io/automate/ha_backup_restore_file_system/#troubleshooting` to do a clean up of the snapshot repo", backupLocation)
 					return "", false, err
 				}
 
@@ -1583,7 +1547,7 @@ func compareSnapshotLocationOfServices(backupLocation string, sshUtil SSHUtil) (
 						snapshotEs5ServicePath = complianceServicePath
 					}
 				} else {
-					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer the documents to do a clean up of the snapshot repo.", backupLocation)
+					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer `https://docs.chef.io/automate/ha_backup_restore_file_system/#troubleshooting` to do a clean up of the snapshot repo", backupLocation)
 					return "", false, err
 				}
 			}
@@ -1600,7 +1564,7 @@ func compareSnapshotLocationOfServices(backupLocation string, sshUtil SSHUtil) (
 						snapshotEs6ServicePath = complianceServicePath
 					}
 				} else {
-					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer the documents to do a clean up of the snapshot repo.", backupLocation)
+					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer `https://docs.chef.io/automate/ha_backup_restore_object_storage/#troubleshooting` to do a clean up of the snapshot repo", backupLocation)
 					return "", false, err
 				}
 			}
@@ -1615,7 +1579,7 @@ func compareSnapshotLocationOfServices(backupLocation string, sshUtil SSHUtil) (
 						snapshotEs5ServicePath = complianceServicePath
 					}
 				} else {
-					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer the documents to do a clean up of the snapshot repo.", backupLocation)
+					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer `https://docs.chef.io/automate/ha_backup_restore_object_storage/#troubleshooting` to do a clean up of the snapshot repo", backupLocation)
 					return "", false, err
 				}
 			}
@@ -1632,7 +1596,7 @@ func compareSnapshotLocationOfServices(backupLocation string, sshUtil SSHUtil) (
 						snapshotEs6ServicePath = complianceServicePath
 					}
 				} else {
-					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer the documents to do a clean up of the snapshot repo.", backupLocation)
+					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer `https://docs.chef.io/automate/ha_backup_restore_object_storage/#troubleshooting` to do a clean up of the snapshot repo", backupLocation)
 					return "", false, err
 				}
 			}
@@ -1647,7 +1611,7 @@ func compareSnapshotLocationOfServices(backupLocation string, sshUtil SSHUtil) (
 						snapshotEs5ServicePath = complianceServicePath
 					}
 				} else {
-					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer the documents to do a clean up of the snapshot repo.", backupLocation)
+					err := fmt.Errorf("discrepancy in the backup types. Backup type of all indices should be %s. Refer `https://docs.chef.io/automate/ha_backup_restore_object_storage/#troubleshooting` to do a clean up of the snapshot repo", backupLocation)
 					return "", false, err
 				}
 			}
@@ -1659,12 +1623,8 @@ func compareSnapshotLocationOfServices(backupLocation string, sshUtil SSHUtil) (
 			allowRestore = true
 			return snapshotEs6ServicePath, allowRestore, nil
 		}
-		writer.Println("Response from compareSnapshotLocationOfServices:")
-		writer.Printf("Allow Restore %t\n", allowRestore)
-		writer.Printf("isEs5Service %t\n", isEs5Service)
-		writer.Printf("isEs6Service %t\n", isEs6Service)
-		writer.Printf("snapshotEs5ServicePath %s\n", snapshotEs5ServicePath)
-		writer.Printf("snapshotEs6ServicePath %s\n", snapshotEs6ServicePath)
+		logrus.Debugf("Response from compareSnapshotLocationOfServices. allowRestore flag: %t, isEs5Service flag: %t, isEs6Service: %t, snapshotEs5ServicePath: %s,  snapshotEs6ServicePath: %s", 
+			allowRestore, isEs5Service, isEs6Service, snapshotEs5ServicePath, snapshotEs6ServicePath)
 
 		if isEs5Service && isEs6Service && snapshotEs5ServicePath == snapshotEs6ServicePath {
 			return snapshotEs6ServicePath, allowRestore, nil
