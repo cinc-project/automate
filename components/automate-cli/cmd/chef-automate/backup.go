@@ -1458,7 +1458,7 @@ func compareBackupPaths(infra *AutomateHAInfraDetails, sshUtil SSHUtil, pullConf
 		return false, err
 	}
 
-	automateBackupPath, err := pullConfig.getBackupPathFromAutomateConfig(a2ConfigMap)
+	automateBackupPath, err := pullConfig.getBackupPathFromAutomateConfig(a2ConfigMap, backupLocation)
 	if err != nil {
 		return false, err
 	}

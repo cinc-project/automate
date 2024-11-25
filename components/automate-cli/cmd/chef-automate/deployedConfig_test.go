@@ -298,7 +298,7 @@ type MockPullConfigs struct {
 	setExceptionIpsFunc                   func(ips []string)
 	getOsCertsByIpFunc                    func(map[string]*ConfigKeys) []CertByIP
 	setInfraAndSSHUtilFunc                func(*AutomateHAInfraDetails, SSHUtil)
-	getBackupPathFromAutomateConfigFunc   func(map[string]*dc.AutomateConfig) (string, error)
+	getBackupPathFromAutomateConfigFunc   func(map[string]*dc.AutomateConfig, string) (string, error)
 	getBackupPathFromOpensearchConfigFunc func() (string, error)
 }
 
@@ -349,8 +349,8 @@ func (m *MockPullConfigs) getOsCertsByIp(configKeysMap map[string]*ConfigKeys) [
 	return m.getOsCertsByIpFunc(configKeysMap)
 }
 
-func (m *MockPullConfigs) getBackupPathFromAutomateConfig(automateConfig map[string]*dc.AutomateConfig) (string, error) {
-	return m.getBackupPathFromAutomateConfig(automateConfig)
+func (m *MockPullConfigs) getBackupPathFromAutomateConfig(a2ConfigMap map[string]*dc.AutomateConfig, backupLocation string) (string, error) {
+	return m.getBackupPathFromAutomateConfig(a2ConfigMap, backupLocation)
 }
 
 func (m *MockPullConfigs) getBackupPathFromOpensearchConfig() (string, error) {

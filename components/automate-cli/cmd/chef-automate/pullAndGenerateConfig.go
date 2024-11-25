@@ -204,7 +204,7 @@ type PullConfigs interface {
 	setExceptionIps(ips []string)
 	getOsCertsByIp(map[string]*ConfigKeys) []CertByIP
 	setInfraAndSSHUtil(*AutomateHAInfraDetails, SSHUtil)
-	getBackupPathFromAutomateConfig(map[string]*dc.AutomateConfig) (string, error)
+	getBackupPathFromAutomateConfig(a2ConfigMap map[string]*dc.AutomateConfig, backupLocation string) (string, error)
 	getBackupPathFromOpensearchConfig() (string, error)
 }
 
@@ -1479,12 +1479,8 @@ func getGcsBackupConfig(a2ConfigMap map[string]*dc.AutomateConfig, fileUtils fil
 	return objStoage, nil
 }
 
-func (p *PullConfigsImpl) getBackupPathFromAutomateConfig(a2ConfigMap map[string]*dc.AutomateConfig) (string, error) {
+func (p *PullConfigsImpl) getBackupPathFromAutomateConfig(a2ConfigMap map[string]*dc.AutomateConfig, backupLocation string) (string, error) {
 	for _, ele := range a2ConfigMap {
-		_, backupLocation, err := determineBkpConfig(a2ConfigMap, "", "objectStorage", "fileStorage")
-		if err != nil {
-			return "", err
-		}
 		path := ""
 		switch backupLocation {
 		case "fs":

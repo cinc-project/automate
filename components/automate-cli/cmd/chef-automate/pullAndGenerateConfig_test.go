@@ -1265,11 +1265,13 @@ func TestGetBackupPathFromAutomateConfig(t *testing.T) {
 	tests := []struct {
 		testCaseDescription string
 		a2ConfigMap         map[string]*dc.AutomateConfig
+		backupLocation      string
 		expectedResult      string
 		expectedError       error
 	}{
 		{
 			testCaseDescription: "when backupLocation is fs",
+			backupLocation: "fs",
 			a2ConfigMap: map[string]*dc.AutomateConfig{
 				"config": {
 					Global: &shared.GlobalConfig{
@@ -1307,6 +1309,7 @@ func TestGetBackupPathFromAutomateConfig(t *testing.T) {
 		},
 		{
 			testCaseDescription: "when backupLocation is s3",
+			backupLocation: "s3",
 			a2ConfigMap: map[string]*dc.AutomateConfig{
 				"config": {
 					Global: &shared.GlobalConfig{
@@ -1342,6 +1345,7 @@ func TestGetBackupPathFromAutomateConfig(t *testing.T) {
 		},
 		{
 			testCaseDescription: "when backupLocation is gcs",
+			backupLocation: "gcs",
 			a2ConfigMap: map[string]*dc.AutomateConfig{
 				"config": {
 					Global: &shared.GlobalConfig{
@@ -1375,33 +1379,6 @@ func TestGetBackupPathFromAutomateConfig(t *testing.T) {
 			expectedResult: "opensearch",
 			expectedError:    nil,
 		},
-		{
-			testCaseDescription: "when backupLocation is not a supported type",
-			a2ConfigMap: map[string]*dc.AutomateConfig{
-				"config": {
-					Global: &shared.GlobalConfig{
-						V1: &shared.V1{
-							Backups: &shared.Backups{
-								Location: &wrapperspb.StringValue{
-									Value: "bs",
-								},
-							},
-							External: &shared.External{
-								Opensearch: &shared.External_Opensearch{
-									Backup: &shared.External_Opensearch_Backup{
-										Location: &wrapperspb.StringValue{
-											Value: "bs",
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			expectedResult: "",
-			expectedError: errors.New("backup type could not be determined"),
-		},
 	}
 	pullconfig := &PullConfigsImpl{
 		infra:        NewMockInfra(),
@@ -1410,7 +1387,7 @@ func TestGetBackupPathFromAutomateConfig(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.testCaseDescription, func(t *testing.T) {
-			result, err := pullconfig.getBackupPathFromAutomateConfig(tc.a2ConfigMap)
+			result, err := pullconfig.getBackupPathFromAutomateConfig(tc.a2ConfigMap, tc.backupLocation)
 			if tc.expectedError != nil {
 				assert.Equal(t, tc.expectedError, err)
 			} else {
