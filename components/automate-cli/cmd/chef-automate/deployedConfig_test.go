@@ -350,11 +350,11 @@ func (m *MockPullConfigs) getOsCertsByIp(configKeysMap map[string]*ConfigKeys) [
 }
 
 func (m *MockPullConfigs) getBackupPathFromAutomateConfig(a2ConfigMap map[string]*dc.AutomateConfig, backupLocation string) (string, error) {
-	return m.getBackupPathFromAutomateConfig(a2ConfigMap, backupLocation)
+	return m.getBackupPathFromAutomateConfigFunc(a2ConfigMap, backupLocation)
 }
 
 func (m *MockPullConfigs) getBackupPathFromOpensearchConfig() (string, error) {
-	return m.getBackupPathFromOpensearchConfig()
+	return m.getBackupPathFromOpensearchConfigFunc()
 }
 
 
