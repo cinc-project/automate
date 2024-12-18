@@ -1357,7 +1357,7 @@ func (t *LocalTarget) installHabViaInstallScript(ctx context.Context, requiredVe
 		return err
 	}
 
-	version := requiredVersion.Version()
+	version := requiredVersion.Version() 
 
 	output, execErr := t.Executor.CombinedOutput(
 		"bash",
