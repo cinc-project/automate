@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,6 +22,8 @@ import (
 )
 
 const GET_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.os_password"
+const GET_PG_SUPERUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_superuser_password"
+const GET_PG_DBUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_dbuser_password"
 const AUTOMATE_HA_WORKSPACE_GOOGLE_SERVICE_FILE = "/hab/a2_deploy_workspace/googleServiceAccount.json"
 
 type ConfigKeys struct {
@@ -535,19 +538,19 @@ func (p *PullConfigsImpl) fetchInfraConfig(removeUnreachableNodes bool) (*Existi
 			sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchInstanceURL = externalOsDetails.OpensearchInstanceURL
 			sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchRootCert = externalOsDetails.OpensearchRootCert
 			sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchSuperUserName = externalOsDetails.OpensearchSuperUserName
-			sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchSuperUserPassword = externalOsDetails.OpensearchSuperUserPassword
+			sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchSuperUserPassword = base64.StdEncoding.EncodeToString([]byte(externalOsDetails.OpensearchSuperUserPassword))
 			sharedConfigToml.ExternalDB.Database.Opensearch.AWS.AwsOsSnapshotRoleArn = externalOsDetails.AWS.AwsOsSnapshotRoleArn
 			sharedConfigToml.ExternalDB.Database.Opensearch.AWS.OsUserAccessKeyId = externalOsDetails.AWS.OsUserAccessKeyId
 			sharedConfigToml.ExternalDB.Database.Opensearch.AWS.OsUserAccessKeySecret = externalOsDetails.AWS.OsUserAccessKeySecret
 		}
-		externalPgDetails := getExternalPGDetails(a2ConfigMap)
+		externalPgDetails, err := p.getExternalPGDetails(a2ConfigMap)
 		if externalPgDetails != nil {
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserName = externalPgDetails.PostgreSQLDBUserName
-			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserPassword = externalPgDetails.PostgreSQLDBUserPassword
+			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserPassword = base64.StdEncoding.EncodeToString([]byte(externalPgDetails.PostgreSQLDBUserPassword))
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLInstanceURL = externalPgDetails.PostgreSQLInstanceURL
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLRootCert = externalPgDetails.PostgreSQLRootCert
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLSuperUserName = externalPgDetails.PostgreSQLSuperUserName
-			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLSuperUserPassword = externalPgDetails.PostgreSQLSuperUserPassword
+			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLSuperUserPassword = base64.StdEncoding.EncodeToString([]byte(externalPgDetails.PostgreSQLSuperUserPassword))
 		}
 	}
 
@@ -717,6 +720,38 @@ func (p *PullConfigsImpl) getOSpassword() (string, error) {
 
 }
 
+func (p *PullConfigsImpl) getPGSuperUserPassword() (string, error) {
+	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
+		if stringutils.SliceContains(p.exceptionIps, ip) {
+			continue
+		}
+		p.sshUtil.getSSHConfig().hostIP = ip
+		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_SUPERUSER_PASSWORD, true)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(rawOutput), nil
+	}
+	return "", nil
+
+}
+
+func (p *PullConfigsImpl) getPGDBUserPassword() (string, error) {
+	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
+		if stringutils.SliceContains(p.exceptionIps, ip) {
+			continue
+		}
+		p.sshUtil.getSSHConfig().hostIP = ip
+		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_DBUSER_PASSWORD, true)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(rawOutput), nil
+	}
+	return "", nil
+
+}
+
 func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*dc.AutomateConfig, dbType string) (*ExternalOpensearchToml, error) {
 	for _, ele := range a2ConfigMap {
 		roleArn := ""
@@ -726,14 +761,17 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 			ele.Global.V1.External.Opensearch.Backup.S3.Settings.RoleArn != nil {
 			roleArn = ele.Global.V1.External.Opensearch.Backup.S3.Settings.RoleArn.Value
 		}
-
+        osPass, err := p.getOSpassword()
+		if err != nil {
+			return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
+		}
 		if dbType == TYPE_AWS {
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.AwsOs != nil {
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.Username.Value,
-					ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value,
+					base64.StdEncoding.EncodeToString([]byte(osPass)),
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.AccessKey.Value,
@@ -742,16 +780,12 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 				), nil
 			}
 		} else if dbType == TYPE_SELF_MANAGED {
-			osPass, err := p.getOSpassword()
-			if err != nil {
-				return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
-			}
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.BasicAuth != nil {
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.BasicAuth.Username.Value,
-					osPass,
+					base64.StdEncoding.EncodeToString([]byte(osPass)),
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					"",
@@ -783,22 +817,30 @@ func setExternalOpensearchDetails(instanceUrl, superUserName, superPassword, roo
 	}
 }
 
-func getExternalPGDetails(a2ConfigMap map[string]*dc.AutomateConfig) *ExternalPostgreSQLToml {
+func (p *PullConfigsImpl) getExternalPGDetails(a2ConfigMap map[string]*dc.AutomateConfig) (*ExternalPostgreSQLToml, error) {
 	for _, ele := range a2ConfigMap {
+		pgSuPwd, err := p.getPGSuperUserPassword()
+		if err != nil {
+			return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres superuser password")
+		}
+		pgDbuPwd, err := p.getPGDBUserPassword()
+		if err != nil {
+			return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres Dbuser password")
+		}
 		if ele.Global.V1.External.Postgresql.Nodes != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Superuser != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Dbuser != nil {
 			return setExternalPGDetails(
 				ele.Global.V1.External.Postgresql.Nodes[0].Value,
 				ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Username.Value,
-				ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password.Value,
+				base64.StdEncoding.EncodeToString([]byte(pgSuPwd)),
 				ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Username.Value,
-				ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password.Value,
+				base64.StdEncoding.EncodeToString([]byte(pgDbuPwd)),
 				ele.Global.V1.External.Postgresql.Ssl.RootCert.Value,
-			)
+			), nil
 		}
 	}
-	return nil
+	return nil, nil
 }
 
 func setExternalPGDetails(instanceUrl, superUserName, superUserPassword, dBUserName, dBUserPassword, rootCerts string) *ExternalPostgreSQLToml {
@@ -998,19 +1040,19 @@ func (p *PullConfigsImpl) fetchAwsConfig(removeUnreachableNodes bool) (*AwsConfi
 			sharedConfigToml.Aws.Config.OpensearchDomainUrl = externalOsDetails.OpensearchInstanceURL
 			sharedConfigToml.Aws.Config.OpensearchCertificate = externalOsDetails.OpensearchRootCert
 			sharedConfigToml.Aws.Config.OpensearchUsername = externalOsDetails.OpensearchSuperUserName
-			sharedConfigToml.Aws.Config.OpensearchUserPassword = externalOsDetails.OpensearchSuperUserPassword
+			sharedConfigToml.Aws.Config.OpensearchUserPassword = base64.StdEncoding.EncodeToString([]byte(externalOsDetails.OpensearchSuperUserPassword))
 			sharedConfigToml.Aws.Config.AwsOsSnapshotRoleArn = externalOsDetails.AWS.AwsOsSnapshotRoleArn
 			sharedConfigToml.Aws.Config.OsUserAccessKeyId = externalOsDetails.AWS.OsUserAccessKeyId
 			sharedConfigToml.Aws.Config.OsUserAccessKeySecret = externalOsDetails.AWS.OsUserAccessKeySecret
 		}
-		externalPgDetails := getExternalPGDetails(a2ConfigMap)
+		externalPgDetails, err := p.getExternalPGDetails(a2ConfigMap)
 		if externalPgDetails != nil {
 			sharedConfigToml.Aws.Config.RDSDBUserName = externalPgDetails.PostgreSQLDBUserName
-			sharedConfigToml.Aws.Config.RDSDBUserPassword = externalPgDetails.PostgreSQLDBUserPassword
+			sharedConfigToml.Aws.Config.RDSDBUserPassword = base64.StdEncoding.EncodeToString([]byte(externalPgDetails.PostgreSQLDBUserPassword))
 			sharedConfigToml.Aws.Config.RDSInstanceUrl = externalPgDetails.PostgreSQLInstanceURL
 			sharedConfigToml.Aws.Config.RDSCertificate = externalPgDetails.PostgreSQLRootCert
 			sharedConfigToml.Aws.Config.RDSSuperUserName = externalPgDetails.PostgreSQLSuperUserName
-			sharedConfigToml.Aws.Config.RDSSuperUserPassword = externalPgDetails.PostgreSQLSuperUserPassword
+			sharedConfigToml.Aws.Config.RDSSuperUserPassword = base64.StdEncoding.EncodeToString([]byte(externalPgDetails.PostgreSQLSuperUserPassword))
 		}
 	}
 
@@ -1233,16 +1275,16 @@ func getExistingHAConfigFromTFVars(tfvarConfig *HATfvars) (*ExistingInfraConfigT
 	sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchDomainName = strings.TrimSpace(tfvarConfig.ManagedOpensearchDomainName)
 	sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchRootCert = strings.TrimSpace(tfvarConfig.OpensearchRootCert)
 	sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchSuperUserName = strings.TrimSpace(tfvarConfig.ManagedOpensearchUsername)
-	sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchSuperUserPassword = strings.TrimSpace(tfvarConfig.ManagedOpensearchUserPassword)
+	sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchSuperUserPassword = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(tfvarConfig.ManagedOpensearchUserPassword)))
 	sharedConfigToml.ExternalDB.Database.Opensearch.AWS.AwsOsSnapshotRoleArn = strings.TrimSpace(tfvarConfig.AwsOsSnapshotRoleArn)
 	sharedConfigToml.ExternalDB.Database.Opensearch.AWS.OsUserAccessKeyId = strings.TrimSpace(tfvarConfig.OsSnapshotUserAccessKeyId)
 	sharedConfigToml.ExternalDB.Database.Opensearch.AWS.OsUserAccessKeySecret = strings.TrimSpace(tfvarConfig.OsSnapshotUserAccessKeySecret)
 	sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserName = strings.TrimSpace(tfvarConfig.ManagedRdsDbuserUsername)
-	sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserPassword = strings.TrimSpace(tfvarConfig.ManagedRdsDbuserPassword)
+	sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserPassword = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(tfvarConfig.ManagedRdsDbuserPassword)))
 	sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLInstanceURL = strings.TrimSpace(tfvarConfig.ManagedRdsInstanceUrl)
 	sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLRootCert = strings.TrimSpace(tfvarConfig.PostgresqlRootCert)
 	sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLSuperUserName = strings.TrimSpace(tfvarConfig.ManagedRdsSuperuserUsername)
-	sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLSuperUserPassword = strings.TrimSpace(tfvarConfig.ManagedRdsSuperuserPassword)
+	sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLSuperUserPassword = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(tfvarConfig.ManagedRdsSuperuserPassword)))
 	setupManagedServices := strings.TrimSpace(tfvarConfig.SetupManagedServices)
 	setupSelfManagedServices := strings.TrimSpace(tfvarConfig.SetupSelfManagedServices)
 	if strings.EqualFold(setupManagedServices, "true") && strings.EqualFold(setupSelfManagedServices, "true") {
