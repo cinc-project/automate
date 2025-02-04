@@ -1,8 +1,11 @@
 package pg_gateway
 
 import (
+	"encoding/base64"
 	"fmt"
 	"net"
+	"os/exec"
+	"strings"
 
 	ac "github.com/chef/automate/api/config/shared"
 	w "github.com/chef/automate/api/config/shared/wrappers"
@@ -11,8 +14,9 @@ import (
 )
 
 const (
-	defaultResolverPort = 53
-	defaultServerPort   = "5432"
+	defaultResolverPort     = 53
+	defaultServerPort       = "5432"
+	habPkgPlatformToolsPath = "hab pkg path chef/automate-platform-tools"
 )
 
 // NewConfigRequest returns a new instance of ConfigRequest with zero values.
@@ -79,6 +83,37 @@ func (c *ConfigRequest) SetGlobalConfig(g *ac.GlobalConfig) {
 
 			c.V1.Sys.Service.ParsedNodes = endpoints
 		}
+
+		superUserPassword := g.GetV1().GetExternal().GetPostgresql().GetAuth().GetPassword().GetSuperuser().GetPassword().GetValue()
+		if superUserPassword == "" {
+			args := []string{
+				"show",
+				"userconfig.pg_superuser_password",
+			}
+			getPwd := exec.Command(getLatestPlatformToolsPath()+"/bin/secrets-helper", args...)
+			superUserPwd, err := getPwd.Output()
+			if err != nil {
+				return
+			}
+			superUserPassword = strings.TrimSpace(string(superUserPwd))
+
+			c.V1.Sys.Service.ExternalPostgresql.Auth.Password.Superuser.Password = w.String(base64.StdEncoding.EncodeToString([]byte(superUserPassword)))
+		}
+		dbUserPassword := g.GetV1().GetExternal().GetPostgresql().GetAuth().GetPassword().GetDbuser().GetPassword().GetValue()
+		if dbUserPassword == "" {
+			args := []string{
+				"show",
+				"userconfig.pg_dbuser_password",
+			}
+			getPwd := exec.Command(getLatestPlatformToolsPath()+"/bin/secrets-helper", args...)
+			dbUserPwd, err := getPwd.Output()
+			if err != nil {
+				return
+			}
+			dbUserPassword = strings.TrimSpace(string(dbUserPwd))
+
+			c.V1.Sys.Service.ExternalPostgresql.Auth.Password.Dbuser.Password = w.String(base64.StdEncoding.EncodeToString([]byte(dbUserPassword)))
+		}
 	}
 }
 
@@ -114,4 +149,14 @@ func getSystemResolvers() []*wrappers.StringValue {
 
 func isIPAddress(addr string) bool {
 	return net.ParseIP(addr) != nil
+}
+
+func getLatestPlatformToolsPath() string {
+	cmd, err := exec.Command("/bin/sh", "-c", habPkgPlatformToolsPath).Output()
+	if err != nil {
+		fmt.Printf("error %s", err)
+	}
+	output := string(cmd)
+
+	return strings.TrimSpace(output)
 }
