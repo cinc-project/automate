@@ -761,17 +761,14 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 			ele.Global.V1.External.Opensearch.Backup.S3.Settings.RoleArn != nil {
 			roleArn = ele.Global.V1.External.Opensearch.Backup.S3.Settings.RoleArn.Value
 		}
-        osPass, err := p.getOSpassword()
-		if err != nil {
-			return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
-		}
+
 		if dbType == TYPE_AWS {
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.AwsOs != nil {
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.Username.Value,
-					base64.StdEncoding.EncodeToString([]byte(osPass)),
+					ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value,
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.AccessKey.Value,
@@ -780,12 +777,16 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 				), nil
 			}
 		} else if dbType == TYPE_SELF_MANAGED {
+			osPass, err := p.getOSpassword()
+			if err != nil {
+				return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
+			}
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.BasicAuth != nil {
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.BasicAuth.Username.Value,
-					base64.StdEncoding.EncodeToString([]byte(osPass)),
+					osPass,
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					"",
