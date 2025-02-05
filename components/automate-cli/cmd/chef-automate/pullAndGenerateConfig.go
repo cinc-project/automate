@@ -763,12 +763,16 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 		}
 
 		if dbType == TYPE_AWS {
+			osPass, err := p.getOSpassword()
+			if err != nil {
+				return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
+			}
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.AwsOs != nil {
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.Username.Value,
-					ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value,
+					base64.StdEncoding.EncodeToString([]byte(osPass)),
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.AccessKey.Value,
@@ -786,7 +790,7 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 				ele.Global.V1.External.Opensearch.Auth.BasicAuth != nil {
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.BasicAuth.Username.Value,
-					osPass,
+					base64.StdEncoding.EncodeToString([]byte(osPass)),
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					"",
@@ -1364,16 +1368,16 @@ func getAwsHAConfigFromTFVars(tfvarConfig *HATfvars, awsAutoTfvarConfig *HAAwsAu
 	sharedConfigToml.Aws.Config.OpensearchDomainName = strings.TrimSpace(awsAutoTfvarConfig.ManagedOpensearchDomainName)
 	sharedConfigToml.Aws.Config.OpensearchCertificate = strings.TrimSpace(tfvarConfig.ManagedOpensearchCertificateDep)
 	sharedConfigToml.Aws.Config.OpensearchUsername = strings.TrimSpace(tfvarConfig.ManagedOpensearchUsernameDep)
-	sharedConfigToml.Aws.Config.OpensearchUserPassword = strings.TrimSpace(tfvarConfig.ManagedOpensearchUserPasswordDep)
+	sharedConfigToml.Aws.Config.OpensearchUserPassword = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(tfvarConfig.ManagedOpensearchUserPasswordDep)))
 	sharedConfigToml.Aws.Config.AwsOsSnapshotRoleArn = strings.TrimSpace(tfvarConfig.AwsOsSnapshotRoleArnDep)
 	sharedConfigToml.Aws.Config.OsUserAccessKeyId = strings.TrimSpace(tfvarConfig.OsSnapshotUserAccessKeyIdDep)
 	sharedConfigToml.Aws.Config.OsUserAccessKeySecret = strings.TrimSpace(tfvarConfig.OsSnapshotUserAccessKeySecretDep)
 	sharedConfigToml.Aws.Config.RDSCertificate = strings.TrimSpace(tfvarConfig.AwsManagedRdsPostgresqlCertificateDep)
 	sharedConfigToml.Aws.Config.RDSDBUserName = strings.TrimSpace(tfvarConfig.ManagedRdsDbuserUsernameDep)
-	sharedConfigToml.Aws.Config.RDSDBUserPassword = strings.TrimSpace(tfvarConfig.ManagedRdsDbuserPasswordDep)
+	sharedConfigToml.Aws.Config.RDSDBUserPassword = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(tfvarConfig.ManagedRdsDbuserPasswordDep)))
 	sharedConfigToml.Aws.Config.RDSInstanceUrl = strings.TrimSpace(tfvarConfig.ManagedRdsInstanceUrlDep)
 	sharedConfigToml.Aws.Config.RDSSuperUserName = strings.TrimSpace(tfvarConfig.ManagedRdsSuperuserUsernameDep)
-	sharedConfigToml.Aws.Config.RDSSuperUserPassword = strings.TrimSpace(tfvarConfig.ManagedRdsSuperuserPasswordDep)
+	sharedConfigToml.Aws.Config.RDSSuperUserPassword = base64.StdEncoding.EncodeToString([]byte(strings.TrimSpace(tfvarConfig.ManagedRdsSuperuserPasswordDep)))
 	sharedConfigToml.Aws.Config.LBAccessLogs = strings.TrimSpace(awsAutoTfvarConfig.LBAccessLogs)
 	sharedConfigToml.Aws.Config.DeleteOnTermination, _ = strconv.ParseBool(awsAutoTfvarConfig.DeleteOnTermination)
 	sharedConfigToml.Aws.Config.AutomateServerInstanceType = strings.TrimSpace(awsAutoTfvarConfig.AutomateServerInstanceType)
