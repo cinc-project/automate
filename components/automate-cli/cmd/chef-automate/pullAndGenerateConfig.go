@@ -763,16 +763,13 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 		}
 
 		if dbType == TYPE_AWS {
-			osPass, err := p.getOSpassword()
-			if err != nil {
-				return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
-			}
+			//Password has to be coming from SecretHelper but currently that is not implemented for AWS Managed Database
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.AwsOs != nil {
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.Username.Value,
-					base64.StdEncoding.EncodeToString([]byte(osPass)),
+					base64.StdEncoding.EncodeToString([]byte(ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value)),
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.AccessKey.Value,
