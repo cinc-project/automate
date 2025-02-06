@@ -731,18 +731,26 @@ func (p *PullConfigsImpl) getOSpassword() (string, error) {
 }
 
 func (p *PullConfigsImpl) getPGSuperUserPassword() (string, error) {
+	fmt.Println("RT Printing 1")
 	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
+		fmt.Println("RT Printing 2")
 		if stringutils.SliceContains(p.exceptionIps, ip) {
+			fmt.Println("RT Printing 3")
 			continue
 		}
+		fmt.Println("RT Printing 4")
 		p.sshUtil.getSSHConfig().hostIP = ip
+		fmt.Println("RT Printing 5")
 		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_SUPERUSER_PASSWORD, true)
+		fmt.Println("RT Printing 6")
 		if err != nil {
+			fmt.Println("RT Printing 7")
 			return "", err
 		}
 		writer.Printf("RT Printing getPGSuperUserPassword: %s", strings.TrimSpace(rawOutput))
 		return strings.TrimSpace(rawOutput), nil
 	}
+	fmt.Println("RT Printing 8")
 	return "", nil
 
 }
