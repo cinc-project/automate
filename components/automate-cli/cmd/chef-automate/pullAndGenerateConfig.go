@@ -738,13 +738,13 @@ func (p *PullConfigsImpl) getPGSuperUserPassword() (string, error) {
 			fmt.Println("RT Printing 3")
 			continue
 		}
-		fmt.Println("RT Printing 4")
+		fmt.Printf("RT Printing 4 ip: %s", ip)
 		p.sshUtil.getSSHConfig().hostIP = ip
 		fmt.Println("RT Printing 5")
 		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_SUPERUSER_PASSWORD, true)
-		fmt.Println("RT Printing 6")
+		fmt.Printf("RT Printing 6 rawoutput %s:", rawOutput)
 		if err != nil {
-			fmt.Println("RT Printing 7")
+			fmt.Printf("RT Printing 7 error %v: ", err)
 			return "", err
 		}
 		writer.Printf("RT Printing getPGSuperUserPassword: %s", strings.TrimSpace(rawOutput))
