@@ -545,8 +545,11 @@ func (p *PullConfigsImpl) fetchInfraConfig(removeUnreachableNodes bool) (*Existi
 			sharedConfigToml.ExternalDB.Database.Opensearch.AWS.OsUserAccessKeySecret = externalOsDetails.AWS.OsUserAccessKeySecret
 			writer.Printf("RT Printing OSP fetchInfraConfig %s", sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchSuperUserPassword)
 		}
+		writer.Println("RT Printing before calling getExternalPGDetails")
 		externalPgDetails, err := p.getExternalPGDetails(a2ConfigMap)
+		writer.Println("RT Printing after calling getExternalPGDetails")
 		if externalPgDetails != nil {
+			writer.Println("RT Printing inside after calling getExternalPGDetails")
 			writer.Printf("RT Printing DBP fetchInfraConfig %s", externalPgDetails.PostgreSQLDBUserPassword)
 			writer.Printf("RT Printing SUP fetchInfraConfig %s", externalPgDetails.PostgreSQLSuperUserPassword)
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserName = externalPgDetails.PostgreSQLDBUserName
@@ -832,11 +835,14 @@ func setExternalOpensearchDetails(instanceUrl, superUserName, superPassword, roo
 
 func (p *PullConfigsImpl) getExternalPGDetails(a2ConfigMap map[string]*dc.AutomateConfig) (*ExternalPostgreSQLToml, error) {
 	for _, ele := range a2ConfigMap {
+		writer.Println("RT printing getExternalPGDetails inside for loop")
 		pgSuPwd, err := p.getPGSuperUserPassword()
+		writer.Printf("RT printing getExternalPGDetails pgSuPwd %s", pgSuPwd)
 		if err != nil {
 			return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres superuser password")
 		}
 		pgDbuPwd, err := p.getPGDBUserPassword()
+		writer.Printf("RT printing getExternalPGDetails pgDbuPwd %s", pgDbuPwd)
 		if err != nil {
 			return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres Dbuser password")
 		}
@@ -845,6 +851,7 @@ func (p *PullConfigsImpl) getExternalPGDetails(a2ConfigMap map[string]*dc.Automa
 		if ele.Global.V1.External.Postgresql.Nodes != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Superuser != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Dbuser != nil {
+				writer.Println("RT printing getExternalPGDetails inside multiple if loop")
 			return setExternalPGDetails(
 				ele.Global.V1.External.Postgresql.Nodes[0].Value,
 				ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Username.Value,
