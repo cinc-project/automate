@@ -534,6 +534,7 @@ func (p *PullConfigsImpl) fetchInfraConfig(removeUnreachableNodes bool) (*Existi
 			return nil, unreachableNodes, err
 		}
 		if externalOsDetails != nil {
+			writer.Printf("RT Printing OSP fetchInfraConfig %s", externalOsDetails.OpensearchSuperUserPassword)
 			sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchDomainName = externalOsDetails.OpensearchDomainName
 			sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchInstanceURL = externalOsDetails.OpensearchInstanceURL
 			sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchRootCert = externalOsDetails.OpensearchRootCert
@@ -542,15 +543,20 @@ func (p *PullConfigsImpl) fetchInfraConfig(removeUnreachableNodes bool) (*Existi
 			sharedConfigToml.ExternalDB.Database.Opensearch.AWS.AwsOsSnapshotRoleArn = externalOsDetails.AWS.AwsOsSnapshotRoleArn
 			sharedConfigToml.ExternalDB.Database.Opensearch.AWS.OsUserAccessKeyId = externalOsDetails.AWS.OsUserAccessKeyId
 			sharedConfigToml.ExternalDB.Database.Opensearch.AWS.OsUserAccessKeySecret = externalOsDetails.AWS.OsUserAccessKeySecret
+			writer.Printf("RT Printing OSP fetchInfraConfig %s", sharedConfigToml.ExternalDB.Database.Opensearch.OpensearchSuperUserPassword)
 		}
 		externalPgDetails, err := p.getExternalPGDetails(a2ConfigMap)
 		if externalPgDetails != nil {
+			writer.Printf("RT Printing DBP fetchInfraConfig %s", externalPgDetails.PostgreSQLDBUserPassword)
+			writer.Printf("RT Printing SUP fetchInfraConfig %s", externalPgDetails.PostgreSQLSuperUserPassword)
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserName = externalPgDetails.PostgreSQLDBUserName
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserPassword = externalPgDetails.PostgreSQLDBUserPassword
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLInstanceURL = externalPgDetails.PostgreSQLInstanceURL
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLRootCert = externalPgDetails.PostgreSQLRootCert
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLSuperUserName = externalPgDetails.PostgreSQLSuperUserName
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLSuperUserPassword = externalPgDetails.PostgreSQLSuperUserPassword
+			writer.Printf("RT Printing DBP fetchInfraConfig %s", sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserPassword)
+			writer.Printf("RT Printing SUP fetchInfraConfig %s", sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLSuperUserPassword)
 		}
 	}
 
@@ -714,6 +720,7 @@ func (p *PullConfigsImpl) getOSpassword() (string, error) {
 		if err != nil {
 			return "", err
 		}
+		writer.Printf("RT Printing getOSpassword: %s", strings.TrimSpace(rawOutput))
 		return strings.TrimSpace(rawOutput), nil
 	}
 	return "", nil
@@ -730,6 +737,7 @@ func (p *PullConfigsImpl) getPGSuperUserPassword() (string, error) {
 		if err != nil {
 			return "", err
 		}
+		writer.Printf("RT Printing getPGSuperUserPassword: %s", strings.TrimSpace(rawOutput))
 		return strings.TrimSpace(rawOutput), nil
 	}
 	return "", nil
@@ -746,6 +754,7 @@ func (p *PullConfigsImpl) getPGDBUserPassword() (string, error) {
 		if err != nil {
 			return "", err
 		}
+		writer.Printf("RT Printing getPGDBUserPassword: %s", strings.TrimSpace(rawOutput))
 		return strings.TrimSpace(rawOutput), nil
 	}
 	return "", nil
@@ -767,6 +776,7 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.AwsOs != nil {
+					writer.Printf("RT printing OSP inside AWS getExternalOpensearchDetails %s", base64.StdEncoding.EncodeToString([]byte(ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value)))
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.Username.Value,
 					base64.StdEncoding.EncodeToString([]byte(ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value)),
@@ -785,6 +795,7 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.BasicAuth != nil {
+					writer.Printf("RT printing OSP inside selfmanaged getExternalOpensearchDetails %s", base64.StdEncoding.EncodeToString([]byte(osPass)))
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.BasicAuth.Username.Value,
 					base64.StdEncoding.EncodeToString([]byte(osPass)),
@@ -829,6 +840,8 @@ func (p *PullConfigsImpl) getExternalPGDetails(a2ConfigMap map[string]*dc.Automa
 		if err != nil {
 			return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres Dbuser password")
 		}
+		writer.Printf("RT printing SUP getExternalPGDetails %s", base64.StdEncoding.EncodeToString([]byte(pgSuPwd)))
+		writer.Printf("RT printing DBP getExternalPGDetails %s", base64.StdEncoding.EncodeToString([]byte(pgDbuPwd)))
 		if ele.Global.V1.External.Postgresql.Nodes != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Superuser != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Dbuser != nil {
@@ -1038,6 +1051,7 @@ func (p *PullConfigsImpl) fetchAwsConfig(removeUnreachableNodes bool) (*AwsConfi
 			return nil, unreachableNodes, err
 		}
 		if externalOsDetails != nil {
+			fmt.Sprintf("RT Printing OSP fetchAwsConfig %s", externalOsDetails.OpensearchSuperUserPassword)
 			sharedConfigToml.Aws.Config.OpensearchDomainName = externalOsDetails.OpensearchDomainName
 			sharedConfigToml.Aws.Config.OpensearchDomainUrl = externalOsDetails.OpensearchInstanceURL
 			sharedConfigToml.Aws.Config.OpensearchCertificate = externalOsDetails.OpensearchRootCert
@@ -1046,15 +1060,20 @@ func (p *PullConfigsImpl) fetchAwsConfig(removeUnreachableNodes bool) (*AwsConfi
 			sharedConfigToml.Aws.Config.AwsOsSnapshotRoleArn = externalOsDetails.AWS.AwsOsSnapshotRoleArn
 			sharedConfigToml.Aws.Config.OsUserAccessKeyId = externalOsDetails.AWS.OsUserAccessKeyId
 			sharedConfigToml.Aws.Config.OsUserAccessKeySecret = externalOsDetails.AWS.OsUserAccessKeySecret
+			fmt.Sprintf("RT Printing OSP fetchAwsConfig %s", sharedConfigToml.Aws.Config.OpensearchUserPassword)
 		}
 		externalPgDetails, err := p.getExternalPGDetails(a2ConfigMap)
 		if externalPgDetails != nil {
+			fmt.Sprintf("RT Printing DBP fetchAwsConfig %s", externalPgDetails.PostgreSQLDBUserPassword)
+			fmt.Sprintf("RT Printing SUP fetchAwsConfig %s", externalPgDetails.PostgreSQLSuperUserPassword)
 			sharedConfigToml.Aws.Config.RDSDBUserName = externalPgDetails.PostgreSQLDBUserName
 			sharedConfigToml.Aws.Config.RDSDBUserPassword = externalPgDetails.PostgreSQLDBUserPassword
 			sharedConfigToml.Aws.Config.RDSInstanceUrl = externalPgDetails.PostgreSQLInstanceURL
 			sharedConfigToml.Aws.Config.RDSCertificate = externalPgDetails.PostgreSQLRootCert
 			sharedConfigToml.Aws.Config.RDSSuperUserName = externalPgDetails.PostgreSQLSuperUserName
 			sharedConfigToml.Aws.Config.RDSSuperUserPassword = externalPgDetails.PostgreSQLSuperUserPassword
+			fmt.Sprintf("RT Printing DBP fetchAwsConfig %s", sharedConfigToml.Aws.Config.RDSDBUserPassword)
+			fmt.Sprintf("RT Printing SUP fetchAwsConfig %s", sharedConfigToml.Aws.Config.RDSSuperUserPassword)
 		}
 	}
 
