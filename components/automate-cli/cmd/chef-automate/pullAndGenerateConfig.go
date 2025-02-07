@@ -727,7 +727,7 @@ func (p *PullConfigsImpl) getPGSuperUserPassword() (string, error) {
 		}
 		p.sshUtil.getSSHConfig().hostIP = ip
 		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_SUPERUSER_PASSWORD, true)
-		fmt.Printf("RT Printing rawoutput %s:", rawOutput)
+		writer.Printf("RT Printing rawoutput %s:", rawOutput)
 		if err != nil {
 			fmt.Printf("RT Printing error %v: ", err)
 			return "", err
@@ -824,23 +824,34 @@ func setExternalOpensearchDetails(instanceUrl, superUserName, superPassword, roo
 
 func (p *PullConfigsImpl) getExternalPGDetails(a2ConfigMap map[string]*dc.AutomateConfig) (*ExternalPostgreSQLToml, error) {
 	for _, ele := range a2ConfigMap {
-		pgSuPwd, err := p.getPGSuperUserPassword()
-		if err != nil {
-			return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres superuser password")
-		}
-		pgDbuPwd, err := p.getPGDBUserPassword()
-		if err != nil {
-			return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres Dbuser password")
-		}
 		if ele.Global.V1.External.Postgresql.Nodes != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Superuser != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Dbuser != nil {
+				var spwd, dpwd string
+				if ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password != nil && ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password.Value != "" {
+					spwd = ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password.Value
+				} else {
+					supwd, err := p.getPGSuperUserPassword()
+					if err != nil {
+						return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres superuser password")
+					}
+					spwd = supwd
+				}
+				if ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password != nil && ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password.Value != "" {
+					dpwd = ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password.Value
+				} else {
+					dbpwd, err := p.getPGDBUserPassword()
+					if err != nil {
+						return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres Dbuser password")
+					}
+					dpwd = dbpwd
+				}
 			return setExternalPGDetails(
 				ele.Global.V1.External.Postgresql.Nodes[0].Value,
 				ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Username.Value,
-				base64.StdEncoding.EncodeToString([]byte(pgSuPwd)),
+				base64.StdEncoding.EncodeToString([]byte(spwd)),
 				ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Username.Value,
-				base64.StdEncoding.EncodeToString([]byte(pgDbuPwd)),
+				base64.StdEncoding.EncodeToString([]byte(dpwd)),
 				ele.Global.V1.External.Postgresql.Ssl.RootCert.Value,
 			), nil
 		}
