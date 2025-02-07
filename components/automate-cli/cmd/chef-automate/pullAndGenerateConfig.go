@@ -727,12 +727,9 @@ func (p *PullConfigsImpl) getPGSuperUserPassword() (string, error) {
 		}
 		p.sshUtil.getSSHConfig().hostIP = ip
 		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_SUPERUSER_PASSWORD, true)
-		writer.Printf("RT Printing rawoutput %s:", rawOutput)
 		if err != nil {
-			fmt.Printf("RT Printing error %v: ", err)
 			return "", err
 		}
-		writer.Printf("RT Printing getPGSuperUserPassword: %s", strings.TrimSpace(rawOutput))
 		return strings.TrimSpace(rawOutput), nil
 	}
 	return "", nil
@@ -770,9 +767,19 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.AwsOs != nil {
+					var osPwd string
+					if ele.Global.V1.External.Opensearch.Auth.AwsOs.Password != nil && ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value != "" {
+						osPwd = ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value
+					} else {
+						osPass, err := p.getOSpassword()
+						if err != nil {
+							return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
+						}
+						osPwd = osPass
+					}
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.Username.Value,
-					base64.StdEncoding.EncodeToString([]byte(ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value)),
+					base64.StdEncoding.EncodeToString([]byte(osPwd)),
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.AccessKey.Value,
