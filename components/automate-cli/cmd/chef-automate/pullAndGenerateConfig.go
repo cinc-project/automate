@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,7 +21,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const GET_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.os_password"
+const GET_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.aws_os_password"
+const GET_AWS_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.os_password"
+const GET_PG_SUPERUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_superuser_password"
+const GET_PG_DBUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_dbuser_password"
 const AUTOMATE_HA_WORKSPACE_GOOGLE_SERVICE_FILE = "/hab/a2_deploy_workspace/googleServiceAccount.json"
 
 type ConfigKeys struct {
@@ -540,7 +544,7 @@ func (p *PullConfigsImpl) fetchInfraConfig(removeUnreachableNodes bool) (*Existi
 			sharedConfigToml.ExternalDB.Database.Opensearch.AWS.OsUserAccessKeyId = externalOsDetails.AWS.OsUserAccessKeyId
 			sharedConfigToml.ExternalDB.Database.Opensearch.AWS.OsUserAccessKeySecret = externalOsDetails.AWS.OsUserAccessKeySecret
 		}
-		externalPgDetails := getExternalPGDetails(a2ConfigMap)
+		externalPgDetails, err := p.getExternalPGDetails(a2ConfigMap)
 		if externalPgDetails != nil {
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserName = externalPgDetails.PostgreSQLDBUserName
 			sharedConfigToml.ExternalDB.Database.PostgreSQL.PostgreSQLDBUserPassword = externalPgDetails.PostgreSQLDBUserPassword
@@ -717,6 +721,54 @@ func (p *PullConfigsImpl) getOSpassword() (string, error) {
 
 }
 
+func (p *PullConfigsImpl) getAwsOSpassword() (string, error) {
+	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
+		if stringutils.SliceContains(p.exceptionIps, ip) {
+			continue
+		}
+		p.sshUtil.getSSHConfig().hostIP = ip
+		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_AWS_OS_PASSWORD, true)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(rawOutput), nil
+	}
+	return "", nil
+
+}
+
+func (p *PullConfigsImpl) getPGSuperUserPassword() (string, error) {
+	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
+		if stringutils.SliceContains(p.exceptionIps, ip) {
+			continue
+		}
+		p.sshUtil.getSSHConfig().hostIP = ip
+		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_SUPERUSER_PASSWORD, true)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(rawOutput), nil
+	}
+	return "", nil
+
+}
+
+func (p *PullConfigsImpl) getPGDBUserPassword() (string, error) {
+	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
+		if stringutils.SliceContains(p.exceptionIps, ip) {
+			continue
+		}
+		p.sshUtil.getSSHConfig().hostIP = ip
+		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_DBUSER_PASSWORD, true)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSpace(rawOutput), nil
+	}
+	return "", nil
+
+}
+
 func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*dc.AutomateConfig, dbType string) (*ExternalOpensearchToml, error) {
 	for _, ele := range a2ConfigMap {
 		roleArn := ""
@@ -731,9 +783,19 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 			if ele.Global.V1.External.Opensearch != nil &&
 				ele.Global.V1.External.Opensearch.Auth != nil &&
 				ele.Global.V1.External.Opensearch.Auth.AwsOs != nil {
+					var osPwd string
+					if ele.Global.V1.External.Opensearch.Auth.AwsOs.Password != nil && ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value != "" {
+						osPwd = ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value
+					} else {
+						osPass, err := p.getAwsOSpassword()
+						if err != nil {
+							return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
+						}
+						osPwd = osPass
+					}
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.Username.Value,
-					ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value,
+					base64.StdEncoding.EncodeToString([]byte(osPwd)),
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					ele.Global.V1.External.Opensearch.Auth.AwsOs.AccessKey.Value,
@@ -751,7 +813,7 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 				ele.Global.V1.External.Opensearch.Auth.BasicAuth != nil {
 				return setExternalOpensearchDetails(ele.Global.V1.External.Opensearch.Nodes[0].Value,
 					ele.Global.V1.External.Opensearch.Auth.BasicAuth.Username.Value,
-					osPass,
+					base64.StdEncoding.EncodeToString([]byte(osPass)),
 					ele.Global.V1.External.Opensearch.Ssl.RootCert.Value,
 					ele.Global.V1.External.Opensearch.Ssl.ServerName.Value,
 					"",
@@ -783,22 +845,41 @@ func setExternalOpensearchDetails(instanceUrl, superUserName, superPassword, roo
 	}
 }
 
-func getExternalPGDetails(a2ConfigMap map[string]*dc.AutomateConfig) *ExternalPostgreSQLToml {
+func (p *PullConfigsImpl) getExternalPGDetails(a2ConfigMap map[string]*dc.AutomateConfig) (*ExternalPostgreSQLToml, error) {
 	for _, ele := range a2ConfigMap {
 		if ele.Global.V1.External.Postgresql.Nodes != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Superuser != nil &&
 			ele.Global.V1.External.Postgresql.Auth.Password.Dbuser != nil {
+				var spwd, dpwd string
+				if ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password != nil && ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password.Value != "" {
+					spwd = ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password.Value
+				} else {
+					supwd, err := p.getPGSuperUserPassword()
+					if err != nil {
+						return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres superuser password")
+					}
+					spwd = supwd
+				}
+				if ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password != nil && ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password.Value != "" {
+					dpwd = ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password.Value
+				} else {
+					dbpwd, err := p.getPGDBUserPassword()
+					if err != nil {
+						return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres Dbuser password")
+					}
+					dpwd = dbpwd
+				}
 			return setExternalPGDetails(
 				ele.Global.V1.External.Postgresql.Nodes[0].Value,
 				ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Username.Value,
-				ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password.Value,
+				base64.StdEncoding.EncodeToString([]byte(spwd)),
 				ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Username.Value,
-				ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password.Value,
+				base64.StdEncoding.EncodeToString([]byte(dpwd)),
 				ele.Global.V1.External.Postgresql.Ssl.RootCert.Value,
-			)
+			), nil
 		}
 	}
-	return nil
+	return nil, nil
 }
 
 func setExternalPGDetails(instanceUrl, superUserName, superUserPassword, dBUserName, dBUserPassword, rootCerts string) *ExternalPostgreSQLToml {
@@ -1003,7 +1084,7 @@ func (p *PullConfigsImpl) fetchAwsConfig(removeUnreachableNodes bool) (*AwsConfi
 			sharedConfigToml.Aws.Config.OsUserAccessKeyId = externalOsDetails.AWS.OsUserAccessKeyId
 			sharedConfigToml.Aws.Config.OsUserAccessKeySecret = externalOsDetails.AWS.OsUserAccessKeySecret
 		}
-		externalPgDetails := getExternalPGDetails(a2ConfigMap)
+		externalPgDetails, err := p.getExternalPGDetails(a2ConfigMap)
 		if externalPgDetails != nil {
 			sharedConfigToml.Aws.Config.RDSDBUserName = externalPgDetails.PostgreSQLDBUserName
 			sharedConfigToml.Aws.Config.RDSDBUserPassword = externalPgDetails.PostgreSQLDBUserPassword
