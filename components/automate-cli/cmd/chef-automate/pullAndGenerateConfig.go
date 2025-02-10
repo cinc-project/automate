@@ -21,8 +21,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const GET_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.aws_os_password"
-const GET_AWS_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.os_password"
+const GET_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.os_password"
+const GET_AWS_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.aws_os_password"
 const GET_PG_SUPERUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_superuser_password"
 const GET_PG_DBUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_dbuser_password"
 const AUTOMATE_HA_WORKSPACE_GOOGLE_SERVICE_FILE = "/hab/a2_deploy_workspace/googleServiceAccount.json"
@@ -721,7 +721,7 @@ func (p *PullConfigsImpl) getOSpassword() (string, error) {
 
 }
 
-func (p *PullConfigsImpl) getAwsOSpassword() (string, error) {
+func (p *PullConfigsImpl) getAwsOSPassword() (string, error) {
 	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
 		if stringutils.SliceContains(p.exceptionIps, ip) {
 			continue
@@ -787,7 +787,7 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 					if ele.Global.V1.External.Opensearch.Auth.AwsOs.Password != nil && ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value != "" {
 						osPwd = ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value
 					} else {
-						osPass, err := p.getAwsOSpassword()
+						osPass, err := p.getAwsOSPassword()
 						if err != nil {
 							return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
 						}
