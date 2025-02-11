@@ -76,12 +76,23 @@ class ChefServerDataBootstrap
       @superuser_id
   end
 
+  def bifrost_superuser_id_from_env
+    fd = ENV['CHEF_SECRETS_FD']
+    if fd
+      f = IO.for_fd(fd.to_i)
+      secrets = JSON.parse(f.read())
+      secrets['oc_bifrost']['superuser_id']
+    else
+      raise "No secrets data found in environment"
+    end
+  end
+
   def pg_superuser_id_from_env
     fd = ENV['CHEF_SECRETS_FD']
     if fd
       f = IO.for_fd(fd.to_i)
       secrets = JSON.parse(f.read())
-      @superuser_id  ||= secrets['oc_bifrost']['superuser_id']
+      @superuser_id ||= secrets['oc_bifrost']['superuser_id']
       secrets['userconfig']['pg_superuser_password']
     else
       raise "No PG secrets data found in environment"
@@ -94,6 +105,7 @@ class ChefServerDataBootstrap
       userpass = pg_superuser_id_from_env()
       dbname.dup.sub!('<redacted>',userpass)
     else
+      @superuser_id ||= bifrost_superuser_id_from_env()
       dbname
     end
   end
