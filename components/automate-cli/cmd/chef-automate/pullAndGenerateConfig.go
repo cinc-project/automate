@@ -21,10 +21,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const GET_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.os_password"
-const GET_AWS_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.aws_os_password"
-const GET_PG_SUPERUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_superuser_password"
-const GET_PG_DBUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_dbuser_password"
+var GET_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.os_password"
+var GET_AWS_OS_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.aws_os_password"
+var GET_PG_SUPERUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_superuser_password"
+var GET_PG_DBUSER_PASSWORD = "sudo HAB_LICENSE=accept-no-persist hab pkg exec chef/automate-platform-tools secrets-helper show userconfig.pg_dbuser_password"
 const AUTOMATE_HA_WORKSPACE_GOOGLE_SERVICE_FILE = "/hab/a2_deploy_workspace/googleServiceAccount.json"
 
 type ConfigKeys struct {
@@ -705,68 +705,19 @@ func findCommonPath(path1, path2 string) (common, unique1, unique2 string) {
 	return
 }
 
-func (p *PullConfigsImpl) getOSpassword() (string, error) {
+func (p *PullConfigsImpl) getPasswordFromSecretHelper(pwdConfigValue string) (string, error) {
 	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
 		if stringutils.SliceContains(p.exceptionIps, ip) {
 			continue
 		}
 		p.sshUtil.getSSHConfig().hostIP = ip
-		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_OS_PASSWORD, true)
+		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(pwdConfigValue, true)
 		if err != nil {
 			return "", err
 		}
 		return strings.TrimSpace(rawOutput), nil
 	}
 	return "", nil
-
-}
-
-func (p *PullConfigsImpl) getAwsOSPassword() (string, error) {
-	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
-		if stringutils.SliceContains(p.exceptionIps, ip) {
-			continue
-		}
-		p.sshUtil.getSSHConfig().hostIP = ip
-		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_AWS_OS_PASSWORD, true)
-		if err != nil {
-			return "", err
-		}
-		return strings.TrimSpace(rawOutput), nil
-	}
-	return "", nil
-
-}
-
-func (p *PullConfigsImpl) getPGSuperUserPassword() (string, error) {
-	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
-		if stringutils.SliceContains(p.exceptionIps, ip) {
-			continue
-		}
-		p.sshUtil.getSSHConfig().hostIP = ip
-		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_SUPERUSER_PASSWORD, true)
-		if err != nil {
-			return "", err
-		}
-		return strings.TrimSpace(rawOutput), nil
-	}
-	return "", nil
-
-}
-
-func (p *PullConfigsImpl) getPGDBUserPassword() (string, error) {
-	for _, ip := range p.infra.Outputs.AutomatePrivateIps.Value {
-		if stringutils.SliceContains(p.exceptionIps, ip) {
-			continue
-		}
-		p.sshUtil.getSSHConfig().hostIP = ip
-		rawOutput, err := p.sshUtil.connectAndExecuteCommandOnRemote(GET_PG_DBUSER_PASSWORD, true)
-		if err != nil {
-			return "", err
-		}
-		return strings.TrimSpace(rawOutput), nil
-	}
-	return "", nil
-
 }
 
 func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*dc.AutomateConfig, dbType string) (*ExternalOpensearchToml, error) {
@@ -787,7 +738,7 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 					if ele.Global.V1.External.Opensearch.Auth.AwsOs.Password != nil && ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value != "" {
 						osPwd = ele.Global.V1.External.Opensearch.Auth.AwsOs.Password.Value
 					} else {
-						osPass, err := p.getAwsOSPassword()
+						osPass, err := p.getPasswordFromSecretHelper(GET_AWS_OS_PASSWORD)
 						if err != nil {
 							return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
 						}
@@ -804,7 +755,7 @@ func (p *PullConfigsImpl) getExternalOpensearchDetails(a2ConfigMap map[string]*d
 				), nil
 			}
 		} else if dbType == TYPE_SELF_MANAGED {
-			osPass, err := p.getOSpassword()
+			osPass, err := p.getPasswordFromSecretHelper(GET_OS_PASSWORD)
 			if err != nil {
 				return nil, status.Wrap(err, status.ConfigError, "unable to fetch Opensearch password")
 			}
@@ -854,7 +805,7 @@ func (p *PullConfigsImpl) getExternalPGDetails(a2ConfigMap map[string]*dc.Automa
 				if ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password != nil && ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password.Value != "" {
 					spwd = ele.Global.V1.External.Postgresql.Auth.Password.Superuser.Password.Value
 				} else {
-					supwd, err := p.getPGSuperUserPassword()
+					supwd, err := p.getPasswordFromSecretHelper(GET_PG_SUPERUSER_PASSWORD)
 					if err != nil {
 						return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres superuser password")
 					}
@@ -863,7 +814,7 @@ func (p *PullConfigsImpl) getExternalPGDetails(a2ConfigMap map[string]*dc.Automa
 				if ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password != nil && ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password.Value != "" {
 					dpwd = ele.Global.V1.External.Postgresql.Auth.Password.Dbuser.Password.Value
 				} else {
-					dbpwd, err := p.getPGDBUserPassword()
+					dbpwd, err := p.getPasswordFromSecretHelper(GET_PG_DBUSER_PASSWORD)
 					if err != nil {
 						return nil, status.Wrap(err, status.ConfigError, "unable to fetch Postgres Dbuser password")
 					}
