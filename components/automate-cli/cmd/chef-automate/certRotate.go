@@ -254,7 +254,8 @@ func (c *certRotateFlow) certRotate(cmd *cobra.Command, args []string, flagsObj 
 		if err != nil {
 			return err
 		}
-
+        c.writer.Println("Inside certRotate")
+		c.log.Debugln("Inside certRotate")
 		sshConfig := c.getSshDetails(infra)
 		sshUtil := NewSSHUtil(sshConfig)
 		sshConfig.timeout = flagsObj.timeout
@@ -365,6 +366,8 @@ func (c *certRotateFlow) certRotatePG(sshUtil SSHUtil, certs *certificates, infr
 	if isManagedServicesOn() {
 		return status.Errorf(status.InvalidCommandArgsError, ERROR_SELF_MANAGED_DB_CERT_ROTATE, POSTGRESQL)
 	}
+	c.writer.Println("Inside certRotatePG")
+	c.log.Debugln("Inside certRotatePG")
 	fileName := "cert-rotate-pg.toml"
 	timestamp := time.Now().Format("20060102150405")
 	remoteService := POSTGRESQL
@@ -865,16 +868,21 @@ func (c *certRotateFlow) compareCurrentCertsWithNewCerts(remoteService string, n
 	}
 
 	c.writer.Println("Before executing the condition for postgres")
+	c.log.Debugln("Before executing the condition for postgres")
 
 	if remoteService == POSTGRESQL {
 		c.writer.Printf("RT printing flagsObj.node: %v\n", flagsObj.node)
 		c.writer.Printf("RT printing currentCertsInfo.PostgresqlRootCert: %v\n", currentCertsInfo.PostgresqlRootCert)
 		c.writer.Printf("RT printing newCerts.rootCA: %v\n", newCerts.rootCA)
-		c.writer.Printf("RT printing flagsObj.node: %v\n")
+		c.log.Debugln("RT printing flagsObj.node: %v\n", flagsObj.node)
+		c.log.Debugln("RT printing currentCertsInfo.PostgresqlRootCert: %v\n", currentCertsInfo.PostgresqlRootCert)
+		c.log.Debugln("RT printing newCerts.rootCA: %v\n", newCerts.rootCA)
 		if flagsObj.node == "" {
 			c.writer.Println("RT printing from inside if loop which compares current cert and root cert")
+			c.log.Debugln("RT printing from inside if loop which compares current cert and root cert")
 			isCertsSame = strings.TrimSpace(currentCertsInfo.PostgresqlRootCert) == newCerts.rootCA
 			c.writer.Printf("RT printing isCertsSame: %v\n", isCertsSame)
+			c.log.Debugln("RT printing isCertsSame: %v\n", isCertsSame)
 		}
 		skipIpsList = c.comparePublicCertAndPrivateCert(newCerts, currentCertsInfo.PostgresqlCertsByIP, isCertsSame, flagsObj)
 		return skipIpsList
