@@ -899,25 +899,6 @@ func (c *certRotateFlow) comparePublicCertAndPrivateCert(newCerts *certificates,
 	return skipIpsList
 }
 
-// comparePublicCertAndPrivateCert compare new public-cert and private cert with current public-cert and private-cert and returns ips to skip cert-rotation.
-func (c *certRotateFlow) compareRootCert(newCerts *certificates, certByIpList []CertByIP, isCertsSame bool, flagsObj *certRotateFlags) []string {
-	skipIpsList := []string{}
-	for _, currentCerts := range certByIpList {
-		isCertsSameTemp := false
-		if (strings.TrimSpace(currentCerts.RootKey) == newCerts.rootCA) && isCertsSame {
-			isCertsSameTemp = true
-		}
-
-		if isCertsSameTemp {
-			if flagsObj.node == currentCerts.IP {
-				return []string{flagsObj.node}
-			}
-			skipIpsList = append(skipIpsList, currentCerts.IP)
-		}
-	}
-	return skipIpsList
-}
-
 // getFrontEndIpsForSkippingCnAndRootCaPatching compare new root-ca and new cn with current root-ca and cn and returns ips to skip root-ca patching.
 func (c *certRotateFlow) getFrontEndIpsForSkippingCnAndRootCaPatching(newRootCA, newCn, oldCn, oldRootCA, node string) bool {
 	isRootCaSame := false
