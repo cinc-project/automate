@@ -865,8 +865,14 @@ func (c *certRotateFlow) compareCurrentCertsWithNewCerts(remoteService string, n
 	}
 
 	if remoteService == POSTGRESQL {
+		writer.Printf("RT printing flagsObj.node: %v\n", flagsObj.node)
+		writer.Printf("RT printing currentCertsInfo.PostgresqlRootCert: %v\n", currentCertsInfo.PostgresqlRootCert)
+		writer.Printf("RT printing newCerts.rootCA: %v\n", newCerts.rootCA)
+		writer.Printf("RT printing flagsObj.node: %v\n")
 		if flagsObj.node == "" {
+			writer.Println("RT printing from inside if loop which compares current cert and root cert")
 			isCertsSame = strings.TrimSpace(currentCertsInfo.PostgresqlRootCert) == newCerts.rootCA
+			writer.Printf("RT printing isCertsSame: %v\n", isCertsSame)
 		}
 		skipIpsList = c.comparePublicCertAndPrivateCert(newCerts, currentCertsInfo.PostgresqlCertsByIP, isCertsSame, flagsObj)
 		return skipIpsList
@@ -880,6 +886,25 @@ func (c *certRotateFlow) comparePublicCertAndPrivateCert(newCerts *certificates,
 	for _, currentCerts := range certByIpList {
 		isCertsSameTemp := false
 		if (strings.TrimSpace(currentCerts.PublicKey) == newCerts.publicCert) && (strings.TrimSpace(currentCerts.PrivateKey) == newCerts.privateCert) && isCertsSame {
+			isCertsSameTemp = true
+		}
+
+		if isCertsSameTemp {
+			if flagsObj.node == currentCerts.IP {
+				return []string{flagsObj.node}
+			}
+			skipIpsList = append(skipIpsList, currentCerts.IP)
+		}
+	}
+	return skipIpsList
+}
+
+// comparePublicCertAndPrivateCert compare new public-cert and private cert with current public-cert and private-cert and returns ips to skip cert-rotation.
+func (c *certRotateFlow) compareRootCert(newCerts *certificates, certByIpList []CertByIP, isCertsSame bool, flagsObj *certRotateFlags) []string {
+	skipIpsList := []string{}
+	for _, currentCerts := range certByIpList {
+		isCertsSameTemp := false
+		if (strings.TrimSpace(currentCerts.RootKey) == newCerts.rootCA) && isCertsSame {
 			isCertsSameTemp = true
 		}
 
