@@ -864,6 +864,8 @@ func (c *certRotateFlow) compareCurrentCertsWithNewCerts(remoteService string, n
 		return skipIpsList
 	}
 
+	writer.Println("Before executing the condition for postgres")
+
 	if remoteService == POSTGRESQL {
 		writer.Printf("RT printing flagsObj.node: %v\n", flagsObj.node)
 		writer.Printf("RT printing currentCertsInfo.PostgresqlRootCert: %v\n", currentCertsInfo.PostgresqlRootCert)
