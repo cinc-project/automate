@@ -864,17 +864,17 @@ func (c *certRotateFlow) compareCurrentCertsWithNewCerts(remoteService string, n
 		return skipIpsList
 	}
 
-	writer.Println("Before executing the condition for postgres")
+	c.writer.Println("Before executing the condition for postgres")
 
 	if remoteService == POSTGRESQL {
-		writer.Printf("RT printing flagsObj.node: %v\n", flagsObj.node)
-		writer.Printf("RT printing currentCertsInfo.PostgresqlRootCert: %v\n", currentCertsInfo.PostgresqlRootCert)
-		writer.Printf("RT printing newCerts.rootCA: %v\n", newCerts.rootCA)
-		writer.Printf("RT printing flagsObj.node: %v\n")
+		c.writer.Printf("RT printing flagsObj.node: %v\n", flagsObj.node)
+		c.writer.Printf("RT printing currentCertsInfo.PostgresqlRootCert: %v\n", currentCertsInfo.PostgresqlRootCert)
+		c.writer.Printf("RT printing newCerts.rootCA: %v\n", newCerts.rootCA)
+		c.writer.Printf("RT printing flagsObj.node: %v\n")
 		if flagsObj.node == "" {
-			writer.Println("RT printing from inside if loop which compares current cert and root cert")
+			c.writer.Println("RT printing from inside if loop which compares current cert and root cert")
 			isCertsSame = strings.TrimSpace(currentCertsInfo.PostgresqlRootCert) == newCerts.rootCA
-			writer.Printf("RT printing isCertsSame: %v\n", isCertsSame)
+			c.writer.Printf("RT printing isCertsSame: %v\n", isCertsSame)
 		}
 		skipIpsList = c.comparePublicCertAndPrivateCert(newCerts, currentCertsInfo.PostgresqlCertsByIP, isCertsSame, flagsObj)
 		return skipIpsList
