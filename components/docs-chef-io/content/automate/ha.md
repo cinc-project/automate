@@ -40,9 +40,9 @@ HA architecture includes the cluster of the *Chef Automate*, *Chef Server*, *Pos
 Chef Automate HA for Managed Services has default port 5432 for Managed PostgreSQL and 9200 for Managed OpenSearch. You can also change to your custom port.
 {{< /note >}}
 
-### Chef Automate HA Architecture for OnPremise Non-Managed Minimum Node Cluster
+### Chef Automate HA Architecture for On-Premises Non-Managed Minimum Node Cluster
 
-The below depiction is a 5-node cluster, a Progress-supported deployment pattern. However, please work with your Progress technical teams to determine the appropriate cluster configuration for optimum performance based on parameters like node count and data size.
+The following shows a five-node cluster, which is a supported deployment pattern. Work with your Progress technical teams to determine the appropriate cluster configuration for optimal performance based on parameters such as node count and data size.
 
 ![High Availability Architecture](/images/automate/ha_arch_minnode_cluster.png)
 
@@ -71,19 +71,20 @@ The Chef Automate HA Architecture involves the following clusters as part of the
 
 Chef Automate's high availability solution can run on cloud providers and on-premise infrastructure systems. Appropriately provisioned backend, frontend, and bastion systems will help ensure a smooth deployment and installation experience.
 
-  - On-premise provisioning
-  - Cloud provisioning
+- On-premise provisioning
+- Cloud provisioning
 
 ### On-premise provisioning
 
   The customer can provision virtual machines or bare metal machines on a supported operating system with the required system settings to deploy the Automate HA solution.
 
 ### Cloud provisioing
+
   Systems and services from the following cloud providers are supported:
 
-  - [AWS](https://docs.chef.io/automate/ha_aws_deploy_steps/#steps-to-provision)
-  - Azure
-  - Google
+- [AWS](https://docs.chef.io/automate/ha_aws_deploy_steps/#steps-to-provision)
+- Azure
+- Google
 
 Deploy the Automate HA on the cloud infrastructure after provisioning the cloud systems. We have a simplified provisioning utility for AWS, Azure, and Google, and we expect to provision the systems manually.
 
