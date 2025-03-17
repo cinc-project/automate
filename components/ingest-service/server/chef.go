@@ -21,6 +21,13 @@ import (
 	"github.com/chef/automate/lib/version"
 )
 
+var skipIndices = map[string]bool{
+	"security-auditlog":         true,
+	".opendistro":               true,
+	".plugins-ml-config":        true,
+	".opensearch-observability": true,
+}
+
 type ChefIngestServer struct {
 	chefRunPipeline    pipeline.ChefRunPipeline
 	chefActionPipeline pipeline.ChefActionPipeline
@@ -238,14 +245,14 @@ func (s *ChefIngestServer) ProcessNodeDelete(ctx context.Context,
 
 func (s *ChefIngestServer) StartReindex(ctx context.Context, req *ingest.StartReindexRequest) (*ingest.StartReindexResponse, error) {
 	log.Info("Received request to start reindexing")
-	idcs, err := fetchIndices()
+	indices, err := s.client.GetIndices(context.Background())
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to fetch indices: %s", err)
 	}
 
 	// Reindex the indices with version difference
 OuterLoop:
-	for _, index := range idcs {
+	for _, index := range indices {
 		for prefix := range skipIndices {
 			if strings.HasPrefix(index.Index, prefix) {
 				fmt.Printf("Skipping index %s\n", index.Index)
@@ -254,7 +261,7 @@ OuterLoop:
 		}
 
 		// Is reindexing needed?
-		settings, err := fetchIndexSettingsVersion(index.Index)
+		settings, err := s.client.GetIndexSettingsVersion(index.Index)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to fetch settings for index %s: %s", index.Index, err)
 		}
@@ -264,7 +271,7 @@ OuterLoop:
 			continue
 		}
 
-		if err := triggerReindex(index.Index); err != nil {
+		if err := s.client.TriggerReindex(index.Index); err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to reindex index %s: %s", index.Index, err)
 		}
 	}
