@@ -346,12 +346,8 @@ func handleBackupCommands(cmd *cobra.Command, args []string, commandString strin
 		os.Exit(1)
 	}
 	if strings.Contains(cmd.CommandPath(), "restore") {
-		fmt.Println("Inside restore of Handle Backup command")
-		writer.Body("Hi, I am in restore command")
-		fmt.Println("Calling deleteSkipMigrationFileIfExists")
 		writer.Body("Calling deleteSkipMigrationFileIfExists")
         deleteSkipMigrationFileIfExists(infra) 
-        fmt.Println("Completed deleteSkipMigrationFileIfExists")
 		writer.Body("Completed deleteSkipMigrationFileIfExists")
 		if !backupCmdFlags.yes && !backupCmdFlags.skipPreflight {
 			yes, err := writer.Confirm(strings.TrimSpace(a2AlreadyDeployedMessage))
@@ -983,7 +979,6 @@ func checkFlags(f *flag.Flag) {
 
 // nolint: gocyclo
 func runRestoreBackupCmd(cmd *cobra.Command, args []string) error {
-	fmt.Println("RT Printing")
 	if !backupCmdFlags.yes && !backupCmdFlags.skipPreflight {
 		deployed, err := isA2Deployed()
 		if err != nil {
@@ -1198,18 +1193,13 @@ func runRestoreBackupCmd(cmd *cobra.Command, args []string) error {
 		res.Restore.TaskID(),
 		writer,
 	)
-	fmt.Println("RT Printing 1")
 	if err != nil {
 		return err
 	}
-	fmt.Println("RT Printing 3")
-	writer.Body("Hi in runRestoreBackupCmd")
-	fmt.Println("Checking if file exists and creating skip migration file")
 	writer.Body("Checking if file exists and creating skip migration file")
     if isSkipMigrationFileExist {
 		defer createSkipMigrationFile()
 	}
-	fmt.Println("Done Checking if file exists and creating skip migration file")
 	writer.Body("Done Checking if file exists and creating skip migration file")
 	writer.Successf("Restored backup %s", res.Restore.Backup.TaskID())
 	return nil
@@ -1420,7 +1410,6 @@ func getBackupStatusAsCompletedOrFailed(backup *api.BackupTask) bool {
 }
 
 func deleteSkipMigrationFileIfExists(infra *AutomateHAInfraDetails) (error) {
-	fmt.Println("Inside deleteSkipMigrationFileIfExists")
 	writer.Body("Inside deleteSkipMigrationFileIfExists")
 	sshUtil, err := getSshUtilConfig(infra)
 	if err != nil {
@@ -1432,21 +1421,17 @@ func deleteSkipMigrationFileIfExists(infra *AutomateHAInfraDetails) (error) {
 		return err
 	}
 	if strings.Contains(result, "1") {
-		fmt.Println("Skip Migration file exists and was deleted successfully")
 		writer.Printf("Skip Migration file exists and was deleted successfully: %s", result)
 		isSkipMigrationFileExist = true
 	} else {
-		fmt.Println("Skip Migration file does not exist")
 		writer.Printf("Skip Migration file does not exist: ", result)
 		isSkipMigrationFileExist = false
 	}
-	fmt.Println("Skip Migration file check completed") 
 	writer.Body("Skip Migration file check completed")
 	return nil
 }
 
 func createSkipMigrationFile() (error) {
-	fmt.Println("Inside createSkipMigrationFile")
 	writer.Body("Inside createSkipMigrationFile")
 	infra, err := getAutomateHAInfraDetails()
 	if err != nil {
@@ -1461,13 +1446,11 @@ func createSkipMigrationFile() (error) {
 		writer.Error(err.Error())
 		return err
 	}
-	fmt.Println("Skip Migration file created successfully")
 	writer.Body("Skip Migration file created successfully")
 	return nil
 }
 
 func getSshUtilConfig(infra *AutomateHAInfraDetails) (SSHUtil, error) {
-	fmt.Println("started getting ssh config")
 	writer.Body("started getting ssh config")
 	sshconfig := &SSHConfig{}
 	sshconfig.sshUser = infra.Outputs.SSHUser.Value
@@ -1479,7 +1462,6 @@ func getSshUtilConfig(infra *AutomateHAInfraDetails) (SSHUtil, error) {
 		return nil, status.Errorf(status.ConfigError, "Invalid deployment config")
 	}
 	sshUtil.getSSHConfig().hostIP = automateIps[0]
-	fmt.Println("completed getting ssh config")
 	writer.Body("completed getting ssh config")
 	return sshUtil, nil
 }
