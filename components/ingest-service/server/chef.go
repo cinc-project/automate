@@ -2,6 +2,8 @@ package server
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -236,6 +238,37 @@ func (s *ChefIngestServer) ProcessNodeDelete(ctx context.Context,
 
 func (s *ChefIngestServer) StartReindex(ctx context.Context, req *ingest.StartReindexRequest) (*ingest.StartReindexResponse, error) {
 	log.Info("Received request to start reindexing")
+	idcs, err := fetchIndices()
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch indices: %s", err)
+	}
+
+	// Reindex the indices with version difference
+OuterLoop:
+	for _, index := range idcs {
+		for prefix := range skipIndices {
+			if strings.HasPrefix(index.Index, prefix) {
+				fmt.Printf("Skipping index %s\n", index.Index)
+				continue OuterLoop
+			}
+		}
+
+		// Is reindexing needed?
+		settings, err := fetchIndexSettingsVersion(index.Index)
+		if err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to fetch settings for index %s: %s", index.Index, err)
+		}
+
+		if settings.Settings.Index.Version.CreatedString == settings.Settings.Index.Version.UpgradedString {
+			fmt.Printf("Skipping index %s as it is already up to date\n", index.Index)
+			continue
+		}
+
+		if err := triggerReindex(index.Index); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to reindex index %s: %s", index.Index, err)
+		}
+	}
+
 	return &ingest.StartReindexResponse{
 		Message: "Reindexing started successfully",
 	}, nil
