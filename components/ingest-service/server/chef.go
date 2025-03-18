@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -264,7 +263,7 @@ OuterLoop:
 	for _, index := range indices {
 		for prefix := range skipIndices {
 			if strings.HasPrefix(index.Index, prefix) {
-				fmt.Printf("Skipping index %s\n", index.Index)
+				log.WithFields(log.Fields{"index": index.Index}).Info("Skipping index")
 				continue OuterLoop
 			}
 		}
@@ -276,7 +275,7 @@ OuterLoop:
 
 		// Is reindexing needed?
 		if settings.Settings.Index.Version.CreatedString == settings.Settings.Index.Version.UpgradedString {
-			fmt.Printf("Skipping index %s as it is already up to date\n", index.Index)
+			log.WithFields(log.Fields{"index": index.Index}).Info("Skipping index as it is already up to date")
 			continue
 		}
 
@@ -299,6 +298,7 @@ OuterLoop:
 		}
 	}
 
+	log.Info("Reindexing started successfully")
 	return &ingest.StartReindexResponse{
 		Message: "Reindexing started successfully",
 	}, nil
