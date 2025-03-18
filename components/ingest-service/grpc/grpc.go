@@ -94,6 +94,12 @@ func Spawn(opts *serveropts.Opts) error {
 	}
 	log.Info("Database connection and migrations successful!")
 
+	ins, err := storage.InitializeDB(storageConfig)
+	if err != nil {
+		log.WithError(err).Fatal("Failed to initialize database")
+		return err
+	}
+
 	// Authz Interface
 	authzConn, err := opts.ConnFactory.Dial("authz-service", opts.AuthzAddress)
 	if err != nil {
@@ -197,7 +203,7 @@ func Spawn(opts *serveropts.Opts) error {
 
 	// ChefRuns
 	chefIngest := server.NewChefIngestServer(client, authzProjectsClient, nodeMgrServiceClient,
-		nodesServiceClient, chefActionPipeline, chefRunPipeline)
+		nodesServiceClient, chefActionPipeline, chefRunPipeline, ins)
 
 	ingest.RegisterChefIngesterServiceServer(grpcServer, chefIngest)
 

@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"database/sql"
 	"time"
 
 	"github.com/chef/automate/components/ingest-service/config"
@@ -39,6 +40,21 @@ type ReindexRequestDetailed struct {
 	UpdatedAt   time.Time `db:"updated_at"`
 }
 
+func InitializeDB(dbConf *config.Storage) (*DB, error) {
+	db, err := sql.Open("postgres", dbConf.URI)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to connect to the database")
+	}
+
+	dbMap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
+
+	if err := RunMigrations(dbConf); err != nil {
+		return nil, err
+	}
+
+	return &DB{DbMap: dbMap}, nil
+}
+
 func RunMigrations(dbConf *config.Storage) error {
 	if err := migrator.Migrate(dbConf.URI, dbConf.SchemaPath, logger.NewLogrusStandardLogger(), false); err != nil {
 		return errors.Wrapf(err, "Unable to create database schema. [path:%s]", dbConf.SchemaPath)
@@ -47,6 +63,16 @@ func RunMigrations(dbConf *config.Storage) error {
 }
 
 // CRUD Operations
+
+type Reindex interface {
+	InsertReindexRequest(requestID int, status string) error
+	UpdateReindexRequest(requestID int, status string) error
+	GetReindexRequest(requestID int) (*ReindexRequest, error)
+	InsertReindexRequestDetailed(detail ReindexRequestDetailed) error
+	GetReindexRequestDetails(requestID int) ([]*ReindexRequestDetailed, error)
+	DeleteReindexRequest(requestID int) error
+	DeleteReindexRequestDetail(id int) error
+}
 
 // Create a new reindex request
 func (db *DB) InsertReindexRequest(requestID int, status string) error {

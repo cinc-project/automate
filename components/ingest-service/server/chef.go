@@ -18,6 +18,7 @@ import (
 	"github.com/chef/automate/api/interservice/nodemanager/nodes"
 	"github.com/chef/automate/components/ingest-service/backend"
 	"github.com/chef/automate/components/ingest-service/pipeline"
+	"github.com/chef/automate/components/ingest-service/storage"
 	"github.com/chef/automate/lib/version"
 )
 
@@ -35,6 +36,7 @@ type ChefIngestServer struct {
 	authzClient        authz.ProjectsServiceClient
 	nodeMgrClient      manager.NodeManagerServiceClient
 	nodesClient        nodes.NodesServiceClient
+	reindex            storage.Reindex
 }
 
 // NewChefIngestServer creates a new server instance and it automatically
@@ -44,7 +46,8 @@ func NewChefIngestServer(client backend.Client, authzClient authz.ProjectsServic
 	nodeMgrClient manager.NodeManagerServiceClient,
 	nodesClient nodes.NodesServiceClient,
 	actionPipeline pipeline.ChefActionPipeline,
-	chefRunPipeline pipeline.ChefRunPipeline) *ChefIngestServer {
+	chefRunPipeline pipeline.ChefRunPipeline,
+	reindex storage.Reindex) *ChefIngestServer {
 	return &ChefIngestServer{
 		chefRunPipeline:    chefRunPipeline,
 		chefActionPipeline: actionPipeline,
@@ -52,6 +55,7 @@ func NewChefIngestServer(client backend.Client, authzClient authz.ProjectsServic
 		authzClient:        authzClient,
 		nodeMgrClient:      nodeMgrClient,
 		nodesClient:        nodesClient,
+		reindex:            reindex,
 	}
 }
 
@@ -250,7 +254,12 @@ func (s *ChefIngestServer) StartReindex(ctx context.Context, req *ingest.StartRe
 		return nil, status.Errorf(codes.Internal, "failed to fetch indices: %s", err)
 	}
 
-	// Reindex the indices with version difference
+	requestID := int(time.Now().Unix())
+	// Reindexing request
+	if err := s.reindex.InsertReindexRequest(requestID, "running"); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to add reindex request: %s", err)
+	}
+
 OuterLoop:
 	for _, index := range indices {
 		for prefix := range skipIndices {
@@ -260,15 +269,29 @@ OuterLoop:
 			}
 		}
 
-		// Is reindexing needed?
 		settings, err := s.client.GetIndexSettingsVersion(index.Index)
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to fetch settings for index %s: %s", index.Index, err)
 		}
 
+		// Is reindexing needed?
 		if settings.Settings.Index.Version.CreatedString == settings.Settings.Index.Version.UpgradedString {
 			fmt.Printf("Skipping index %s as it is already up to date\n", index.Index)
 			continue
+		}
+
+		if err := s.reindex.InsertReindexRequestDetailed(storage.ReindexRequestDetailed{
+			RequestID:   requestID,
+			Index:       index.Index,
+			FromVersion: settings.Settings.Index.Version.CreatedString,
+			ToVersion:   settings.Settings.Index.Version.UpgradedString,
+			Stage:       "running",
+			OsTaskID:    "",
+			Heartbeat:   time.Now(),
+			HavingAlias: false,
+			AliasList:   "",
+		}); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to add reindex request: %s", err)
 		}
 
 		if err := s.client.TriggerReindex(index.Index); err != nil {
