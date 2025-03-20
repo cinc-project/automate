@@ -478,7 +478,7 @@ func (es *Backend) RemoveAlias(ctx context.Context, aliasName string, indexName 
 	return err
 }
 
-//GetNodeCount - count how many node-state documents are in an index
+// GetNodeCount - count how many node-state documents are in an index
 func (es *Backend) GetNodeCount(ctx context.Context, indexName string) (int64, error) {
 	count, err := es.client.Count(indexName).Type("node-state").Do(ctx)
 	if err != nil {
@@ -486,4 +486,24 @@ func (es *Backend) GetNodeCount(ctx context.Context, indexName string) (int64, e
 		return 0, err
 	}
 	return count, err
+}
+
+func (es *Backend) GetAliases(ctx context.Context, index string) ([]string, bool, error) {
+
+	aliasesResult, err := es.client.Aliases().Index(index).Do(ctx)
+	if err != nil {
+		return nil, false, err
+	}
+
+	// Extract aliases from the result
+	var aliases []string
+
+	if indexAliases, ok := aliasesResult.Indices[index]; ok {
+		for _, alias := range indexAliases.Aliases {
+			aliases = append(aliases, alias.AliasName)
+		}
+	}
+
+	hasAliases := len(aliases) > 0
+	return aliases, hasAliases, nil
 }

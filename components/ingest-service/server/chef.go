@@ -241,6 +241,11 @@ func (s *ChefIngestServer) ProcessNodeDelete(ctx context.Context,
 
 func (s *ChefIngestServer) StartReindex(ctx context.Context, req *ingest.StartReindexRequest) (*ingest.StartReindexResponse, error) {
 	log.Info("Received request to start reindexing")
+
+	err := s.GetAliases([]string{"reindexing", "reindexing-new"})
+	if err != nil {
+		return nil, err
+	}
 	return &ingest.StartReindexResponse{
 		Message: "Reindexing started successfully",
 	}, nil
@@ -297,4 +302,23 @@ func (s *ChefIngestServer) GetVersion(ctx context.Context, empty *ingest.Version
 		Name:    SERVICE_NAME,
 		Sha:     version.GitSHA,
 	}, nil
+}
+
+// Get aliases for indexes
+func (s *ChefIngestServer) GetAliases(index []string) error {
+	log.Info("Fetching aliases for indexes")
+	for _, indice := range index {
+		log.Info("Fetching aliases for index: ", indice)
+		alias, hasAlias, err := s.client.GetAliases(context.Background(), indice)
+		if err != nil {
+			log.Info("Failed to fetch aliases for index: ", indice)
+			return err
+		}
+		err = s.db.UpdateAliasesForIndex(indice, hasAlias, alias)
+		if err != nil {
+			log.Info("Failed to update aliases for index: ", indice)
+			return err
+		}
+	}
+	return nil
 }
