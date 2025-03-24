@@ -91,12 +91,16 @@ type Client interface {
 	GetNodeCount(context.Context, string) (int64, error)
 	// @param (context, previousIndex)
 	// @return (taskID, error)
+
+	// Methods to reindex indices
 	ReindexNodeStateToLatest(context.Context, string) (string, error)
 	GetActions(string, int, time.Time, string, bool) ([]InternalChefAction, int64, error)
 	DeleteAllIndexesWithPrefix(string, context.Context) error
 	GetIndices(ctx context.Context) ([]Index, error)
 	GetIndexVersionSettings(index string) (*IndexSettingsVersion, error)
-
 	TriggerReindex(index string) error
 	GetAliases(context.Context, string) ([]string, bool, error)
+	FetchIndexSettings(index string) (map[string]interface{}, error)
+	FetchIndexMappings(index string) (map[string]interface{}, error)
+	CreateIndex(destIndex string, sourceIndex string, sourceIndexSettings map[string]interface{}, sourceIndexMappings map[string]interface{}) error
 }
