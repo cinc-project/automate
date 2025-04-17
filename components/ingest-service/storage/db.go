@@ -309,7 +309,7 @@ func (db *DB) GetLatestReindexStatus() (string, time.Time, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			logrus.Error("No reindex requests found in the database")
-			return "", time.Time{}, errors.New("no reindex requests found")
+			return "", time.Time{}, nil
 		}
 		return "", time.Time{}, errors.Wrap(err, "error fetching latest request ID")
 	}
