@@ -300,6 +300,16 @@ To create a backup, run the backup command from the bastion host.
 chef-automate backup create
 ```
 
+### Pre-Restore Validation
+
+Before executing the actual restore command, it is recommended to use the --verify-restore-config flag. This flag performs a pre-check to ensure that all backup and restore-related configurations are correctly set.
+Running this verification helps identify potential issues in advance, allowing users to resolve them before initiating the restore process. If these issues are only discovered during the restore operation, they can be harder to diagnose, as errors appear only in logs after the restore attempt fails.
+Using this flag proactively minimizes the risk of restore failures and ensures a smoother, more efficient, and reliable restore process.
+
+To perform the pre-check, execute the following command from the bastion host:
+
+`chef-automate backup restore s3://BUCKET_NAME/PATH_TO_BACKUPS/BACKUP_ID --verify-restore-config`
+
 ### Restore
 
 Restore a backup from external object storage.
@@ -315,7 +325,7 @@ Restore a backup from external object storage.
    For S3:
 
    ```sh
-   chef-automate backup restore s3://BUCKET_NAME/PATH/TO/BACKUPS/BACKUP_ID --skip-preflight --s3-access-key "ACCESS_KEY" --s3-secret-key "SECRET_KEY"
+   chef-automate backup restore s3://BUCKET_NAME/PATH_TO_BACKUPS/BACKUP_ID --skip-preflight --s3-access-key "ACCESS_KEY" --s3-secret-key "SECRET_KEY"
    ```
 
    For GCS:

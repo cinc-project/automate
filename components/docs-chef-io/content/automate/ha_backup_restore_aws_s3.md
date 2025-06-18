@@ -138,6 +138,16 @@ In case of if you are using the Managed AWS Service you need to create a [snapsh
     chef-automate backup create
     ```
 
+### Pre-Restore Validation
+
+Before executing the actual restore command, it is recommended to use the --verify-restore-config flag. This flag performs a pre-check to ensure that all backup and restore-related configurations are correctly set.
+Running this verification helps identify potential issues in advance, allowing users to resolve them before initiating the restore process. If these issues are only discovered during the restore operation, they can be harder to diagnose, as errors appear only in logs after the restore attempt fails.
+Using this flag proactively minimizes the risk of restore failures and ensures a smoother, more efficient, and reliable restore process.
+
+To perform the pre-check, execute the following command from the bastion host:
+
+`chef-automate backup restore s3://bucket_name/path_to_backups/BACKUP_ID --verify-restore-config`
+
 ### Restore
 
 To restore backed-up data of the Chef Automate High Availability (HA) using External AWS S3, follow the steps given below:
@@ -146,7 +156,7 @@ To restore backed-up data of the Chef Automate High Availability (HA) using Exte
 
 - Log in to the same instance of Chef Automate front-end node from which backup is taken.
 
-- Execute the restore command from bastion `chef-automate backup restore s3://bucket_name/path/to/backups/BACKUP_ID --skip-preflight --s3-access-key "Access_Key" --s3-secret-key "Secret_Key"`.
+- Execute the restore command from bastion `chef-automate backup restore s3://bucket_name/path_to_backups/BACKUP_ID --skip-preflight --s3-access-key "Access_Key" --s3-secret-key "Secret_Key"`.
 
 - In case of Airgapped Environment, Execute this restore command from bastion `chef-automate backup restore <object-storage-bucket-path>/backups/BACKUP_ID --airgap-bundle </path/to/bundle> --skip-preflight`.
 
