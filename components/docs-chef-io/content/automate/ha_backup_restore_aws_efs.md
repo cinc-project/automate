@@ -123,9 +123,9 @@ Configure the OpenSearch `path.repo` attribute.
 
 ### Pre-Restore Validation
 
-Before executing the actual restore command, it is recommended to use the --verify-restore-config flag. This flag performs a pre-check to ensure that all backup and restore-related configurations are correctly set.
-Running this verification helps identify potential issues in advance, allowing users to resolve them before initiating the restore process. If these issues are only discovered during the restore operation, they can be harder to diagnose, as errors appear only in logs after the restore attempt fails.
-Using this flag proactively minimizes the risk of restore failures and ensures a smoother, more efficient, and reliable restore process.
+Run the restore command with the --verify-restore-config flag to perform a pre-check. This ensures all backup and restore-related configurations are set correctly before execution.
+Running the verification identifies potential issues early, enabling you to resolve them before starting the restore process. Discovering these issues during the restore operation makes them harder to diagnose, as errors only appear in logs after the restore attempt fails.
+This flag proactively minimizes the risk of restore failures and ensures a smoother, more efficient, and reliable restore process.
 
 To perform the pre-check, execute the following command from the bastion host:
 
