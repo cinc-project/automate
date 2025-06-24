@@ -20,7 +20,7 @@ Follow the steps listed below if Chef Automate encounters an error during data r
 
 4. Check the status of the Automate node, and then attempt to run the restore command from the bastion host.
 
-5. To change the `base_path` or `path`, follow the steps below for performing a backup
+5. To change the `base_path` or `path`, follow the steps below for performing a backup.
 
    * File System
 
@@ -45,7 +45,7 @@ Follow the steps listed below if Chef Automate encounters an error during data r
          repo = "/bkp/backps"
       ```
 
-      * Run the curl request against one of the Automate frontend node
+      * Run the curl request against one of the Automate frontend node.
 
         ```sh
         curl localhost:10144/_snapshot?pretty
@@ -53,7 +53,7 @@ Follow the steps listed below if Chef Automate encounters an error during data r
 
          * If the response is an empty JSON object `{}`, no changes are required to the snapshot settings in the OpenSearch cluster.
 
-         * If the response contains JSON output, ensure that the `backup_mount` setting is correctly configured. Refer to the `location` value in the response. It should start with `/bkp/backps`.
+         * If the response contains JSON output similar to the example below, ensure that the `backup_mount` setting is correctly configured. Refer to the `location` value in the response. It should start with `/bkp/backps`.
 
         ```sh
         {
@@ -112,7 +112,7 @@ Follow the steps listed below if Chef Automate encounters an error during data r
    * Object Storage
 
       * During deployment, the `backup_config` should be set to `object_storage`.
-      * To use `object_storage`, we use the following template during deployment
+      * To use `object_storage`, we use the following template during deployment.
 
       ```sh
          [object_storage.config]
@@ -140,15 +140,15 @@ Follow the steps listed below if Chef Automate encounters an error during data r
 
       * You can assign any value to the `base_path` variable. The `base_path` configuration is required only for the Frontend nodes.
       * Use the command `chef-automate config patch frontend.toml --fe` to apply the above template and update the configuration.
-      * Use the following curl request to validate the configuration
+      * Use the following curl request to validate the configuration.
 
          ```sh
          curl localhost:10144/_snapshot?pretty
          ```
 
-      * If the response is an empty JSON object ({}), the configuration is valid
+      * If the response is an empty JSON object ({}), the configuration is valid.
 
-      * If the response contains a JSON output, it should have the correct value for the `base_path`.
+      * If the response contains a JSON output similar to the example below, it should have the correct value for the `base_path`.
 
          ```sh
          {
