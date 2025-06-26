@@ -1,4 +1,4 @@
-Follow the steps listed below if Chef Automate encounters an error during data restoration.
+Follow the steps below if Chef Automate encounters an error during data restoration.
 
 1. Check the Chef Automate status.
 
@@ -24,10 +24,10 @@ Follow the steps listed below if Chef Automate encounters an error during data r
 
    * File System
 
-      * By default, the `backup_mount` is set to `/mnt/automate_backups` during deployment.
-      * If you update the `backup_mount` value in the `config.toml` file before deployment, the deployment process will automatically apply the updated path.
+      * During deployment, the `backup_mount` is default set to `/mnt/automate_backups`.
+      * The deployment process will automatically apply the updated path if you update the `backup_mount` value in the `config.toml` file before deployment.
       * If the `backup_mount` value is changed after deployment (e.g., to /bkp/backps), you must manually patch the configuration on all frontend and backend nodes.
-      * Update the FE nodes using the template provided below. Use the command  `chef-automate config patch fe.toml --fe` to update the configuration.
+      * Update the FE nodes using the template below. To update the configuration, use the command  `chef-automate config patch fe.toml --fe`.
 
       ```sh
          [global.v1.backups]
@@ -38,14 +38,14 @@ Follow the steps listed below if Chef Automate encounters an error during data r
                path = "/bkp/backps"
       ```
 
-      * Update the OpenSearch nodes using the template provided below. Use the command  `chef-automate config patch os.toml --os` to update the Opensearch node configs.
+      * Update the OpenSearch nodes using the template provided below. Use the `chef-automate config patch os.toml --os` command to update the Opensearch node configs.
 
       ```sh
       [path]
          repo = "/bkp/backps"
       ```
 
-      * Run the curl request against one of the Automate frontend node.
+      * Run the curl request against one of the Automate frontend nodes.
 
         ```sh
         curl localhost:10144/_snapshot?pretty
@@ -53,7 +53,7 @@ Follow the steps listed below if Chef Automate encounters an error during data r
 
          * If the response is an empty JSON object `{}`, no changes are required to the snapshot settings in the OpenSearch cluster.
 
-         * If the response contains JSON output similar to the example below, ensure that the `backup_mount` setting is correctly configured. Refer to the `location` value in the response. It should start with `/bkp/backps`.
+         * If you see a JSON response similar to the example below, check that the `backup_mount` setting is correctly configured. Use the `location` value in the response to verify. It should start with `/bkp/backps`.
 
         ```sh
         {
@@ -191,4 +191,4 @@ Follow the steps listed below if Chef Automate encounters an error during data r
          }
          ```
 
-         * If the `base_path` value does not match, you must delete the existing snapshots. Please refer to the File System troubleshooting steps for guidance.
+         * If the `base_path` value does not match, you must delete the existing snapshots. Please take a look at the File System troubleshooting steps for guidance.
