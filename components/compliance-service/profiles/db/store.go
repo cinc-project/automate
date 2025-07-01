@@ -420,6 +420,20 @@ type ProfilesListRequest struct {
 }
 
 func (s *Store) ListProfilesMetadata(req ProfilesListRequest) ([]inspec.Metadata, int, error) {
+	allowedSchema := map[string]map[string]bool{
+		"store_profiles": {
+			"sha256": true,
+			"info":   true,
+			"tar":   true, 
+		},
+		"store_namespace": {
+			"owner": true,
+			"sha256": true,
+		},
+		"store_market": {
+			"sha256": true,
+		},
+	}
 	if req.Order != "ASC" && req.Order != "DESC" {
 		return nil, 0, status.Errorf(codes.InvalidArgument, "order field '%s' is invalid. Use either 'ASC' or 'DESC'", req.Order)
 	}
@@ -445,12 +459,16 @@ func (s *Store) ListProfilesMetadata(req ProfilesListRequest) ([]inspec.Metadata
 	}
 
 	for key, values := range req.Filters {
+		err := pgutils.ValidateColumnNames("store_profiles", []string{key}, allowedSchema)
+		if err != nil {
+			return nil, 0, status.Errorf(codes.InvalidArgument, "invalid filter key '%s': %v", key, err)
+		}
 		terms := squirrel.Or{}
 		for _, value := range values {
 			field := fmt.Sprintf("info->>'%s'", key)
 			v := pgutils.EscapeLiteralForPGPatternMatch(value)
 			v = strings.ReplaceAll(v, "*", "%")
-			terms = append(terms, squirrel.Like{field: v})
+			terms = append(terms, squirrel.Expr(fmt.Sprintf("%s LIKE ?", field), v))
 		}
 		sql = sql.Where(terms)
 	}
