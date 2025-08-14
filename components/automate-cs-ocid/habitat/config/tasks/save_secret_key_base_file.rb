@@ -1,4 +1,5 @@
 require 'base64'
+require 'fileutils'
 
 class SecretKeyBaseGenerator
   # This constant will be used to extract the first `n` characters from the erchef webui private key
@@ -27,7 +28,7 @@ class SecretKeyBaseGenerator
           puts "SECRET_KEY_BASE file doesn't exist. It will be generated.."
           dir = File.dirname(secret_key_base_file_path)
           unless File.directory?(dir)
-            FileUtils.mkdir_p(dir)
+            ::FileUtils.mkdir_p(dir)
           end
         end
         
