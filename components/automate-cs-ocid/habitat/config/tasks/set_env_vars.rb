@@ -1,6 +1,19 @@
 require 'yaml'
+require 'fileutils'
+
 env_config_file_path = ENV['ENV_CONFIG_FILE_PATH']
-env_config = YAML.load_file(env_config_file_path)
+
+# Ensure the directory exists
+config_dir = File.dirname(env_config_file_path)
+FileUtils.mkdir_p(config_dir) unless Dir.exist?(config_dir)
+
+# Check if the file exists before trying to load it
+if File.exist?(env_config_file_path)
+  env_config = YAML.load_file(env_config_file_path)
+else
+  puts "Warning: Environment config file not found at #{env_config_file_path}. Creating new config."
+  env_config = {}
+end
 override_configs = {
   'endpoint' => ENV['CHEF_SERVER_ENDPOINT'],
   'superuser' => ENV['CHEF_SERVER_SUPERUSER'],

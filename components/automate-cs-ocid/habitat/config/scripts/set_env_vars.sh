@@ -3,4 +3,8 @@ export CHEF_SERVER_ENDPOINT="{{cfg.ocid.chef_server_config.endpoint}}"
 export CHEF_SERVER_SUPERUSER="{{cfg.ocid.chef_server_config.superuser}}"
 export CHEF_SERVER_SSL_VERIFY_MODE="{{cfg.ocid.chef_server_config.ssl_verify_mode}}"
 
+echo "DEBUG: ENV_CONFIG_FILE_PATH=$ENV_CONFIG_FILE_PATH"
+echo "DEBUG: OCID_PKG_CONFIG_FOLDER_PATH=$OCID_PKG_CONFIG_FOLDER_PATH"
+echo "DEBUG: RAILS_ENV=$RAILS_ENV"
+
 ruby "{{pkg.svc_config_path}}/tasks/set_env_vars.rb"
