@@ -16,7 +16,7 @@ gh_repo = "automate"
 
 ### Use Modern TLS Protocols
 
-Chef Automate supports TLS 1.2 and TLS 1.3. For optimal security, use the following configuration:
+Chef Automate supports TLS 1.2 and TLS 1.3. For optimal security, use the configuration outlined in the following section.
 
 #### Recommended Configuration (Production)
 
@@ -28,10 +28,11 @@ ssl_ciphersuites = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_
 ```
 
 This configuration:
--  Supports both TLS 1.2 (for legacy clients) and TLS 1.3 (for modern clients)
--  Prioritizes strongest ciphers
--  Provides forward secrecy with ECDHE key exchange
--  Disables weak and deprecated protocols
+
+- Supports both TLS 1.2 (for legacy clients) and TLS 1.3 (for modern clients)
+- Prioritizes the strongest ciphers
+- Provides forward secrecy with ECDHE key exchange
+- Disables weak and deprecated protocols
 
 #### High Security Configuration (TLS 1.3 Only)
 
@@ -53,7 +54,7 @@ ssl_ciphersuites = "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256"
 - **TLSv1** - Deprecated, not supported by modern OpenSSL (1.1.0+)
 - **TLSv1.1** - Deprecated by major browsers and standards, not supported by modern OpenSSL
 
-These protocols are non-functional even if configured, as they are not supported by OpenSSL 1.1.0 and newer.
+These protocols are non-functional even if configured because they are not supported by OpenSSL 1.1.0 and newer.
 {{< /warning >}}
 
 ### TLS Cipher Selection Guidelines
@@ -116,7 +117,7 @@ openssl s_client -connect your-automate-fqdn:443 -tls1_2
 # - Cipher: ECDHE-RSA-AES256-GCM-SHA384 (or configured cipher)
 ```
 
-#### Verify Weak Protocols are Disabled
+#### Verify that Weak Protocols are Disabled
 
 ```bash
 # These should fail with connection errors:
