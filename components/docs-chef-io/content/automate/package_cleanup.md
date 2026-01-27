@@ -23,8 +23,8 @@ The package cleanup process works through several stages to ensure system safety
 2. **Protection**: Builds a whitelist of essential packages, including:
    - All currently running services
    - Dependencies of running services
-   - Core Habitat components (hab, hab-sup, hab-launcher)
-   - The Chef Automate CLI itself
+   - Core Habitat components (hab, hab-sup, and hab-launcher)
+   - The Chef Automate Command Line Interface (CLI) itself
 3. **Analysis**: Compares installed packages against the whitelist to identify candidates for removal
 4. **Cleanup**: Removes unused packages using `hab pkg uninstall`
 
@@ -32,18 +32,20 @@ The package cleanup process works through several stages to ensure system safety
 
 Consider running package cleanup in these scenarios:
 
-* After upgrading Chef Automate to a new version
-* When disk space is running low on your Chef Automate server
-* As part of regular system maintenance (monthly or quarterly)
-* Before creating system backups to reduce backup size
-* After testing new features that required additional packages
+- After upgrading Chef Automate to a new version
+- When disk space is running low on your Chef Automate server
+- As part of regular system maintenance (monthly or quarterly)
+- Before creating system backups to reduce backup size
+- After testing new features that required additional packages
 
 ## Prerequisites
 
-* Root or sudo access to the Chef Automate system
-* Chef Automate must be running
-* Sufficient disk I/O capacity for the cleanup operation
-* Recommended: Take a system backup before cleanup
+The following are some prerequisites to be aware of:
+
+- Root or sudo access to the Chef Automate system
+- Chef Automate must be running
+- There must be sufficient disk I/O capacity for the cleanup operation
+- Recommended: Take a system backup before the cleanup
 
 ## Basic Usage
 
@@ -55,13 +57,13 @@ Always start with a dry-run to see what packages would be deleted:
 sudo chef-automate package-cleanup --dry-run
 ```
 
-This command will output:
+This command outputs:
 
-* Number of currently running services
-* Total number of packages installed
-* Number of packages in the whitelist (protected)
-* Number of unused packages that would be deleted
-* Estimated space to be reclaimed
+- Number of currently running services
+- Total number of packages installed
+- Number of packages in the whitelist (protected)
+- Number of unused packages that would be deleted
+- Estimated space to be reclaimed
 
 **CASE 1: Dry-Run - System with unused packages**
 
@@ -96,11 +98,11 @@ Once you've reviewed the dry-run output and are satisfied with the results, run 
 sudo chef-automate package-cleanup
 ```
 
-The command will:
+The command:
 
-* Display analysis of running services and installed packages
-* Delete unused packages
-* Report completion with statistics
+- Displays analysis of running services and installed packages
+- Deletes unused packages
+- Reports completion with statistics
 
 **CASE 2: Actual Cleanup - Successfully deleted packages**
 
@@ -167,10 +169,10 @@ sudo chef-automate package-cleanup --dry-run --verbose
 
 Verbose mode provides:
 
-* Step-by-step execution progress
-* Complete list of running services and their package identifiers
-* All packages in the whitelist (protected packages)
-* Detailed statistical breakdown
+- Step-by-step execution progress
+- A complete list of running services and their package identifiers
+- All packages in the whitelist (protected packages)
+- Detailed statistical breakdown
 
 **CASE 4: Dry-Run with Verbose - System with unused packages**
 
@@ -262,11 +264,11 @@ sudo chef-automate package-cleanup --verbose
 
 Verbose mode during actual cleanup shows:
 
-* Step-by-step execution progress
-* List of running services with identifiers
-* Complete whitelist contents
-* Multi-pass statistics (pass number, packages to delete per pass)
-* Final summary with total passes and packages removed
+- Step-by-step execution progress
+- A list of running services with identifiers
+- Complete whitelist contents
+- Multi-pass statistics (pass number and packages to delete per pass)
+- A final summary with the total passes and packages removed
 
 **CASE 6: Actual Cleanup with Verbose - Multi-pass deletion**
 
@@ -346,7 +348,7 @@ Packages to delete in this pass:
 |------|-----------|-------------|---------|
 | `--dry-run` | | Show which packages would be deleted without actually deleting them. Displays package count and estimated space savings. | `false` |
 | `--verbose` | `-v` | Enable detailed progress output showing running services, whitelist contents, per-package deletion status, and multi-pass statistics. | `false` |
-| `--debug` | `-d` | Enable debug output (shows chef-automate version and build info). | `false` |
+| `--debug` | `-d` | Enable debug output (shows the chef-automate version and build info). | `false` |
 | `--help` | `-h` | Display command help and usage information. | - |
 
 ### Using Verbose Mode
@@ -359,18 +361,18 @@ sudo chef-automate package-cleanup --verbose
 
 Verbose mode provides:
 
-* Step-by-step execution stages
-* Complete list of running services with package identifiers
-* All whitelisted/protected packages
-* Per-package deletion progress
-* Pass-by-pass cleanup statistics
-* Detailed final summary
+- Step-by-step execution stages
+- A complete list of running services with package identifiers
+- All whitelisted/protected packages
+- Per-package deletion progress
+- Pass-by-pass cleanup statistics
+- Detailed final summary
 
 ## Protected Packages
 
 The following package categories are automatically protected from deletion:
 
-### 1. Running Services
+### Running Services
 
 All packages currently running as Habitat services are protected. To see your running services:
 
@@ -378,21 +380,21 @@ All packages currently running as Habitat services are protected. To see your ru
 sudo hab svc status
 ```
 
-### 2. Essential Habitat Packages
+### Essential Habitat Packages
 
 Core Habitat components required for system operation:
 
-* `*/hab/*/*` - Habitat binary
-* `*/hab-sup/*/*` - Habitat Supervisor
-* `*/hab-launcher/*/*` - Habitat Launcher
+- `*/hab/*/*` - Habitat binary
+- `*/hab-sup/*/*` - Habitat Supervisor
+- `*/hab-launcher/*/*` - Habitat Launcher
 
-### 3. Chef Automate CLI
+### Chef Automate CLI
 
 The CLI tool itself is protected using wildcard pattern:
 
-* `*/automate-cli/*/*` - All versions of the CLI from any origin
+- `*/automate-cli/*/*` - All versions of the CLI from any origin
 
-### 4. Service Dependencies
+### Service Dependencies
 
 All packages that are dependencies of running services, including transitive dependencies.
 
@@ -407,7 +409,7 @@ The whitelist is built dynamically each time you run the command:
 
 ## Multi-Pass Cleanup Process
 
-The package cleanup uses an **iterative multi-pass approach** to handle complex dependency chains safely:
+The package cleanup uses an iterative multi-pass approach to handle complex dependency chains safely.
 
 ### Why Multi-Pass?
 
@@ -438,12 +440,14 @@ END WHILE
 **Initial State**: 2847 packages installed
 
 **Pass 1**:
+
 - Running services: 45
 - Whitelist: 1247 protected packages
 - To delete: 1345 packages
 - After deletion: 1502 packages remain
 
 **Pass 2**:
+
 - Whitelist rebuilds with current state
 - Some dependencies of deleted packages are now unused
 - To delete: 255 newly identified unused packages
@@ -453,7 +457,7 @@ END WHILE
 
 ## Best Practices
 
-### 1. Always Use Dry-Run First
+### Always Use Dry-Run First
 
 ```bash
 # Preview before cleanup
@@ -463,7 +467,7 @@ sudo chef-automate package-cleanup --dry-run
 sudo chef-automate package-cleanup
 ```
 
-### 2. Schedule Regular Cleanups
+### Schedule Regular Cleanups
 
 Add to your maintenance schedule:
 
@@ -472,7 +476,7 @@ Add to your maintenance schedule:
 0 2 1 * * /bin/chef-automate package-cleanup
 ```
 
-### 3. Monitor Disk Space
+### Monitor Disk Space
 
 Check disk space before and after:
 
@@ -487,7 +491,7 @@ sudo chef-automate package-cleanup
 df -h /hab/pkgs
 ```
 
-### 4. Combine with Service Management
+### Combine with Service Management
 
 Stop unnecessary services before cleanup to maximize space reclamation:
 
@@ -499,9 +503,9 @@ sudo hab svc unload chef/old-service
 sudo chef-automate package-cleanup
 ```
 
-### 5. Backup Before Major Cleanups
+### Backup Before Major Cleanups
 
-Always maintain a backup:
+Always take a backup:
 
 ```bash
 # Create backup before cleanup
@@ -517,22 +521,26 @@ sudo chef-automate package-cleanup
 
 If some packages fail to delete:
 
-1. **Check if Package is in Use**:
+1. **Check if the package is in use**:
+
    ```bash
    sudo hab svc status
    ```
 
-2. **Verify Package Exists**:
+2. **Verify that the package exists**:
+
    ```bash
    sudo hab pkg list <origin>/<name>
    ```
 
-3. **Check File Locks**:
+3. **Check file locks**:
+
    ```bash
    sudo lsof | grep hab/pkgs
    ```
 
-4. **Review Verbose Output**:
+4. **Review verbose output**:
+
    ```bash
    sudo chef-automate package-cleanup --verbose
    ```
@@ -563,7 +571,8 @@ sudo systemctl restart hab-sup
 
 If disk space doesn't free up as expected:
 
-1. **Verify Deletions**:
+1. **Verify deletions**:
+
    ```bash
    # Count packages before
    sudo hab pkg list --all | wc -l
@@ -575,13 +584,15 @@ If disk space doesn't free up as expected:
    sudo hab pkg list --all | wc -l
    ```
 
-2. **Check for Other Space Issues**:
+2. **Check for other space issues**:
+
    ```bash
    # Find large directories
    sudo du -sh /hab/* | sort -h
    ```
 
-3. **Consider Log Files**:
+3. **Consider log files**:
+
    ```bash
    # Check log directory size
    sudo du -sh /hab/svc/*/logs
@@ -591,56 +602,55 @@ If disk space doesn't free up as expected:
 
 The package cleanup command includes multiple safety mechanisms:
 
-1. **Whitelist Protection**: Essential packages are never deleted
-2. **Dependency Awareness**: Habitat respects package dependencies during uninstall
-3. **Dry-Run Mode**: Preview changes before applying them
-4. **Individual Package Handling**: Failed deletions don't stop the entire process
-5. **Detailed Logging**: All actions are logged for audit purposes
+- **Whitelist protection**: Essential packages are never deleted
+- **Dependency awareness**: Habitat respects package dependencies during uninstall
+- **Dry-run mode**: Preview changes before applying them
+- **Individual package handling**: Failed deletions don't stop the entire process
+- **Detailed logging**: All actions are logged for audit purposes
 
 ## Performance Considerations
 
-* Cleanup time scales with the number of packages to delete
-* Typical cleanup takes 2-5 minutes for 50-100 packages
-* Large cleanups (500+ packages) may take 15-30 minutes
-* Disk I/O is the primary performance factor
-* No impact on running services during cleanup
-
+- Cleanup time scales with the number of packages to delete
+- Typical cleanup takes 2-5 minutes for 50-100 packages
+- Large cleanups (500+ packages) may take 15-30 minutes
+- Disk I/O is the primary performance factor
+- No impact on running services during cleanup
 
 ## Disk Space Reclamation
 
 Typical space savings vary by installation and upgrade history:
 
-* **Small Installation** (few upgrades): 500 MB - 1 GB
-* **Medium Installation** (multiple upgrades): 1 GB - 3 GB  
-* **Large Installation** (many upgrades, long-running): 3 GB - 10+ GB
+- **Small installation** (a few upgrades): 500 MB - 1 GB
+- **Medium installation** (multiple upgrades): 1 GB - 3 GB
+- **Large installation** (many upgrades, long-running): 3 GB - 10+ GB
 
 Packages are stored in `/hab/pkgs`, with each package consuming:
 
-* Small packages (binaries): 10-50 MB
-* Medium packages (services): 50-200 MB
-* Large packages (runtimes): 200 MB - 1 GB
+- Small packages (binaries): 10-50 MB
+- Medium packages (services): 50-200 MB
+- Large packages (runtimes): 200 MB - 1 GB
 
 ## Related Commands
 
-* `chef-automate service-versions` - Check versions of running services
-* `chef-automate status` - View system status
-* `chef-automate upgrade run` - Upgrade Chef Automate
-* `hab pkg list --all` - List all installed Habitat packages
-* `hab svc status` - Check Habitat service status
-* `hab pkg uninstall` - Manually uninstall specific packages
+- `chef-automate service-versions` - Check versions of running services
+- `chef-automate status` - View system status
+- `chef-automate upgrade run` - Upgrade Chef Automate
+- `hab pkg list --all` - List all installed Habitat packages
+- `hab svc status` - Check Habitat service status
+- `hab pkg uninstall` - Manually uninstall specific packages
 
 ## Additional Resources
 
-* [Chef Automate CLI Reference]({{< ref "cli.md" >}})
-* [Chef Automate Upgrade Guide]({{< ref "upgrade.md" >}})
-* [Chef Automate Backup Guide]({{< ref "backup.md" >}})
-* [Habitat Package Management](https://www.habitat.sh/docs/using-habitat/#manage-packages)
+- [Chef Automate CLI Reference]({{< ref "cli.md" >}})
+- [Chef Automate Upgrade Guide]({{< ref "upgrade.md" >}})
+- [Chef Automate Backup Guide]({{< ref "backup.md" >}})
+- [Habitat Package Management](https://www.habitat.sh/docs/using-habitat/#manage-packages)
 
 ## Support
 
 If you encounter issues with package cleanup:
 
-1. Review the [troubleshooting section](#troubleshooting) above
-2. Check the [Chef Automate documentation]({{< ref "_index.md" >}})
-3. Contact [Chef Support](https://www.chef.io/support)
-4. Visit the [Chef Community Forum](https://discourse.chef.io/)
+1. Review the [troubleshooting section](#troubleshooting) above.
+2. Check the [Chef Automate documentation]({{< ref "_index.md" >}}).
+3. Contact [Chef Support](https://www.chef.io/support).
+4. Visit the [Chef Community Forum](https://discourse.chef.io/).
