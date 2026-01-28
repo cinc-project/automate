@@ -68,18 +68,18 @@ This command outputs:
 **CASE 1: Dry-Run - System with unused packages**
 
 ```
-🔍 Chef Automate Package Cleanup
+ Chef Automate Package Cleanup
   Analyzing installed Habitat packages...
 
 
-  ✓ Found 45 running service(s)
+   Found 45 running service(s)
 
-  ✓ Total installed packages: 2847
+   Total installed packages: 2847
 
 
-  ✓ Whitelist contains 1247 protected package(s)
+   Whitelist contains 1247 protected package(s)
 
-  ✓ Found 1600 unused package(s) to delete
+   Found 1600 unused package(s) to delete
 
 DRY-RUN MODE
 
@@ -87,7 +87,7 @@ DRY-RUN MODE
   Estimated space to be saved: ~80000 MB
 
 
-✓ Dry-run completed - run without --dry-run to delete packages
+ Dry-run completed - run without --dry-run to delete packages
 ```
 
 ### Actual Cleanup
@@ -107,26 +107,26 @@ The command:
 **CASE 2: Actual Cleanup - Successfully deleted packages**
 
 ```
-🔍 Chef Automate Package Cleanup
+ Chef Automate Package Cleanup
   Analyzing installed Habitat packages...
 
 
-  ✓ Found 45 running service(s)
+   Found 45 running service(s)
 
-  ✓ Total installed packages: 2847
-
-
-  ✓ Whitelist contains 1247 protected package(s)
-
-  ✓ Found 1600 unused package(s) to delete
+   Total installed packages: 2847
 
 
-📦 Starting cleanup...
+   Whitelist contains 1247 protected package(s)
+
+   Found 1600 unused package(s) to delete
+
+
+ Starting cleanup...
 
 
 
 
-✓ Cleanup completed successfully!
+ Cleanup completed successfully!
   Removed 1600 package(s)
   Estimated space saved: ~80000 MB
 ```
@@ -134,26 +134,26 @@ The command:
 **CASE 3: Running cleanup when system is already clean**
 
 ```
-🔍 Chef Automate Package Cleanup
+ Chef Automate Package Cleanup
   Analyzing installed Habitat packages...
 
 
-  ✓ Found 33 running service(s)
+   Found 33 running service(s)
 
-  ✓ Total installed packages: 148
-
-
-  ✓ Whitelist contains 148 protected package(s)
-
-  ✓ Found 0 unused package(s) to delete
+   Total installed packages: 148
 
 
-📦 Starting cleanup...
+   Whitelist contains 148 protected package(s)
+
+   Found 0 unused package(s) to delete
+
+
+ Starting cleanup...
 
 
 
 
-✓ Cleanup completed successfully!
+ Cleanup completed successfully!
   Removed 0 package(s)
 ```
 
@@ -177,32 +177,32 @@ Verbose mode provides:
 **CASE 4: Dry-Run with Verbose - System with unused packages**
 
 ```
-🔍 Chef Automate Package Cleanup
+ Chef Automate Package Cleanup
   Analyzing installed Habitat packages...
 
 Step 1: Fetching running Habitat services (hab svc status)...
-  ✓ Found 45 running service(s)
+   Found 45 running service(s)
 
 Running services:
-  • chef/automate-gateway/4.10.20/20231101120000
-  • chef/automate-load-balancer/4.10.20/20231101120000
-  • chef/compliance-service/4.10.20/20231101120000
+  - chef/automate-gateway/4.10.20/20231101120000
+  - chef/automate-load-balancer/4.10.20/20231101120000
+  - chef/compliance-service/4.10.20/20231101120000
   ... (42 more services)
 
 Step 2: Building whitelist (services + dependencies + essential)...
 Step 3: Fetching all installed packages (hab pkg list --all)...
-  ✓ Total installed packages: 2847
+   Total installed packages: 2847
 
 
-  ✓ Whitelist contains 1247 protected package(s)
+   Whitelist contains 1247 protected package(s)
 
 Whitelisted packages:
-  • chef/automate-gateway/4.10.20/20231101120000
-  • core/glibc/2.27/20200612213729
-  • core/hab/1.6.0/20200612213729
+  - chef/automate-gateway/4.10.20/20231101120000
+  - core/glibc/2.27/20200612213729
+  - core/hab/1.6.0/20200612213729
   ... (1244 more packages)
 
-  ✓ Found 1600 unused package(s) to delete
+   Found 1600 unused package(s) to delete
 
 DRY-RUN MODE
 
@@ -210,40 +210,40 @@ DRY-RUN MODE
   Running services:            45
   Whitelist protected:         1247
   Unused candidates found:     1600
-  → 1600 unused package(s) would be deleted
+  -> 1600 unused package(s) would be deleted
   Estimated space to be saved: ~80000 MB
 
 
-✓ Dry-run completed - run without --dry-run to delete packages
+ Dry-run completed - run without --dry-run to delete packages
 ```
 
 **CASE 5: Dry-Run with Verbose - System already clean**
 
 ```
-🔍 Chef Automate Package Cleanup
+ Chef Automate Package Cleanup
   Analyzing installed Habitat packages...
 
 Step 1: Fetching running Habitat services (hab svc status)...
-  ✓ Found 33 running service(s)
+   Found 33 running service(s)
 
 Running services:
-  • chef/automate-gateway/4.10.20/20231101120000
-  • core/postgresql13/13.8/20220913145821
+  - chef/automate-gateway/4.10.20/20231101120000
+  - core/postgresql13/13.8/20220913145821
   ... (31 more services)
 
 Step 2: Building whitelist (services + dependencies + essential)...
 Step 3: Fetching all installed packages (hab pkg list --all)...
-  ✓ Total installed packages: 148
+   Total installed packages: 148
 
 
-  ✓ Whitelist contains 148 protected package(s)
+   Whitelist contains 148 protected package(s)
 
 Whitelisted packages:
-  • chef/automate-gateway/4.10.20/20231101120000
-  • core/glibc/2.27/20200612213729
+  - chef/automate-gateway/4.10.20/20231101120000
+  - core/glibc/2.27/20200612213729
   ... (146 more packages)
 
-  ✓ Found 0 unused package(s) to delete
+   Found 0 unused package(s) to delete
 
 DRY-RUN MODE
 
@@ -253,7 +253,7 @@ DRY-RUN MODE
   Unused candidates found:     0
 
 
-✓ Dry-run completed - run without --dry-run to delete packages
+ Dry-run completed - run without --dry-run to delete packages
 ```
 
 #### Actual Cleanup with Verbose
@@ -273,37 +273,37 @@ Verbose mode during actual cleanup shows:
 **CASE 6: Actual Cleanup with Verbose - Multi-pass deletion**
 
 ```
-🔍 Chef Automate Package Cleanup
+ Chef Automate Package Cleanup
   Analyzing installed Habitat packages...
 
 Step 1: Fetching running Habitat services (hab svc status)...
-  ✓ Found 45 running service(s)
+   Found 45 running service(s)
 
 Running services:
-  • chef/automate-gateway/4.10.20/20231101120000
-  • chef/automate-load-balancer/4.10.20/20231101120000
+  - chef/automate-gateway/4.10.20/20231101120000
+  - chef/automate-load-balancer/4.10.20/20231101120000
   ... (43 more services)
 
 Step 2: Building whitelist (services + dependencies + essential)...
 Step 3: Fetching all installed packages (hab pkg list --all)...
-  ✓ Total installed packages: 2847
+   Total installed packages: 2847
 
 
-  ✓ Whitelist contains 1247 protected package(s)
+   Whitelist contains 1247 protected package(s)
 
 Whitelisted packages:
-  • chef/automate-gateway/4.10.20/20231101120000
-  • core/glibc/2.27/20200612213729
+  - chef/automate-gateway/4.10.20/20231101120000
+  - core/glibc/2.27/20200612213729
   ... (1245 more packages)
 
-  ✓ Found 1600 unused package(s) to delete
+   Found 1600 unused package(s) to delete
 
 
-📦 Starting automated cleanup process...
+ Starting automated cleanup process...
   The cleanup will run in multiple passes until all unused packages are removed.
 
 
-📦 Starting cleanup...
+ Starting cleanup...
 
 === Cleanup Pass #1 ===
 Rebuilding whitelist...
@@ -313,8 +313,8 @@ To delete in this pass: 1345 packages
   Attempting to delete 1345 candidate(s)...
 
 Packages to delete in this pass:
-  • chef/automate-gateway/4.9.0/20230101120000
-  • chef/automate-load-balancer/4.9.0/20230101120000
+  - chef/automate-gateway/4.9.0/20230101120000
+  - chef/automate-load-balancer/4.9.0/20230101120000
   ... (1343 more packages)
 
 [Per-package deletion progress...]
@@ -327,14 +327,14 @@ To delete in this pass: 255 packages
   Attempting to delete 255 candidate(s)...
 
 Packages to delete in this pass:
-  • core/old-dep/1.0.0/20200101000000
+  - core/old-dep/1.0.0/20200101000000
   ... (254 more packages)
 
 [Per-package deletion progress...]
 
-  ✓ Cleanup complete after 2 pass(es)!
+   Cleanup complete after 2 pass(es)!
 
-✓ Cleanup completed successfully!
+ Cleanup completed successfully!
   Removed 1600 package(s)
   Estimated space saved: ~80000 MB
 ```
