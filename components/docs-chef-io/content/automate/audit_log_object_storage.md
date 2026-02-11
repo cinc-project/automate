@@ -281,12 +281,52 @@ For copy/paste examples, see [Quick start](#quick-start) (minimum required confi
 ### Defaults
 
 {{< note >}}
-If you omit these sections, Chef Automate uses the defaults shown below.
-
-Upload behavior defaults (controls how uploads are batched/time out):
-
 ```toml
 [global.v1.audit]
+
+  [global.v1.audit.logging]
+    # Default: false
+    enabled = false
+
+  [global.v1.audit.input]
+    # Default: "100MB"
+    max_file_size = "100MB"
+
+    # Default: "5"
+    refresh_interval = "5"
+
+    # Default: "5MB"
+    mem_buf_limit = "5MB"
+
+  [global.v1.audit.async]
+    # Default: 4
+    max_concurrent_workers = 4
+
+    # Default: 100
+    queue_size = 100
+
+    # Default: "10MB"
+    multipart_chunk_size = "10MB"
+
+  [global.v1.audit.storage]
+    # Default: "s3"
+    storage_type = "s3"
+
+    # Default: ""
+    access_key = ""
+
+    # Default: ""
+    secret_key = ""
+
+    [global.v1.audit.storage.ssl]
+      # Default: false
+      enabled = false
+
+      # Default: false
+      verify_ssl = false
+
+      # Default: ""
+      root_cert = ""
 
   [global.v1.audit.output]
     # Default: "100M"
@@ -298,26 +338,6 @@ Upload behavior defaults (controls how uploads are batched/time out):
     # Default: "10m"
     upload_timeout = "10m"
 ```
-
-TLS defaults for the object storage connection (applies to `https://` endpoints):
-
-```toml
-[global.v1.audit]
-
-  [global.v1.audit.storage.ssl]
-    # Default: true
-    enabled = true
-
-    # Default: true
-    verify_ssl = true
-
-    # Optional PEM root CA. Use TOML triple quotes for multi-line PEM.
-    # root_cert = """-----BEGIN CERTIFICATE-----
-    # ...
-    # -----END CERTIFICATE-----"""
-```
-
-For `http://` endpoints (common for local MinIO), set `enabled = false`.
 {{< /note >}}
 
 ### `[global.v1.audit.logging]`
@@ -467,7 +487,7 @@ Chef Automate provides APIs (via the `user-settings-service`) to request and tra
 
 ### Request self audit logs (async)
 
-- Method/Path: `GET /api/v0/audit/self/request`
+- Method/Path: `GET /api/v1/audit/self/request`
 - Authentication: Required (Chef Automate session)
 - Access control: Self only (the service uses the authenticated user identity)
 - Query parameters:
@@ -482,7 +502,7 @@ Example:
 ```shell
 curl -sS \
   -H "api-token: $TOKEN" \
-  "https://$FQDN/api/v0/audit/self/request?from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z&order=desc"
+  "https://$FQDN/api/v1/audit/self/request?from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z&order=desc"
 ```
 
 Response:
@@ -497,7 +517,7 @@ Response:
 
 ### Check request status
 
-- Method/Path: `GET /api/v0/audit/status`
+- Method/Path: `GET /api/v1/audit/status`
 - Authentication: Required
 - Access control: Self only (a user can only view their own requested logs)
 - Query parameters:
@@ -512,7 +532,7 @@ Get the latest request status for the current user:
 ```shell
 curl -sS \
   -H "api-token: $TOKEN" \
-  "https://$FQDN/api/v0/audit/status"
+  "https://$FQDN/api/v1/audit/status"
 ```
 
 Get status for a specific request ID:
@@ -520,7 +540,7 @@ Get status for a specific request ID:
 ```shell
 curl -sS \
   -H "api-token: $TOKEN" \
-  "https://$FQDN/api/v0/audit/status?request_id=f47ac10b-58cc-4372-a567-0e02b2c3d479"
+  "https://$FQDN/api/v1/audit/status?request_id=f47ac10b-58cc-4372-a567-0e02b2c3d479"
 ```
 
 Response fields:
@@ -544,5 +564,49 @@ Example (completed):
   "download_url": "https://$FQDN/api/v1/audit/download?request_id=a1c977e1-96a1-4a09-85f8-364721ff9f11",
   "error": "",
   "message": ""
+}
+```
+
+
+### Request admin audit logs
+
+- Method/Path: `GET /api/v1/audit/admin/request`
+- Authentication: Required (Chef Automate session)
+- Access control: Admin-only (protected by IAM policy `iam:users:list`)
+- Query parameters:
+  - `username` (required): One or more usernames to filter audit logs by.
+    - Preferred: repeat the parameter (for example, `username=alice&username=bob`).
+    - Also accepted: a single comma-separated value (for example, `username=alice,bob`).
+  - `from` (optional): Start time (RFC 3339 timestamp). Default: 3 hours ago.
+  - `to` (optional): End time (RFC 3339 timestamp). Default: now.
+  - `order` (optional): Sort order, `asc` or `desc`. Default: `desc`.
+- Constraints:
+  - The requested time range must be 30 days or less.
+
+Examples:
+
+Request admin audit logs for a single user:
+
+```shell
+curl -sS \
+  -H "api-token: $TOKEN" \
+  "https://$FQDN/api/v1/audit/admin/request?username=alice&from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z&order=desc"
+```
+
+Request admin audit logs for multiple users (repeat the parameter):
+
+```shell
+curl -sS \
+  -H "api-token: $TOKEN" \
+  "https://$FQDN/api/v1/audit/admin/request?username=alice&username=bob&from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z"
+```
+
+Response:
+
+```json
+{
+  "request_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "status": "processing",
+  "message": "Admin audit log generation started. Use the request ID to check status and download when ready."
 }
 ```
