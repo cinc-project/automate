@@ -22,6 +22,78 @@ This is helpful when you want audit log data to live outside the local filesyste
 - An existing bucket for audit logs
 - Credentials for the bucket (or an IAM role / instance profile when using AWS)
 
+## Quick start
+
+Use this section if you want the minimum configuration to start uploading audit logs to your bucket.
+
+### Minimum required configuration
+
+At a minimum, you must:
+
+- Enable audit logging (`[global.v1.audit.logging].enabled = true`)
+- Configure storage (`[global.v1.audit.storage]`) with:
+  - `storage_type` (`"s3"` for AWS S3 or `"minio"` for MinIO)
+  - `endpoint`
+  - `bucket`
+  - `storage_region`
+- Provide credentials:
+  - For AWS S3, you can omit `access_key`/`secret_key` when using an IAM role/instance profile (AWS default credential chain)
+  - For MinIO, set `access_key` and `secret_key`
+
+AWS S3 (IAM role / instance profile):
+
+```toml
+[global.v1.audit]
+
+  [global.v1.audit.logging]
+    enabled = true
+
+  [global.v1.audit.storage]
+    storage_type = "s3"
+    endpoint = "https://s3.amazonaws.com"
+    bucket = "<BUCKET_NAME>"
+    storage_region = "<AWS_REGION>"
+```
+
+MinIO (static credentials):
+
+```toml
+[global.v1.audit]
+
+  [global.v1.audit.logging]
+    enabled = true
+
+  [global.v1.audit.storage]
+    storage_type = "minio"
+    endpoint = "http://minio.example.com:9000"
+    bucket = "<BUCKET_NAME>"
+    storage_region = "us-east-1"
+    access_key = "<ACCESS_KEY>"
+    secret_key = "<SECRET_KEY>"
+
+    [global.v1.audit.storage.ssl]
+      enabled = false
+      verify_ssl = false
+```
+
+Patch the Chef Automate configuration:
+
+```bash
+sudo chef-automate config patch </PATH/TO/TOML/FILE>
+```
+
+### Optional/advanced configuration
+
+Once uploads work, you can optionally configure:
+
+- `path_prefix` to group objects under a prefix inside the bucket
+- TLS options under `[global.v1.audit.storage.ssl]` (enable/verify and `root_cert` for private CAs)
+- Local log rotation and Tail input tuning under `[global.v1.audit.input]` (see Configure local audit log rotation)
+- Upload batching and timeouts under `[global.v1.audit.output]` (see Configure upload behavior)
+- Worker/queue tuning under `[global.v1.audit.async]`
+
+For a fully commented template with all options and defaults, see Copy/paste template (all options).
+
 ## Configure audit log uploads
 
 To start uploading audit logs, patch the Chef Automate configuration.
@@ -29,7 +101,11 @@ To start uploading audit logs, patch the Chef Automate configuration.
 `[global.v1.audit.logging].enabled` controls whether the audit logging pipeline is enabled:
 
 - When set to `true`, Chef Automate deploys and runs the `automate-fluent-bit` service.
-- When set to `false`, Chef Automate removes that service (audit logs are not collected/uploaded).
+- When set to `false`, Chef Automate removes that service (no audit log data is collected or uploaded).
+
+{{< note >}}
+If you set `[global.v1.audit.logging].enabled = true` but do not configure `[global.v1.audit.storage]`, Chef Automate will still write audit events locally to `/hab/svc/automate-load-balancer/data/audit.log` (and rotate them based on `[global.v1.audit.input]`), but nothing will be uploaded to S3/MinIO until storage is configured.
+{{< /note >}}
 
 1. Create a TOML file with the following content on the node running Chef Automate in a standalone deployment or on the bastion host in an Automate HA cluster.
 
@@ -369,7 +445,7 @@ sudo chef-automate config patch </PATH/TO/TOML/FILE>
   - Enables or disables the audit logging pipeline.
   - Default: `false`.
   - When `true`, Chef Automate deploys and runs the audit log collector (`automate-fluent-bit`).
-  - When `false`, Chef Automate removes that service (audit logs are not collected/uploaded).
+  - When `false`, Chef Automate removes that service (no audit log data is collected or uploaded).
 
 ### `[global.v1.audit.async]`
 
