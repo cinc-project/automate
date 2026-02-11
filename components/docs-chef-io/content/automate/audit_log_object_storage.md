@@ -269,7 +269,7 @@ To verify audit log uploads:
 
 When audit logging is enabled, Chef Automate runs `automate-fluent-bit` as the audit log collector.
 
-- The load balancer writes audit entries to `/hab/svc/automate-load-balancer/data/audit.log` (and rotates the file based on `[global.v1.audit.input]`).
+- The load balancer writes audit entries to `/hab/svc/automate-load-balancer/data/audit.log`.
 - Fluent Bit tails the active `audit.log` file and uploads matching log entries to S3/MinIO when `[global.v1.audit.storage]` is configured.
 - Only mutating HTTP operations are written to the audit log and therefore stored in S3/MinIO: `POST`, `PUT`, `PATCH`, and `DELETE`.
 
@@ -397,7 +397,7 @@ These settings control how audit logs are written/rotated locally on the Automat
 
 - `max_file_size` (string)
   - Maximum size of the local audit log file before rotation occurs.
-  - Default: `"10MB"`.
+  - Default: `"100MB"`.
   - Supported formats include: `K`/`KB`, `M`/`MB`, `G`/`GB` (for example, `"100M"`, `"100MB"`, `"1G"`).
   - Rotation behavior:
     - The load balancer writes audit entries to `/hab/svc/automate-load-balancer/data/audit.log`.
