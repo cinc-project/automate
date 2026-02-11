@@ -36,24 +36,26 @@ To start uploading audit logs, patch the Chef Automate configuration.
 ### AWS S3 example
 
 ```toml
-[global.v1.audit.logging]
-enabled = true
+[global.v1.audit]
 
-[global.v1.audit.storage]
-storage_type = "s3"
-endpoint = "https://s3.amazonaws.com"
-bucket = "<BUCKET_NAME>"
-storage_region = "<AWS_REGION>"
-path_prefix = "audit-logs/"
+  [global.v1.audit.logging]
+    enabled = true
 
-# If you are using an IAM role/instance profile, omit access_key/secret_key.
-# If you are using static credentials, set both.
-# access_key = "<ACCESS_KEY>"
-# secret_key = "<SECRET_KEY>"
+  [global.v1.audit.storage]
+    storage_type = "s3"
+    endpoint = "https://s3.amazonaws.com"
+    bucket = "<BUCKET_NAME>"
+    storage_region = "<AWS_REGION>"
+    path_prefix = "audit-logs/"
 
-  [global.v1.audit.storage.ssl]
-  enabled = true
-  verify_ssl = true
+    # If you are using an IAM role/instance profile, omit access_key/secret_key.
+    # If you are using static credentials, set both.
+    # access_key = "<ACCESS_KEY>"
+    # secret_key = "<SECRET_KEY>"
+
+    [global.v1.audit.storage.ssl]
+      enabled = true
+      verify_ssl = true
 ```
 
 Set the following values:
@@ -66,28 +68,39 @@ Set the following values:
 ### MinIO example
 
 ```toml
-[global.v1.audit.logging]
-enabled = true
+[global.v1.audit]
 
-[global.v1.audit.storage]
-storage_type = "minio"
-endpoint = "http://minio.example.com:9000"
-bucket = "<BUCKET_NAME>"
-storage_region = "us-east-1"
-path_prefix = "audit-logs/"
-access_key = "<ACCESS_KEY>"
-secret_key = "<SECRET_KEY>"
+  [global.v1.audit.logging]
+    enabled = true
 
-  [global.v1.audit.storage.ssl]
-  # For http:// endpoints, set enabled=false.
-  # For https:// endpoints, set enabled=true.
-  enabled = false
-  verify_ssl = false
-  # For private CAs/self-signed certs, set enabled=true and provide a PEM-encoded CA certificate.
-  # root_cert = """-----BEGIN CERTIFICATE-----
-  # ...
-  # -----END CERTIFICATE-----"""
+  [global.v1.audit.storage]
+    storage_type = "minio"
+    endpoint = "http://minio.example.com:9000"
+    bucket = "<BUCKET_NAME>"
+    storage_region = "us-east-1"
+    path_prefix = "audit-logs/"
+    access_key = "<ACCESS_KEY>"
+    secret_key = "<SECRET_KEY>"
+
+    [global.v1.audit.storage.ssl]
+      # For http:// endpoints, set enabled=false.
+      # For https:// endpoints, set enabled=true.
+      enabled = false
+      verify_ssl = false
+      # For private CAs/self-signed certs, set enabled=true and provide a PEM-encoded CA certificate.
+      # root_cert = """-----BEGIN CERTIFICATE-----
+      # ...
+      # -----END CERTIFICATE-----"""
 ```
+
+{{< note >}}
+For MinIO, the `endpoint` scheme must match the TLS settings:
+
+- Use `http://...` with `ssl.enabled = false`
+- Use `https://...` with `ssl.enabled = true`
+
+If MinIO uses a private CA or self-signed certificate, set `ssl.enabled = true` and provide `ssl.root_cert` as PEM contents (not a file path).
+{{< /note >}}
 
 Set the following values:
 
@@ -114,13 +127,21 @@ To change the rotation size threshold, patch your Automate configuration.
 1. Create a TOML file with the following content:
 
 ```toml
-[global.v1.audit.input]
-max_file_size = "10MB"
+[global.v1.audit]
+
+  [global.v1.audit.input]
+    max_file_size = "10MB"
 ```
 
 Set the following values:
 
 - `max_file_size`: Maximum size of the local audit log file before rotation occurs.
+
+{{< note >}}
+If you also set `[global.v1.audit.input].refresh_interval` or `[global.v1.audit.input].mem_buf_limit`, those values are passed through to Fluent Bit's Tail input (`Refresh_Interval` and `Mem_Buf_Limit`).
+
+See the Fluent Bit Tail input documentation: https://docs.fluentbit.io/manual/pipeline/inputs/tail
+{{< /note >}}
 
 Rotation behavior:
 
@@ -139,8 +160,6 @@ sudo chef-automate config patch </PATH/TO/TOML/FILE>
 
 These settings control how the collector uploads audit logs to S3/MinIO (object size splitting, multipart chunk size, and upload timeouts).
 
-The collector (`automate-fluent-bit`) retries failed uploads indefinitely by default. This retry limit is not configurable via `[global.v1.audit]`.
-
 If you do not set `[global.v1.audit.output]`, Chef Automate uses these defaults:
 
 - `total_file_size = "100M"`
@@ -150,12 +169,18 @@ If you do not set `[global.v1.audit.output]`, Chef Automate uses these defaults:
 1. Create a TOML file with the following content:
 
 ```toml
-[global.v1.audit.output]
-total_file_size = "100M"
-upload_chunk_size = "6M"
-upload_timeout = "10m"
+[global.v1.audit]
 
+  [global.v1.audit.output]
+    total_file_size = "100M"
+    upload_chunk_size = "6M"
+    upload_timeout = "10m"
 ```
+
+{{< note >}}
+These `[global.v1.audit.output]` settings control the Fluent Bit S3 output plugin behavior.
+See the Fluent Bit S3 output plugin documentation for details and constraints: https://docs.fluentbit.io/manual/pipeline/outputs/s3
+{{< /note >}}
 
 Set the following values:
 
@@ -164,6 +189,59 @@ Set the following values:
 - `upload_timeout`: Upload timeout (minutes or hours).
 
 1. Patch the Chef Automate configuration:
+
+```bash
+sudo chef-automate config patch </PATH/TO/TOML/FILE>
+```
+
+## Complete patch example
+
+You can patch all audit log settings in a single TOML file (logging, local rotation, S3/MinIO storage, TLS settings, and upload behavior).
+
+For a fully commented template (including defaults and optional fields), see Copy/paste template (all options) in Global audit configuration reference.
+
+```toml
+[global.v1.audit]
+
+  [global.v1.audit.logging]
+    enabled = true
+
+  [global.v1.audit.input]
+    max_file_size = "10MB"
+    refresh_interval = "5"
+    mem_buf_limit = "5MB"
+
+  [global.v1.audit.async]
+    # max_concurrent_workers = 4
+    # queue_size = 100
+    # multipart_chunk_size = "10MB"
+
+  [global.v1.audit.storage]
+    # Use "s3" for AWS S3 or "minio" for MinIO.
+    storage_type = "minio"
+    endpoint = "http://fqdn:9000"
+    bucket = "audit-logs"
+    storage_region = "us-east-1"
+    path_prefix = "audit-logs/"
+    access_key = "<ACCESS_KEY>"
+    secret_key = "<SECRET_KEY>"
+
+    [global.v1.audit.storage.ssl]
+      # Set enabled=true for https:// endpoints; enabled=false for http:// endpoints.
+      enabled = false
+      verify_ssl = false
+      # For private CAs/self-signed certs, provide a PEM-encoded CA certificate.
+      # root_cert = """-----BEGIN CERTIFICATE-----
+      # ...
+      # -----END CERTIFICATE-----"""
+
+  [global.v1.audit.output]
+    total_file_size = "100M"
+    upload_chunk_size = "6M"
+    upload_timeout = "10m"
+```
+
+Patch the Chef Automate configuration:
 
 ```bash
 sudo chef-automate config patch </PATH/TO/TOML/FILE>
@@ -198,6 +276,92 @@ When audit logging is enabled, Chef Automate runs `automate-fluent-bit` as the a
 ## Global audit configuration reference
 
 This section explains the fields under `[global.v1.audit]`.
+
+### Copy/paste template (all options)
+
+Copy and paste this template, then adjust values for your environment.
+
+```toml
+[global.v1.audit]
+
+  # Turns audit logging on/off (default: false)
+  [global.v1.audit.logging]
+    enabled = false
+
+  # Fluent Bit tail input tuning (defaults shown)
+  [global.v1.audit.input]
+    # Default: "10MB"
+    max_file_size = "10MB"
+
+    # Fluent Bit Refresh_Interval in seconds (stored as a string)
+    # Default: "5"
+    refresh_interval = "5"
+
+    # Fluent Bit Mem_Buf_Limit (defaults shown)
+    # Default: "5MB"
+    mem_buf_limit = "5MB"
+
+  # Upload worker/queue tuning (optional)
+  [global.v1.audit.async]
+    # Default: 4
+    # max_concurrent_workers = 4
+
+    # Default: 100
+    # queue_size = 100
+
+    # Default: "10MB" (note: uses KB/MB/GB format)
+    # multipart_chunk_size = "10MB"
+
+  # Object storage destination + credentials
+  [global.v1.audit.storage]
+    # Storage backend identifier (default: "s3"); supported values: "s3", "minio"
+    storage_type = "s3"
+
+    # Default: "https://s3.amazonaws.com"
+    endpoint = "https://s3.amazonaws.com"
+
+    # Required for uploads
+    # bucket = "my-audit-bucket"
+
+    # Default: "us-east-1"
+    storage_region = "us-east-1"
+
+    # Default: "" (optional prefix inside the bucket)
+    path_prefix = ""
+
+    # Optional (omit for AWS IAM role / default AWS credential chain)
+    # access_key = "..."
+    # secret_key = "..."
+
+    [global.v1.audit.storage.ssl]
+      # Default: true
+      enabled = true
+
+      # Default: true
+      verify_ssl = true
+
+      # Optional PEM root CA. Use TOML triple quotes for multi-line PEM.
+      # root_cert = """-----BEGIN CERTIFICATE-----
+      # ...
+      # -----END CERTIFICATE-----"""
+
+  # Upload aggregation behavior (defaults shown)
+  [global.v1.audit.output]
+    # Total size of a “batch file” that gets uploaded (default: "100M")
+    total_file_size = "100M"
+
+    # Upload chunk size for the batch upload (default: "6M")
+    upload_chunk_size = "6M"
+
+    # Upload timeout duration (default: "10m")
+    upload_timeout = "10m"
+```
+
+Patch the Chef Automate configuration:
+
+```bash
+sudo chef-automate config patch </PATH/TO/TOML/FILE>
+```
 
 ### `[global.v1.audit.logging]`
 
@@ -244,12 +408,14 @@ These settings control how audit logs are written/rotated locally on the Automat
 - `refresh_interval` (string)
   - Polling interval (in seconds) for the `automate-fluent-bit` Tail input to detect new data and file rotation.
   - This value is used as Fluent Bit `Refresh_Interval`.
+  - See: https://docs.fluentbit.io/manual/pipeline/inputs/tail
   - Default: `"5"`.
   - Example: `"10"`.
 
 - `mem_buf_limit` (string)
   - In-memory buffer limit for the `automate-fluent-bit` Tail input while reading logs.
   - This value is used as Fluent Bit `Mem_Buf_Limit`.
+  - See: https://docs.fluentbit.io/manual/pipeline/inputs/tail
   - Default: `"5MB"`.
   - Example: `"20MB"`.
 
@@ -294,12 +460,10 @@ Chef Automate services use this configuration to create the S3/MinIO connection 
 - `enabled` (boolean)
   - Enables TLS for the storage connection.
   - Set to `true` for `https://` endpoints; set to `false` for `http://` endpoints.
-  - Default: `true`.
 
 - `verify_ssl` (boolean)
   - Controls whether TLS certificates are verified.
   - Keep `true` in production when possible.
-  - Default: `true`.
 
 - `root_cert` (string)
   - Optional PEM-encoded CA certificate used to trust a private CA / self-signed certificate on your S3-compatible endpoint.
@@ -308,16 +472,20 @@ Chef Automate services use this configuration to create the S3/MinIO connection 
   - Example:
 
     ```toml
+    [global.v1.audit]
+
       [global.v1.audit.storage.ssl]
-      root_cert = """-----BEGIN CERTIFICATE-----
-      ...
-      -----END CERTIFICATE-----"""
+        root_cert = """-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----"""
     ```
   - Default: empty.
 
 ### `[global.v1.audit.output]`
 
 These settings control how the audit log collector uploads data to S3/MinIO (for example, how large each uploaded object should be, multipart chunk sizing, and upload timeouts).
+
+For more details on how these values affect uploads, see the Fluent Bit S3 output plugin documentation: https://docs.fluentbit.io/manual/pipeline/outputs/s3
 
 - `total_file_size` (string)
   - Total size threshold before the S3/MinIO output is split into additional objects.
