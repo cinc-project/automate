@@ -26,6 +26,8 @@ This is helpful when you want audit log data to live outside the local filesyste
 
 Use this section if you want the minimum configuration to start uploading audit logs to your bucket.
 
+For field descriptions and defaults, see [Global audit configuration reference](#global-audit-configuration-reference).
+
 ### Minimum required configuration
 
 At a minimum, you must:
@@ -39,6 +41,8 @@ At a minimum, you must:
 - Provide credentials:
   - For AWS S3, you can omit `access_key`/`secret_key` when using an IAM role/instance profile (AWS default credential chain)
   - For MinIO, set `access_key` and `secret_key`
+
+For default values and optional snippets (including `root_cert`), see [Defaults](#defaults).
 
 AWS S3 (IAM role / instance profile):
 
@@ -92,7 +96,7 @@ Once uploads work, you can optionally configure:
 - Upload batching and timeouts under `[global.v1.audit.output]` (see Configure upload behavior)
 - Worker/queue tuning under `[global.v1.audit.async]`
 
-For a fully commented template with all options and defaults, see Copy/paste template (all options).
+For details on each field, see [Global audit configuration reference](#global-audit-configuration-reference).
 
 ## Configure audit log uploads
 
@@ -107,67 +111,7 @@ To start uploading audit logs, patch the Chef Automate configuration.
 If you set `[global.v1.audit.logging].enabled = true` but do not configure `[global.v1.audit.storage]`, Chef Automate will still write audit events locally to `/hab/svc/automate-load-balancer/data/audit.log` (and rotate them based on `[global.v1.audit.input]`), but nothing will be uploaded to S3/MinIO until storage is configured.
 {{< /note >}}
 
-1. Create a TOML file with the following content on the node running Chef Automate in a standalone deployment or on the bastion host in an Automate HA cluster.
-
-### AWS S3 example
-
-```toml
-[global.v1.audit]
-
-  [global.v1.audit.logging]
-    enabled = true
-
-  [global.v1.audit.storage]
-    storage_type = "s3"
-    endpoint = "https://s3.amazonaws.com"
-    bucket = "<BUCKET_NAME>"
-    storage_region = "<AWS_REGION>"
-    path_prefix = "audit-logs/"
-
-    # If you are using an IAM role/instance profile, omit access_key/secret_key.
-    # If you are using static credentials, set both.
-    # access_key = "<ACCESS_KEY>"
-    # secret_key = "<SECRET_KEY>"
-
-    [global.v1.audit.storage.ssl]
-      enabled = true
-      verify_ssl = true
-```
-
-Set the following values:
-
-- `bucket`: The S3 bucket where audit logs are stored.
-- `storage_region`: AWS region for the bucket (for example, `"us-east-1"`).
-- `path_prefix`: Optional prefix inside the bucket.
-- `access_key` and `secret_key`: Optional static credentials.
-
-### MinIO example
-
-```toml
-[global.v1.audit]
-
-  [global.v1.audit.logging]
-    enabled = true
-
-  [global.v1.audit.storage]
-    storage_type = "minio"
-    endpoint = "http://minio.example.com:9000"
-    bucket = "<BUCKET_NAME>"
-    storage_region = "us-east-1"
-    path_prefix = "audit-logs/"
-    access_key = "<ACCESS_KEY>"
-    secret_key = "<SECRET_KEY>"
-
-    [global.v1.audit.storage.ssl]
-      # For http:// endpoints, set enabled=false.
-      # For https:// endpoints, set enabled=true.
-      enabled = false
-      verify_ssl = false
-      # For private CAs/self-signed certs, set enabled=true and provide a PEM-encoded CA certificate.
-      # root_cert = """-----BEGIN CERTIFICATE-----
-      # ...
-      # -----END CERTIFICATE-----"""
-```
+1. Use one of the TOML examples in [Quick start](#quick-start) as a starting point, then adjust values for your environment.
 
 {{< note >}}
 For MinIO, the `endpoint` scheme must match the TLS settings:
@@ -178,18 +122,9 @@ For MinIO, the `endpoint` scheme must match the TLS settings:
 If MinIO uses a private CA or self-signed certificate, set `ssl.enabled = true` and provide `ssl.root_cert` as PEM contents (not a file path).
 {{< /note >}}
 
-Set the following values:
+If you need details about a specific field, see [Global audit configuration reference](#global-audit-configuration-reference).
 
-- `endpoint`: MinIO endpoint URL.
-- `bucket`: The bucket where audit logs are stored.
-- `access_key` and `secret_key`: MinIO credentials.
-- `ssl.enabled` / `ssl.verify_ssl` / `ssl.root_cert`: TLS settings.
-
-1. Patch the Chef Automate configuration:
-
-```bash
-sudo chef-automate config patch </PATH/TO/TOML/FILE>
-```
+1. Patch the Chef Automate configuration (see Quick start for the command).
 
 After you patch the Automate configuration, Chef Automate starts running the audit log collector and uploads audit log data to the configured bucket.
 
@@ -226,11 +161,7 @@ Rotation behavior:
 - Older rotated files are shifted up (`audit.1.log` → `audit.2.log`, etc.).
 - Chef Automate keeps up to 10 rotated files (`audit.1.log` through `audit.10.log`).
 
-1. Patch the Chef Automate configuration:
-
-```bash
-sudo chef-automate config patch </PATH/TO/TOML/FILE>
-```
+1. Patch the Chef Automate configuration (see Quick start for the command).
 
 ## Configure upload behavior
 
@@ -264,17 +195,13 @@ Set the following values:
 - `upload_chunk_size`: Multipart upload part size.
 - `upload_timeout`: Upload timeout (minutes or hours).
 
-1. Patch the Chef Automate configuration:
-
-```bash
-sudo chef-automate config patch </PATH/TO/TOML/FILE>
-```
+1. Patch the Chef Automate configuration (see Quick start for the command).
 
 ## Complete patch example
 
 You can patch all audit log settings in a single TOML file (logging, local rotation, S3/MinIO storage, TLS settings, and upload behavior).
 
-For a fully commented template (including defaults and optional fields), see Copy/paste template (all options) in Global audit configuration reference.
+For field descriptions and defaults, see [Global audit configuration reference](#global-audit-configuration-reference).
 
 ```toml
 [global.v1.audit]
@@ -317,11 +244,7 @@ For a fully commented template (including defaults and optional fields), see Cop
     upload_timeout = "10m"
 ```
 
-Patch the Chef Automate configuration:
-
-```bash
-sudo chef-automate config patch </PATH/TO/TOML/FILE>
-```
+Patch the Chef Automate configuration (see Quick start for the command).
 
 ## Verify
 
@@ -353,91 +276,49 @@ When audit logging is enabled, Chef Automate runs `automate-fluent-bit` as the a
 
 This section explains the fields under `[global.v1.audit]`.
 
-### Copy/paste template (all options)
+For copy/paste examples, see [Quick start](#quick-start) (minimum required configuration) and [Complete patch example](#complete-patch-example) (all common settings in one file).
 
-Copy and paste this template, then adjust values for your environment.
+### Defaults
+
+{{< note >}}
+If you omit these sections, Chef Automate uses the defaults shown below.
+
+Upload behavior defaults (controls how uploads are batched/time out):
 
 ```toml
 [global.v1.audit]
 
-  # Turns audit logging on/off (default: false)
-  [global.v1.audit.logging]
-    enabled = false
-
-  # Fluent Bit tail input tuning (defaults shown)
-  [global.v1.audit.input]
-    # Default: "10MB"
-    max_file_size = "10MB"
-
-    # Fluent Bit Refresh_Interval in seconds (stored as a string)
-    # Default: "5"
-    refresh_interval = "5"
-
-    # Fluent Bit Mem_Buf_Limit (defaults shown)
-    # Default: "5MB"
-    mem_buf_limit = "5MB"
-
-  # Upload worker/queue tuning (optional)
-  [global.v1.audit.async]
-    # Default: 4
-    # max_concurrent_workers = 4
-
-    # Default: 100
-    # queue_size = 100
-
-    # Default: "10MB" (note: uses KB/MB/GB format)
-    # multipart_chunk_size = "10MB"
-
-  # Object storage destination + credentials
-  [global.v1.audit.storage]
-    # Storage backend identifier (default: "s3"); supported values: "s3", "minio"
-    storage_type = "s3"
-
-    # Default: "https://s3.amazonaws.com"
-    endpoint = "https://s3.amazonaws.com"
-
-    # Required for uploads
-    # bucket = "my-audit-bucket"
-
-    # Default: "us-east-1"
-    storage_region = "us-east-1"
-
-    # Default: "" (optional prefix inside the bucket)
-    path_prefix = ""
-
-    # Optional (omit for AWS IAM role / default AWS credential chain)
-    # access_key = "..."
-    # secret_key = "..."
-
-    [global.v1.audit.storage.ssl]
-      # Default: true
-      enabled = true
-
-      # Default: true
-      verify_ssl = true
-
-      # Optional PEM root CA. Use TOML triple quotes for multi-line PEM.
-      # root_cert = """-----BEGIN CERTIFICATE-----
-      # ...
-      # -----END CERTIFICATE-----"""
-
-  # Upload aggregation behavior (defaults shown)
   [global.v1.audit.output]
-    # Total size of a “batch file” that gets uploaded (default: "100M")
+    # Default: "100M"
     total_file_size = "100M"
 
-    # Upload chunk size for the batch upload (default: "6M")
+    # Default: "6M"
     upload_chunk_size = "6M"
 
-    # Upload timeout duration (default: "10m")
+    # Default: "10m"
     upload_timeout = "10m"
 ```
 
-Patch the Chef Automate configuration:
+TLS defaults for the object storage connection (applies to `https://` endpoints):
 
-```bash
-sudo chef-automate config patch </PATH/TO/TOML/FILE>
+```toml
+[global.v1.audit]
+
+  [global.v1.audit.storage.ssl]
+    # Default: true
+    enabled = true
+
+    # Default: true
+    verify_ssl = true
+
+    # Optional PEM root CA. Use TOML triple quotes for multi-line PEM.
+    # root_cert = """-----BEGIN CERTIFICATE-----
+    # ...
+    # -----END CERTIFICATE-----"""
 ```
+
+For `http://` endpoints (common for local MinIO), set `enabled = false`.
+{{< /note >}}
 
 ### `[global.v1.audit.logging]`
 
