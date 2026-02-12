@@ -268,7 +268,7 @@ To verify audit log uploads:
 
 When audit logging is enabled, Chef Automate runs `automate-fluent-bit` as the audit log collector.
 
-- The load balancer writes audit entries to `/hab/svc/automate-load-balancer/data/audit.log`.
+- The load balancer writes audit entries to `/hab/svc/automate-load-balancer/data/audit.log` (and rotates the file based on `[global.v1.audit.input]`).
 - Fluent Bit tails the active `audit.log` file and uploads matching log entries to S3/MinIO when `[global.v1.audit.storage]` is configured.
 - Only mutating HTTP operations are written to the audit log and therefore stored in S3/MinIO: `POST`, `PUT`, `PATCH`, and `DELETE`.
 
@@ -278,219 +278,116 @@ This section explains the fields under `[global.v1.audit]`.
 
 For copy/paste examples, see [Quick start](#quick-start) (minimum required configuration) and [Complete patch example](#complete-patch-example) (all common settings in one file).
 
-### Defaults
+### Defaults and validation reference
 
-{{< note >}}
+**View defaults in TOML format:**
+
 ```toml
 [global.v1.audit]
 
   [global.v1.audit.logging]
-    # Default: false
     enabled = false
 
   [global.v1.audit.input]
-    # Default: "100MB"
-    max_file_size = "100MB"
-
-    # Default: "5"
-    refresh_interval = "5"
-
-    # Default: "5MB"
-    mem_buf_limit = "5MB"
+    max_file_size = "10MB"
+    refresh_interval = "60"
+    mem_buf_limit = "5M"
 
   [global.v1.audit.async]
-    # Default: 4
     max_concurrent_workers = 4
-
-    # Default: 100
     queue_size = 100
-
-    # Default: "10MB"
     multipart_chunk_size = "10MB"
 
   [global.v1.audit.storage]
-    # Default: "s3"
     storage_type = "s3"
-
-    # Default: ""
-    access_key = ""
-
-    # Default: ""
-    secret_key = ""
+    endpoint = "https://s3.amazonaws.com"
+    storage_region = "us-east-1"
+    path_prefix = ""
 
     [global.v1.audit.storage.ssl]
-      # Default: false
       enabled = false
-
-      # Default: false
       verify_ssl = false
-
-      # Default: ""
       root_cert = ""
 
   [global.v1.audit.output]
-    # Default: "100M"
-    total_file_size = "100M"
-
-    # Default: "6M"
+    total_file_size = "12M"
     upload_chunk_size = "6M"
-
-    # Default: "10m"
     upload_timeout = "10m"
 ```
-{{< /note >}}
 
-### `[global.v1.audit.logging]`
+**Configuration tables by section:**
 
-- `enabled` (boolean)
-  - Enables or disables the audit logging pipeline.
-  - Default: `false`.
-  - When `true`, Chef Automate deploys and runs the audit log collector (`automate-fluent-bit`).
-  - When `false`, Chef Automate removes that service (no audit log data is collected or uploaded).
+| Field | Default | Validation |
+|-------|---------|-----------|
+| `enabled` | `false` | Must be `true` or `false` |
 
-### `[global.v1.audit.async]`
+#### `[global.v1.audit.async]`
 
-These settings tune the asynchronous worker pool used by services that generate audit log files on-demand (for example, for the audit log retrieval APIs).
+| Field | Default | Validation |
+|-------|---------|-----------|
+| `max_concurrent_workers` | `4` | Higher values increase throughput but also CPU/memory usage |
+| `queue_size` | `100` | If full, new requests may be rejected |
+| `multipart_chunk_size` | `"10MB"` | Format: `KB`, `MB`, or `GB` suffixes (use `"20MB"`, not `"20M"`) |
 
-- `max_concurrent_workers` (integer)
-  - Maximum number of concurrent workers processing audit-log generation/filter tasks.
-  - Default: `4`.
-  - Higher values can increase throughput, but also increase CPU/memory usage.
+#### `[global.v1.audit.input]`
 
-- `queue_size` (integer)
-  - Maximum number of queued tasks waiting to be processed.
-  - Default: `100`.
-  - If the queue is full, new requests may be rejected until capacity is available.
+| Field | Default | Validation |
+|-------|---------|-----------|
+| `max_file_size` | `"10MB"` | Supported formats: `K`/`KB`, `M`/`MB`, `G`/`GB`; load balancer rotates `/hab/svc/automate-load-balancer/data/audit.log` (keeps 10 rotated files) |
+| `refresh_interval` | `"60"` | Positive value (seconds); polling interval for Fluent Bit Tail input |
+| `mem_buf_limit` | `"5M"` | Format: `^\d+M$` (capital M, no spaces, no B suffix); in-memory buffer limit |
 
-- `multipart_chunk_size` (string)
-  - Chunk size (part size) used for multipart operations during large file generation/uploads.
-  - Default: `"10MB"`.
-  - Format: `KB`, `MB`, or `GB` suffixes (for example, `"20MB"`).
-  - Note: Use `MB/GB/KB` (for example, `"20MB"`), not `"20M"`.
+#### `[global.v1.audit.storage]`
 
-### `[global.v1.audit.input]`
-
-These settings control how audit logs are written/rotated locally on the Automate node and how the collector tails/buffers them.
-
-- `max_file_size` (string)
-  - Maximum size of the local audit log file before rotation occurs.
-  - Default: `"100MB"`.
-  - Supported formats include: `K`/`KB`, `M`/`MB`, `G`/`GB` (for example, `"100M"`, `"100MB"`, `"1G"`).
-  - Rotation behavior:
-    - The load balancer writes audit entries to `/hab/svc/automate-load-balancer/data/audit.log`.
-    - When `audit.log` exceeds `max_file_size`, it is rotated to `audit.1.log`.
-    - Older rotated files are shifted up (`audit.1.log` → `audit.2.log`, etc.).
-    - Chef Automate keeps up to 10 rotated files (`audit.1.log` through `audit.10.log`).
-
-- `refresh_interval` (string)
-  - Polling interval (in seconds) for the `automate-fluent-bit` Tail input to detect new data and file rotation.
-  - This value is used as Fluent Bit `Refresh_Interval`.
-  - See: https://docs.fluentbit.io/manual/pipeline/inputs/tail
-  - Default: `"5"`.
-  - Example: `"10"`.
-
-- `mem_buf_limit` (string)
-  - In-memory buffer limit for the `automate-fluent-bit` Tail input while reading logs.
-  - This value is used as Fluent Bit `Mem_Buf_Limit`.
-  - See: https://docs.fluentbit.io/manual/pipeline/inputs/tail
-  - Default: `"5MB"`.
-  - Example: `"20MB"`.
-
-### `[global.v1.audit.storage]`
-
-These settings configure the object storage destination for audit logs (S3 or S3-compatible storage such as MinIO).
-
-Chef Automate services use this configuration to create the S3/MinIO connection (endpoint/region), select the target bucket/prefix, and authenticate (static keys or AWS credential chain).
-
-- `storage_type` (string)
-  - Storage backend type. Must be `"s3"` or `"minio"`.
-  - Default: `"s3"`.
-
-- `endpoint` (string)
-  - S3/MinIO endpoint URL.
-  - Examples: `"https://s3.amazonaws.com"` (AWS), `"http://localhost:9000"` (local MinIO).
-
-- `bucket` (string)
-  - Bucket name where audit logs are stored.
-  - Required: yes. Uploads (collector) do not run unless a bucket is configured.
-
-- `storage_region` (string)
-  - Region to use for S3 API calls.
-  - For MinIO, a region value is still required by many S3 clients; `"us-east-1"` is commonly used.
-
-- `path_prefix` (string)
-  - Optional key prefix inside the bucket.
-  - Use this to group audit logs under a specific path (for example, `"audit-logs/"`).
-
-- `access_key` (string)
-  - Access key for S3/MinIO.
-  - For MinIO, this is typically required.
-  - For AWS, you may omit static credentials if using the AWS default credential chain (IAM role / environment).
-  - Default: empty.
-
-- `secret_key` (string)
-  - Secret key for S3/MinIO.
-  - If you set `access_key`, you must also set `secret_key`.
+| Field | Default | Validation |
+|-------|---------|-----------|
+| `storage_type` | `"s3"` | Must be `"s3"` or `"minio"` |
+| `endpoint` | `"https://s3.amazonaws.com"` | S3/MinIO endpoint URL |
+| `bucket` | — | **Required** - Uploads don't run unless configured |
+| `storage_region` | `"us-east-1"` | AWS region or `"us-east-1"` for MinIO |
+| `path_prefix` | `""` | Optional key prefix inside bucket |
+| `access_key` | `""` | For MinIO: typically required; For AWS: optional if using IAM role |
+| `secret_key` | `""` | **Required if `access_key` is set** |
 
 #### `[global.v1.audit.storage.ssl]`
 
-- `enabled` (boolean)
-  - Enables TLS for the storage connection.
-  - Set to `true` for `https://` endpoints; set to `false` for `http://` endpoints.
+| Field | Default | Validation |
+|-------|---------|-----------|
+| `enabled` | `false` | Use `true` for `https://` endpoints, `false` for `http://` endpoints |
+| `verify_ssl` | `false` | Keep `true` in production when possible |
+| `root_cert` | `""` | PEM-encoded CA certificate (optional, for private CAs or self-signed certs) |
 
-- `verify_ssl` (boolean)
-  - Controls whether TLS certificates are verified.
-  - Keep `true` in production when possible.
+#### `[global.v1.audit.output]`
 
-- `root_cert` (string)
-  - Optional PEM-encoded CA certificate used to trust a private CA / self-signed certificate on your S3-compatible endpoint.
-  - Not typically required for AWS S3.
-  - Provide the certificate contents directly (not a file path) using TOML triple quotes (`"""`).
-  - Example:
-
-    ```toml
-    [global.v1.audit]
-
-      [global.v1.audit.storage.ssl]
-        root_cert = """-----BEGIN CERTIFICATE-----
-...
------END CERTIFICATE-----"""
-    ```
-  - Default: empty.
-
-### `[global.v1.audit.output]`
-
-These settings control how the audit log collector uploads data to S3/MinIO (for example, how large each uploaded object should be, multipart chunk sizing, and upload timeouts).
-
-For more details on how these values affect uploads, see the Fluent Bit S3 output plugin documentation: https://docs.fluentbit.io/manual/pipeline/outputs/s3
-
-- `total_file_size` (string)
-  - Total size threshold before the S3/MinIO output is split into additional objects.
-  - Default: `"100M"`.
-  - Supported units: `M` or `G` only (MiB/GiB).
-  - Minimum: `"1M"`.
-
-- `upload_chunk_size` (string)
-  - Multipart upload chunk size (part size) used when uploading.
-  - Default: `"6M"`.
-  - Supported units: `M` or `G` only (MiB/GiB).
-  - Minimum: `"6M"`.
-
-- `upload_timeout` (string)
-  - Upload timeout.
-  - Default: `"10m"`.
-  - Supported units: minutes (`m`) or hours (`h`). Seconds are not supported.
+| Field | Default | Min | Max | Validation |
+|-------|---------|-----|-----|-----------|
+| `total_file_size` | `"12M"` | `"1M"` | `"50G"` | Units: `M` or `G` only; must be ≥ 2× `upload_chunk_size` |
+| `upload_chunk_size` | `"6M"` | `"6M"` | `"50M"` | Units: `M` or `G` only |
+| `upload_timeout` | `"10m"` | — | — | Units: `s`, `m`, or `h` (positive value) |
 
 ## Audit log retrieval APIs
 
-Chef Automate provides APIs (via the `user-settings-service`) to request and track asynchronous generation of audit logs for the current user.
+Chef Automate provides APIs (via the `user-settings-service`) to request and track asynchronous generation of audit logs.
 
-### Request self audit logs (async)
+### Authentication
 
-- Method/Path: `GET /api/v1/audit/self/request`
-- Authentication: Required (Chef Automate session)
-- Access control: Self only (the service uses the authenticated user identity)
-- Query parameters:
+All audit APIs require authentication using a bearer token:
+
+```bash
+curl -sS \
+  -H "Authorization: Bearer $TOKEN" \
+  "https://$FQDN/api/v0/audit/..."
+```
+
+Alternatively, you may use the `api-token` header in some API contexts.
+
+### Request admin audit logs (async)
+
+- Method/Path: `GET /api/v0/audit/admin/request`
+- Authentication: Required (Chef Automate admin session)
+- Access control: Admin only
+- Query parameters (all optional):
+  - `usernames` (optional): Comma-separated list of users to filter logs. If omitted, returns logs for all users.
   - `from` (optional): Start time (RFC 3339 timestamp). Default: 3 hours ago.
   - `to` (optional): End time (RFC 3339 timestamp). Default: now.
   - `order` (optional): Sort order, `asc` or `desc`. Default: `desc`.
@@ -501,8 +398,38 @@ Example:
 
 ```shell
 curl -sS \
-  -H "api-token: $TOKEN" \
-  "https://$FQDN/api/v1/audit/self/request?from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z&order=desc"
+  -H "Authorization: Bearer $TOKEN" \
+  "https://$FQDN/api/v0/audit/admin/request?usernames=user1,user2&from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z&order=desc"
+```
+
+Response:
+
+```json
+{
+  "request_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "status": "processing",
+  "message": "Admin audit log generation started. Use the request ID to check status and download when ready."
+}
+```
+
+### Request self audit logs (async)
+
+- Method/Path: `GET /api/v0/audit/self/request`
+- Authentication: Required (Chef Automate session)
+- Access control: Self only (the service uses the authenticated user identity)
+- Query parameters (all optional):
+  - `from` (optional): Start time (RFC 3339 timestamp). Default: 3 hours ago.
+  - `to` (optional): End time (RFC 3339 timestamp). Default: now.
+  - `order` (optional): Sort order, `asc` or `desc`. Default: `desc`.
+- Constraints:
+  - The requested time range must be 30 days or less.
+
+Example:
+
+```shell
+curl -sS \
+  -H "Authorization: Bearer $TOKEN" \
+  "https://$FQDN/api/v0/audit/self/request?from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z&order=desc"
 ```
 
 Response:
@@ -517,7 +444,7 @@ Response:
 
 ### Check request status
 
-- Method/Path: `GET /api/v1/audit/status`
+- Method/Path: `GET /api/v0/audit/status`
 - Authentication: Required
 - Access control: Self only (a user can only view their own requested logs)
 - Query parameters:
@@ -531,7 +458,7 @@ Get the latest request status for the current user:
 
 ```shell
 curl -sS \
-  -H "api-token: $TOKEN" \
+  -H "Authorization: Bearer $TOKEN" \
   "https://$FQDN/api/v1/audit/status"
 ```
 
@@ -539,7 +466,7 @@ Get status for a specific request ID:
 
 ```shell
 curl -sS \
-  -H "api-token: $TOKEN" \
+  -H "Authorization: Bearer $TOKEN" \
   "https://$FQDN/api/v1/audit/status?request_id=f47ac10b-58cc-4372-a567-0e02b2c3d479"
 ```
 
@@ -567,46 +494,31 @@ Example (completed):
 }
 ```
 
+### Download audit logs
 
-### Request admin audit logs
-
-- Method/Path: `GET /api/v1/audit/admin/request`
-- Authentication: Required (Chef Automate session)
-- Access control: Admin-only (protected by IAM policy `iam:users:list`)
+- Method/Path: `GET /api/v1/audit/download`
+- Authentication: Required
+- Access control: Self only (a user can only download audit logs they requested)
 - Query parameters:
-  - `username` (required): One or more usernames to filter audit logs by.
-    - Preferred: repeat the parameter (for example, `username=alice&username=bob`).
-    - Also accepted: a single comma-separated value (for example, `username=alice,bob`).
-  - `from` (optional): Start time (RFC 3339 timestamp). Default: 3 hours ago.
-  - `to` (optional): End time (RFC 3339 timestamp). Default: now.
-  - `order` (optional): Sort order, `asc` or `desc`. Default: `desc`.
-- Constraints:
-  - The requested time range must be 30 days or less.
+  - `request_id` (optional):
+    - If omitted, returns the last requested audit log file for the current user.
+    - If provided, returns the audit log file for that specific request ID.
+- Returns: The audit log file in the format specified by the original request (typically JSON or CSV).
 
 Examples:
 
-Request admin audit logs for a single user:
+Download the latest audit log for the current user:
 
 ```shell
 curl -sS \
-  -H "api-token: $TOKEN" \
-  "https://$FQDN/api/v1/audit/admin/request?username=alice&from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z&order=desc"
+  -H "Authorization: Bearer $TOKEN" \
+  "https://$FQDN/api/v1/audit/download" > audit_logs.json
 ```
 
-Request admin audit logs for multiple users (repeat the parameter):
+Download audit logs for a specific request ID:
 
 ```shell
 curl -sS \
-  -H "api-token: $TOKEN" \
-  "https://$FQDN/api/v1/audit/admin/request?username=alice&username=bob&from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z"
-```
-
-Response:
-
-```json
-{
-  "request_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-  "status": "processing",
-  "message": "Admin audit log generation started. Use the request ID to check status and download when ready."
-}
+  -H "Authorization: Bearer $TOKEN" \
+  "https://$FQDN/api/v1/audit/download?request_id=a1c977e1-96a1-4a09-85f8-364721ff9f11" > audit_logs.json
 ```
