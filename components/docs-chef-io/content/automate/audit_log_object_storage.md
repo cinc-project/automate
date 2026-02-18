@@ -228,7 +228,7 @@ For field descriptions and defaults, see [Global audit configuration reference](
   [global.v1.audit.input]
     max_file_size = "10MB"
     refresh_interval = "5"
-    mem_buf_limit = "5MB"
+    mem_buf_limit = "5M"
 
   [global.v1.audit.async]
     # max_concurrent_workers = 4
