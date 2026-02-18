@@ -42,7 +42,7 @@ At a minimum, you must:
   - For AWS S3, you can omit `access_key`/`secret_key` when using an IAM role/instance profile (AWS default credential chain)
   - For MinIO, set `access_key` and `secret_key`
 
-For default values and optional snippets (including `root_cert`), see [Defaults](#defaults).
+For default values and optional snippets (including `root_cert`), see [Defaults and validation reference](#defaults-and-validation-reference).
 
 AWS S3 (IAM role / instance profile):
 
@@ -167,7 +167,7 @@ Set the following values:
 {{< note >}}
 If you also set `[global.v1.audit.input].refresh_interval` or `[global.v1.audit.input].mem_buf_limit`, those values are passed through to Fluent Bit's Tail input (`Refresh_Interval` and `Mem_Buf_Limit`).
 
-See the Fluent Bit Tail input documentation: https://docs.fluentbit.io/manual/pipeline/inputs/tail
+See the [Fluent Bit Tail input documentation](https://docs.fluentbit.io/manual/pipeline/inputs/tail).
 {{< /note >}}
 
 Rotation behavior:
@@ -202,7 +202,7 @@ If you do not set `[global.v1.audit.output]`, Chef Automate uses these defaults:
 
 {{< note >}}
 These `[global.v1.audit.output]` settings control the Fluent Bit S3 output plugin behavior.
-See the Fluent Bit S3 output plugin documentation for details and constraints: https://docs.fluentbit.io/manual/pipeline/outputs/s3
+See the [Fluent Bit S3 output plugin documentation](https://docs.fluentbit.io/manual/pipeline/outputs/s3) for details and constraints.
 {{< /note >}}
 
 Set the following values:
@@ -333,53 +333,53 @@ For copy/paste examples, see [Quick start](#quick-start) (minimum required confi
 
 **Configuration tables by section:**
 
-| Field     | Default | Validation                  |
-| --------- | ------- | --------------------------- |
-| `enabled` | `false` | Must be `true` or `false`.  |
+|Field|Default|Validation|
+|---|---|---|
+|`enabled`|`false`|Must be `true` or `false`.|
 
 #### `[global.v1.audit.async]`
 
-| Field                  | Default  | Validation                                              |
-| ---------------------- | -------- | ------------------------------------------------------- |
-| `max_concurrent_workers` | `4`      | Higher values increase throughput but also CPU/memory usage |
-| `queue_size`           | `100`    | If full, new requests may be rejected                   |
-| `multipart_chunk_size` | `"10MB"` | Format: `KB`, `MB`, or `GB` suffixes (use `"20MB"`, not `"20M"`) |
+|Field|Default|Validation|
+|---|---|---|
+|`max_concurrent_workers`|`4`|Higher values increase throughput but also CPU/memory usage.|
+|`queue_size`|`100`|If full, new requests may be rejected.|
+|`multipart_chunk_size`|`"10MB"`|Format: `KB`, `MB`, or `GB` suffixes (use `"20MB"`, not `"20M"`).|
 
 #### `[global.v1.audit.input]`
 
-| Field              | Default  | Validation                                                                                                                   |
-| ------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `max_file_size`    | `"100MB"` | If set, must be a positive size with `K`, `M`, or `G` units (optional `B`, no spaces; for example, `10MB`) and must be ≥ 1 MiB. |
-| `refresh_interval` | `"60"`   | If set, must be a positive integer number of seconds.                                                                        |
-| `mem_buf_limit`    | `"5M"`   | If set, must be a positive value matching `^\d+M$` (capital `M`, no spaces, no `B` suffix).                                   |
+|Field|Default|Validation|
+|---|---|---|
+|`max_file_size`|`"10MB"`|If set, must be a positive size with `K`, `M`, or `G` units (optional `B`, no spaces; for example, `10MB`) and must be ≥ 1 MiB.|
+|`refresh_interval`|`"60"`|If set, must be a positive integer number of seconds.|
+|`mem_buf_limit`|`"5M"`|If set, must be a positive value matching `^\d+M$` (capital `M`, no spaces, no `B` suffix).|
 
 #### `[global.v1.audit.storage]`
 
-| Field            | Default                      | Validation                                                                                                                   |
-| ---------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `storage_type`   | `"s3"`                      | If set, must be `"s3"` or `"minio"` (cannot be empty).                                                                     |
-| `endpoint`       | `"https://s3.amazonaws.com"` |Required                                                                                                |
-| `bucket`         | —                            |  required. |
-| `storage_region` | `"us-east-1"`               | Required for `"s3"` when `bucket` is set. Optional for MinIO.                                                               |
-| `path_prefix`    | `""`                        | Optional; if set, must be non-empty.                                                                                         |
-| `access_key`     | `""`                        | For MinIO: typically required. For AWS: optional if using IAM role.                                                          |
-| `secret_key`     | `""`                        | Required if `access_key` is set.                                                                                             |
+|Field|Default|Validation|
+|---|---|---|
+|`storage_type`|`"s3"`|If set, must be `"s3"` or `"minio"` (cannot be empty).|
+|`endpoint`|`"https://s3.amazonaws.com"`|Required when `bucket` is set.|
+|`bucket`|—|If set, enables uploads. If omitted, storage is treated as not configured and `endpoint`/`storage_region` are not required.|
+|`storage_region`|`"us-east-1"`|Required for `"s3"` when `bucket` is set. Optional for MinIO.|
+|`path_prefix`|`""`|Optional; if set, must be non-empty.|
+|`access_key`|`""`|For MinIO: typically required. For AWS: optional if using IAM role.|
+|`secret_key`|`""`|Required if `access_key` is set.|
 
 #### `[global.v1.audit.storage.ssl]`
 
-| Field        | Default | Validation                                                       |
-| ------------ | ------- | ---------------------------------------------------------------- |
-| `enabled`    | `false` | If `true`, `root_cert` must be set and non-empty.                |
-| `verify_ssl` | `false` | Allowed only when `enabled = true` and `root_cert` is set.       |
-| `root_cert`  | `""`    | Required when `enabled = true`; must be PEM-encoded and non-empty. |
+|Field|Default|Validation|
+|---|---|---|
+|`enabled`|`false`|If `true`, `root_cert` must be set and non-empty.|
+|`verify_ssl`|`false`|Allowed only when `enabled = true` and `root_cert` is set.|
+|`root_cert`|`""`|Required when `enabled = true`; must be PEM-encoded and non-empty.|
 
 #### `[global.v1.audit.output]`
 
-| Field               | Default | Min    | Max    | Validation                                                                                                               |
-| ------------------- | ------- | ------ | ------ | ------------------------------------------------------------------------------------------------------------------------ |
-| `total_file_size`   | `"12M"` | `"12M"` | `"50G"` | If set, units must be `M` or `G` only and the value must be between 1M and 50G. Must also be ≥ 2× `upload_chunk_size`. |
-| `upload_chunk_size` | `"6M"`  | `"6M"` | `"50M"` | If set, units must be `M` or `G` only and the value must be between 6M and 50M.                                         |
-| `upload_timeout`    | `"10m"` | —      | —      | If set, must be a positive duration with `s`, `m`, or `h` suffix (for example, `30s`, `10m`, `1h`).                      |
+|Field|Default|Min|Max|Validation|
+|---|---|---|---|---|
+|`total_file_size`|`"12M"`|`"1M"`|`"50G"`|If set, units must be `M` or `G` only and the value must be between 1M and 50G. Must also be ≥ 2× `upload_chunk_size`.|
+|`upload_chunk_size`|`"6M"`|`"6M"`|`"50M"`|If set, units must be `M` or `G` only and the value must be between 6M and 50M.|
+|`upload_timeout`|`"10m"`|—|—|If set, must be a positive duration with `s`, `m`, or `h` suffix (for example, `30s`, `10m`, `1h`).|
 
 ## Audit log retrieval APIs
 
