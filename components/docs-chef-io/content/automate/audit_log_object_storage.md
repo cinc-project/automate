@@ -349,7 +349,7 @@ For copy/paste examples, see [Quick start](#quick-start) (minimum required confi
 
 |Field|Default|Validation|
 |---|---|---|
-|`max_file_size`|`"10MB"`|If set, must be a positive size with `K`, `M`, or `G` units (optional `B`, no spaces; for example, `10MB`) and must be ≥ 1 MiB.|
+|`max_file_size`|`"100MB"`|If set, must be a positive size with `K`, `M`, or `G` units (optional `B`, no spaces; for example, `10MB`) and must be ≥ 1 MiB.|
 |`refresh_interval`|`"60"`|If set, must be a positive integer number of seconds.|
 |`mem_buf_limit`|`"5M"`|If set, must be a positive value matching `^\d+M$` (capital `M`, no spaces, no `B` suffix).|
 
@@ -359,7 +359,7 @@ For copy/paste examples, see [Quick start](#quick-start) (minimum required confi
 |---|---|---|
 |`storage_type`|`"s3"`|If set, must be `"s3"` or `"minio"` (cannot be empty).|
 |`endpoint`|`"https://s3.amazonaws.com"`|Required when `bucket` is set.|
-|`bucket`|—|If set, enables uploads. If omitted, storage is treated as not configured and `endpoint`/`storage_region` are not required.|
+|`bucket`|—| required.|
 |`storage_region`|`"us-east-1"`|Required for `"s3"` when `bucket` is set. Optional for MinIO.|
 |`path_prefix`|`""`|Optional; if set, must be non-empty.|
 |`access_key`|`""`|For MinIO: typically required. For AWS: optional if using IAM role.|
