@@ -86,6 +86,22 @@ Patch the Chef Automate configuration:
 sudo chef-automate config patch </PATH/TO/TOML/FILE>
 ```
 
+{{< note >}}
+In a high availability (HA) deployment, patch the config for the correct product:
+
+```bash
+chef-automate config patch automate.toml --automate
+```
+
+Shorthands for `--automate` are `--a2` and `-a`.
+
+```bash
+chef-automate config patch chefserver.toml --chef_server
+```
+
+Shorthands for `--chef_server` are `--cs` and `-c`.
+{{< /note >}}
+
 ### Optional/advanced configuration
 
 Once uploads work, you can optionally configure:
@@ -317,53 +333,53 @@ For copy/paste examples, see [Quick start](#quick-start) (minimum required confi
 
 **Configuration tables by section:**
 
-| Field | Default | Validation |
-|-------|---------|-----------|
-| `enabled` | `false` | Must be `true` or `false` |
+| Field     | Default | Validation                  |
+| --------- | ------- | --------------------------- |
+| `enabled` | `false` | Must be `true` or `false`.  |
 
 #### `[global.v1.audit.async]`
 
-| Field | Default | Validation |
-|-------|---------|-----------|
-| `max_concurrent_workers` | `4` | Higher values increase throughput but also CPU/memory usage |
-| `queue_size` | `100` | If full, new requests may be rejected |
+| Field                  | Default  | Validation                                              |
+| ---------------------- | -------- | ------------------------------------------------------- |
+| `max_concurrent_workers` | `4`      | Higher values increase throughput but also CPU/memory usage |
+| `queue_size`           | `100`    | If full, new requests may be rejected                   |
 | `multipart_chunk_size` | `"10MB"` | Format: `KB`, `MB`, or `GB` suffixes (use `"20MB"`, not `"20M"`) |
 
 #### `[global.v1.audit.input]`
 
-| Field | Default | Validation |
-|-------|---------|-----------|
-| `max_file_size` | `"10MB"` | Supported formats: `K`/`KB`, `M`/`MB`, `G`/`GB`; load balancer rotates `/hab/svc/automate-load-balancer/data/audit.log` (keeps 10 rotated files) |
-| `refresh_interval` | `"60"` | Positive value (seconds); polling interval for Fluent Bit Tail input |
-| `mem_buf_limit` | `"5M"` | Format: `^\d+M$` (capital M, no spaces, no B suffix); in-memory buffer limit |
+| Field              | Default  | Validation                                                                                                                   |
+| ------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `max_file_size`    | `"100MB"` | If set, must be a positive size with `K`, `M`, or `G` units (optional `B`, no spaces; for example, `10MB`) and must be ≥ 1 MiB. |
+| `refresh_interval` | `"60"`   | If set, must be a positive integer number of seconds.                                                                        |
+| `mem_buf_limit`    | `"5M"`   | If set, must be a positive value matching `^\d+M$` (capital `M`, no spaces, no `B` suffix).                                   |
 
 #### `[global.v1.audit.storage]`
 
-| Field | Default | Validation |
-|-------|---------|-----------|
-| `storage_type` | `"s3"` | Must be `"s3"` or `"minio"` |
-| `endpoint` | `"https://s3.amazonaws.com"` | S3/MinIO endpoint URL |
-| `bucket` | — | **Required** - Uploads don't run unless configured |
-| `storage_region` | `"us-east-1"` | AWS region or `"us-east-1"` for MinIO |
-| `path_prefix` | `""` | Optional key prefix inside bucket |
-| `access_key` | `""` | For MinIO: typically required; For AWS: optional if using IAM role |
-| `secret_key` | `""` | **Required if `access_key` is set** |
+| Field            | Default                      | Validation                                                                                                                   |
+| ---------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `storage_type`   | `"s3"`                      | If set, must be `"s3"` or `"minio"` (cannot be empty).                                                                     |
+| `endpoint`       | `"https://s3.amazonaws.com"` |Required                                                                                                |
+| `bucket`         | —                            |  required. |
+| `storage_region` | `"us-east-1"`               | Required for `"s3"` when `bucket` is set. Optional for MinIO.                                                               |
+| `path_prefix`    | `""`                        | Optional; if set, must be non-empty.                                                                                         |
+| `access_key`     | `""`                        | For MinIO: typically required. For AWS: optional if using IAM role.                                                          |
+| `secret_key`     | `""`                        | Required if `access_key` is set.                                                                                             |
 
 #### `[global.v1.audit.storage.ssl]`
 
-| Field | Default | Validation |
-|-------|---------|-----------|
-| `enabled` | `false` | Use `true` for `https://` endpoints, `false` for `http://` endpoints |
-| `verify_ssl` | `false` | Keep `true` in production when possible |
-| `root_cert` | `""` | PEM-encoded CA certificate (optional, for private CAs or self-signed certs) |
+| Field        | Default | Validation                                                       |
+| ------------ | ------- | ---------------------------------------------------------------- |
+| `enabled`    | `false` | If `true`, `root_cert` must be set and non-empty.                |
+| `verify_ssl` | `false` | Allowed only when `enabled = true` and `root_cert` is set.       |
+| `root_cert`  | `""`    | Required when `enabled = true`; must be PEM-encoded and non-empty. |
 
 #### `[global.v1.audit.output]`
 
-| Field | Default | Min | Max | Validation |
-|-------|---------|-----|-----|-----------|
-| `total_file_size` | `"12M"` | `"1M"` | `"50G"` | Units: `M` or `G` only; must be ≥ 2× `upload_chunk_size` |
-| `upload_chunk_size` | `"6M"` | `"6M"` | `"50M"` | Units: `M` or `G` only |
-| `upload_timeout` | `"10m"` | — | — | Units: `s`, `m`, or `h` (positive value) |
+| Field               | Default | Min    | Max    | Validation                                                                                                               |
+| ------------------- | ------- | ------ | ------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `total_file_size`   | `"12M"` | `"12M"` | `"50G"` | If set, units must be `M` or `G` only and the value must be between 1M and 50G. Must also be ≥ 2× `upload_chunk_size`. |
+| `upload_chunk_size` | `"6M"`  | `"6M"` | `"50M"` | If set, units must be `M` or `G` only and the value must be between 6M and 50M.                                         |
+| `upload_timeout`    | `"10m"` | —      | —      | If set, must be a positive duration with `s`, `m`, or `h` suffix (for example, `30s`, `10m`, `1h`).                      |
 
 ## Audit log retrieval APIs
 
@@ -371,7 +387,9 @@ Chef Automate provides APIs (via the `user-settings-service`) to request and tra
 
 ### Authentication
 
-All audit APIs require authentication using a bearer token:
+All audit APIs require authentication.
+
+Bearer tokens (JWT) in the `Authorization` header work for all endpoints:
 
 ```bash
 curl -sS \
@@ -380,6 +398,19 @@ curl -sS \
 ```
 
 Alternatively, you may use the `api-token` header in some API contexts.
+
+{{< note >}}
+`api-token` authentication works with the Admin request API, Status API, and Download API.
+The Self request API does not currently accept `api-token` authentication; use a bearer (JWT) token for `GET /api/v0/audit/self/request`.
+{{< /note >}}
+
+Example using an API token header:
+
+```bash
+curl -sS \
+  -H "api-token: $API_TOKEN" \
+  "https://$FQDN/api/v0/audit/admin/request"
+```
 
 ### Request admin audit logs (async)
 
@@ -392,7 +423,8 @@ Alternatively, you may use the `api-token` header in some API contexts.
   - `to` (optional): End time (RFC 3339 timestamp). Default: now.
   - `order` (optional): Sort order, `asc` or `desc`. Default: `desc`.
 - Constraints:
-  - The requested time range must be 30 days or less.
+  - The requested time range (`to` - `from`) must be 30 days or less.
+  - If you omit both `from` and `to`, the request defaults to the last 3 hours.
 
 Example:
 
@@ -422,7 +454,8 @@ Response:
   - `to` (optional): End time (RFC 3339 timestamp). Default: now.
   - `order` (optional): Sort order, `asc` or `desc`. Default: `desc`.
 - Constraints:
-  - The requested time range must be 30 days or less.
+  - The requested time range (`to` - `from`) must be 30 days or less.
+  - If you omit both `from` and `to`, the request defaults to the last 3 hours.
 
 Example:
 
@@ -444,7 +477,7 @@ Response:
 
 ### Check request status
 
-- Method/Path: `GET /api/v0/audit/status`
+- Method/Path: `GET /api/v1/audit/status`
 - Authentication: Required
 - Access control: Self only (a user can only view their own requested logs)
 - Query parameters:
@@ -504,6 +537,8 @@ Example (completed):
     - If omitted, returns the last requested audit log file for the current user.
     - If provided, returns the audit log file for that specific request ID.
 - Returns: The audit log file in the format specified by the original request (typically JSON or CSV).
+
+Each request generates a single downloadable file containing the audit logs for the full requested time range (up to 30 days).
 
 Examples:
 
