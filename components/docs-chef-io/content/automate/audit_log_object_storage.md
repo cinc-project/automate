@@ -84,7 +84,7 @@ MinIO (static credentials):
 Patch the Chef Automate configuration:
 
 ```bash
-sudo chef-automate config patch </PATH/TO/TOML/FILE>
+sudo chef-automate config patch <PATH/TO/TOML/FILE>
 ```
 
 {{< note >}}
@@ -392,8 +392,6 @@ Audit validation is only enforced when `[global.v1.audit.logging].enabled = true
 | `total_file_size`   | `"12M"` | `"1M"` | `"50G"` | If set, must be a positive size in `M` or `G` where `M`=MB and `G`=GB (for example, `"6M"` or `"6G"`). `K/KB/MB/GB` are not supported. Must be between `"1M"` and `"50G"`, and if both sizes are set, must be ≥ 2× `upload_chunk_size`. |
 | `upload_chunk_size` | `"6M"`  | `"6M"` | `"50M"` | If set, must be a size in `M` or `G` only (no `KB/MB/GB` suffixes). Must be between `"6M"` and `"50M"` (6 MB–50 MB).                                                                                                                    |
 | `upload_timeout`    | `"10m"` | —      | —       | If set, must match minutes-only lowercase `m` (for example, `"10m"`) and must be positive. Empty string is invalid.                                                                                                                     |
-
-<!-- markdownlint-enable MD060 -->
 
 ## Audit log retrieval APIs
 
