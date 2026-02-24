@@ -139,13 +139,9 @@ To verify audit log uploads, follow these steps:
     chef-automate config show | sed -n '/\[global\.v1\.audit\]/,/^\[/p'
     ```
 
-1. Confirm new objects are being written to the configured bucket and prefix.
+1. In your configured S3 or MinIO storage bucket, confirm new objects are being written.
 
-{{< note >}}
-
-If you do not see new objects right away, wait at least the configured `upload_timeout` (or reduce it temporarily) and ensure `total_file_size` is reachable for your traffic volume.
-
-{{< /note >}}
+    If you don't see new objects right away, wait at least the configured `upload_timeout` (or reduce it temporarily) and ensure `total_file_size` is reachable for your traffic volume.
 
 ## Configure audit logs
 
@@ -186,16 +182,16 @@ To change the rotation size threshold, patch your Automate configuration.
 
 ### Configure upload behavior
 
-These settings control how the collector uploads audit logs to S3/MinIO (object size splitting, multipart chunk size, and upload timeouts).
+These settings control object size splitting, multipart chunk size, and upload timeouts for collector uploads to S3 or MinIO.
 
 {{< note >}}
 
-Audit logs are uploaded asynchronously and are not available in S3/MinIO immediately after an event occurs.
-In general, new objects appear after the collector reaches either the `upload_timeout` threshold or the `total_file_size` threshold (whichever happens first), subject to multipart `upload_chunk_size` behavior.
+Audit logs are uploaded asynchronously and aren't available in S3 or MinIO immediately after an event occurs.
+In general, new objects appear after the collector reaches either the `upload_timeout` threshold or the `total_file_size` threshold, whichever happens first, subject to multipart `upload_chunk_size` behavior.
 
 {{< /note >}}
 
-If you do not set `[global.v1.audit.output]`, Chef Automate uses these defaults:
+If you don't set `[global.v1.audit.output]`, Chef Automate uses these defaults:
 
 - `total_file_size = "100M"`
 - `upload_chunk_size = "6M"`
@@ -215,11 +211,11 @@ If you do not set `[global.v1.audit.output]`, Chef Automate uses these defaults:
     The `[global.v1.audit.output]` settings control the Fluent Bit S3 output plugin behavior.
     For details and constraints, see the [Fluent Bit S3 output plugin documentation](https://docs.fluentbit.io/manual/pipeline/outputs/s3).
 
-    Set the values for the following:
+    Set the following values:
 
     - `total_file_size`: Total size threshold before the output is split into additional objects.
     - `upload_chunk_size`: Multipart upload part size.
-    - `upload_timeout`: Upload timeout (minutes or hours).
+    - `upload_timeout`: Upload timeout.
 
 1. Patch the Chef Automate configuration:
 
@@ -236,7 +232,7 @@ If you do not set `[global.v1.audit.output]`, Chef Automate uses these defaults:
 ## Audit log settings reference
 
 The following defines the default audit log storage settings.
-For a complete set of log storage settings, see the [reference example](#audit-log-storage-reference-example) below.
+For a complete set of log storage settings, see the [reference examples](#audit-log-configuration-file-examples) below.
 
 `[global.v1.audit.logging]`
 
@@ -304,7 +300,9 @@ For a complete set of log storage settings, see the [reference example](#audit-l
   ```
 
 : `max_file_size`
-  : Default value: `"10MB"`
+  : The maximum size of the local audit log file before rotation occurs.
+
+    Default value: `"10MB"`
 
     If set, must be greater than or equal to 1 MB using the following units: `K`/`KB`, `M`/`MB`, or `G`/`GB`. For example, `"500K"`, `"10M"`, `"1G"`, `"10MB"`. An empty string is invalid.
 
@@ -443,7 +441,7 @@ For a complete set of log storage settings, see the [reference example](#audit-l
 
     Units: `s`, `m`, or `h`.
 
-### Audit log configuration examples
+### Audit log configuration file examples
 
 The following examples show all audit log settings in a single TOML file (logging, local rotation, S3 or MinIO storage, TLS settings, and upload behavior).
 For a complete description of all settings, see [audit log configuration reference](#audit-log-settings-reference).
@@ -451,7 +449,6 @@ For a complete description of all settings, see [audit log configuration referen
 {{< foundation_tabs tabs-id="audit-log-configuration-examples" >}}
   {{< foundation_tab active="true" panel-link="audit-log-configuration-examples-default" tab-text="Default config">}}
   {{< foundation_tab panel-link="audit-log-configuration-examples-complete" tab-text="Complete config" >}}
-  {{< foundation_tab panel-link="golang-panel" tab-text="Go" >}}
 {{< /foundation_tabs >}}
 
 {{< foundation_tabs_panels tabs-id="audit-log-configuration-examples" >}}
@@ -541,28 +538,17 @@ The following example includes all available settings:
 ```
 
 {{< /foundation_tabs_panel >}}
-{{< foundation_tabs_panel panel-id="golang-panel" >}}
-```go
-package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, world!")
-}
-```
-{{< /foundation_tabs_panel >}}
 {{< /foundation_tabs_panels >}}
 
 ## Retrieve audit logs
 
-Chef Automate provides APIs (with `user-settings-service`) to request and track asynchronous generation of audit logs.
+Chef Automate provides APIs through `user-settings-service` to request and download audit logs asynchronously.
 
 ### Authentication
 
 All audit APIs require authentication.
 
-Bearer tokens (JWT) in the `Authorization` header work for all endpoints:
+All endpoints accept a bearer token (JWT) in the `Authorization` header:
 
 ```bash
 curl -sS \
@@ -570,11 +556,13 @@ curl -sS \
   "https://<FQDN>/api/v0/audit/..."
 ```
 
-Alternatively, you may use the `api-token` header in some API contexts.
+Alternatively, you can use the `api-token` header in some API contexts.
 
 {{< note >}}
+
 `api-token` authentication works with the Admin request API, Status API, and Download API.
-The Self request API does not currently accept `api-token` authentication; use a bearer (JWT) token for `GET /api/v0/audit/self/request`.
+The Self request API doesn't accept `api-token` authentication; use a bearer (JWT) token for `GET /api/v0/audit/self/request`.
+
 {{< /note >}}
 
 Example using an API token header:
@@ -591,10 +579,10 @@ curl -sS \
 - Authentication: Required (Chef Automate admin session)
 - Access control: Admin only
 - Query parameters (all optional):
-  - `usernames` (optional): Comma-separated list of users to filter logs. If omitted, returns logs for all users.
-  - `from` (optional): Start time (RFC 3339 timestamp). Default: 3 hours ago.
-  - `to` (optional): End time (RFC 3339 timestamp). Default: now.
-  - `order` (optional): Sort order, `asc` or `desc`. Default: `desc`.
+  - `usernames`: Comma-separated list of users to filter logs. If omitted, returns logs for all users.
+  - `from`: Start time (RFC 3339 timestamp). Default: 3 hours ago.
+  - `to`: End time (RFC 3339 timestamp). Default: now.
+  - `order`: Sort order, `asc` or `desc`. Default: `desc`.
 - Constraints:
   - The requested time range (`to` - `from`) must be 30 days or less.
   - If you omit both `from` and `to`, the request defaults to the last 3 hours.
@@ -617,29 +605,30 @@ Response:
 }
 ```
 
-### Request audit logs of your activity
+### Request your own audit logs
 
-You can request audit logs for your activity.
-The endpoint uses the users identity to authenticate.
+You can request audit logs for your own activity.
 
-To get audit logs of your activity:
+- Method/Path: `GET /api/v0/audit/self/request`
+- Authentication: Required (Chef Automate session)
+- Access control: Self only
+- Query parameters (all optional):
+  - `from`: Start time (RFC 3339 timestamp). Default: 3 hours ago.
+  - `to`: End time (RFC 3339 timestamp). Default: now.
+  - `order`: Sort order, `asc` or `desc`. Default: `desc`.
+- Constraints:
+  - The requested time range (`to` - `from`) must be 30 days or less.
+  - If you omit both `from` and `to`, the request defaults to the last 3 hours.
+
+Example:
 
 ```shell
 curl -sS \
- -H "Authorization: Bearer <TOKEN>" \
- "https://<FQDN>/api/v0/audit/self/request?from=<FROM>&to=<TO>&order=<SORT_ORDER>"
+  -H "Authorization: Bearer $TOKEN" \
+  "https://$FQDN/api/v0/audit/self/request?from=2025-11-10T00:00:00Z&to=2025-11-11T00:00:00Z&order=desc"
 ```
 
-Replace the following:
-
-- `<FQDN>` with the Chef Automate FQDN, for example `www.example.com`.
-- `<FROM>` with a start time (RFC 3339 timestamp). Default: 3 hours ago. For example, `2025-11-10T00:00:00Z`.
-- `<TO>` with an end time (RFC 3339 timestamp). Default: now. For example, `2025-11-11T00:00:00Z`
-- `<SORT_ORDER>` with the sort order, `asc` or `desc`. Default: `desc`.
-
-The requested time range must be 30 days or less.
-
-The response is similar to the following:
+Response:
 
 ```json
 {
@@ -653,7 +642,7 @@ The response is similar to the following:
 
 - Method/Path: `GET /api/v1/audit/status`
 - Authentication: Required
-- Access control: Self only (a user can only view their own requested logs)
+- Access control: Self only (you can only view your own requested logs)
 - Query parameters:
   - `request_id` (optional):
     - If omitted, returns the status of the latest request for the current user.
@@ -661,7 +650,7 @@ The response is similar to the following:
 
 Examples:
 
-To get the latest request status for the current user:
+To get your latest request status:
 
 ```shell
 curl -sS \
@@ -669,7 +658,7 @@ curl -sS \
   "https://<FQDN>/api/v1/audit/status"
 ```
 
-Get status for a specific request ID:
+To get the status for a specific request ID:
 
 ```shell
 curl -sS \
@@ -705,18 +694,18 @@ Example (completed):
 
 - Method/Path: `GET /api/v1/audit/download`
 - Authentication: Required
-- Access control: Self only (a user can only download audit logs they requested)
+- Access control: Self only (you can only download your own audit logs)
 - Query parameters:
   - `request_id` (optional):
     - If omitted, returns the last requested audit log file for the current user.
     - If provided, returns the audit log file for that specific request ID.
-- Returns: The audit log file in the format specified by the original request (typically JSON or CSV).
+- Returns: The audit log file, typically in JSON or CSV format.
 
-Each request generates a single downloadable file containing the audit logs for the full requested time range (up to 30 days).
+Each request generates a single file containing the audit logs for the full requested time range (up to 30 days).
 
 Examples:
 
-Download the latest audit log for the current user:
+To download the latest audit log for the current user:
 
 ```shell
 curl -sS \
@@ -724,7 +713,7 @@ curl -sS \
   "https://<FQDN>/api/v1/audit/download" > audit_logs.json
 ```
 
-Download audit logs for a specific request ID:
+To download audit logs for a specific request ID:
 
 ```shell
 curl -sS \
