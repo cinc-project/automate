@@ -145,7 +145,7 @@ If you need details about a specific field, see [Global audit configuration refe
 
 After you patch the Automate configuration, Chef Automate starts running the audit log collector and uploads audit log data to the configured bucket.
 
-If you do not set `[global.v1.audit.output]`, Chef Automate uses the defaults shown in Configure upload behavior.
+If you do not set `[global.v1.audit.output]`, Chef Automate uses the defaults shown in [Configure upload behavior](#configure-upload-behavior).
 
 ## Configure local audit log rotation
 
@@ -168,7 +168,7 @@ Set the following values:
 {{< note >}}
 If you also set `[global.v1.audit.input].refresh_interval` or `[global.v1.audit.input].mem_buf_limit`, those values are passed through to Fluent Bit's Tail input (`Refresh_Interval` and `Mem_Buf_Limit`).
 
-See the Fluent Bit Tail input documentation: https://docs.fluentbit.io/manual/pipeline/inputs/tail
+See the [Fluent Bit Tail input documentation](https://docs.fluentbit.io/manual/pipeline/inputs/tail).
 {{< /note >}}
 
 Rotation behavior:
@@ -208,7 +208,7 @@ If you do not set `[global.v1.audit.output]`, Chef Automate uses these defaults:
 
 {{< note >}}
 These `[global.v1.audit.output]` settings control the Fluent Bit S3 output plugin behavior.
-See the Fluent Bit S3 output plugin documentation for details and constraints: https://docs.fluentbit.io/manual/pipeline/outputs/s3
+See the [Fluent Bit S3 output plugin documentation](https://docs.fluentbit.io/manual/pipeline/outputs/s3) for details and constraints.
 {{< /note >}}
 
 Set the following values:
@@ -345,53 +345,55 @@ Audit validation is only enforced when `[global.v1.audit.logging].enabled = true
 
 **Configuration tables by section:**
 
-| Field     | Default | Validation                  |
-| --------- | ------- | --------------------------- |
-| `enabled` | `false` | Must be `true` or `false`.  |
+| Field     | Default | Validation                 |
+| --------- | ------- | -------------------------- |
+| `enabled` | `false` | Must be `true` or `false`. |
 
 #### `[global.v1.audit.async]`
 
-| Field                  | Default  | Validation                                              |
-| ---------------------- | -------- | ------------------------------------------------------- |
-| `max_concurrent_workers` | `4`      | If set, must be between `1` and `100`.                  |
-| `queue_size`           | `100`    | If set, must be between `1` and `10000`.                |
-| `multipart_chunk_size` | `"10M"` | Must be a size in `M` or `G` (for example, `"10M"`, `"1G"`). Must be between `"10M"` and `"1G"` (10 MB–1 GB). |
+| Field                    | Default | Validation                                                                                                      |
+| ------------------------ | ------- | --------------------------------------------------------------------------------------------------------------- |
+| `max_concurrent_workers` | `4`     | If set, must be between `1` and `100`.                                                                          |
+| `queue_size`             | `100`   | If set, must be between `1` and `10000`.                                                                        |
+| `multipart_chunk_size`   | `"10M"` | Must be a size in `M` or `G` (for example, `"10M"`, `"1G"`). Must be between `"10M"` and `"1G"` (10 MB–1 GB). |
 
 #### `[global.v1.audit.input]`
 
-| Field              | Default  | Validation                                                                                                                   |
-| ------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `max_file_size`    | `"100M"` | If set, must be a positive size in `K`, `M`, or `G` with no spaces (optional `b/B` suffix allowed; for example, `"500K"`, `"10M"`, `"1G"`, `"10MB"`) and must be ≥ 1 MB. Explicit empty string is invalid. |
-| `refresh_interval` | `"60"`   | If set, must be a positive integer number of seconds.                                                                        |
-| `mem_buf_limit`    | `"5M"`   | If set, must be a size in `M` with capital `M` and no suffix (for example, `"5M"`). Explicit empty string is invalid.     |
+| Field              | Default  | Validation                                                                                                                                                                                         |
+| ------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `max_file_size`    | `"100M"` | If set, must be a positive size in `K`, `M`, or `G` with no spaces (optional `b/B` suffix allowed; for example, `"500K"`, `"10M"`, `"1G"`, `"10MB"`) and must be ≥ 1 MB. Empty string is invalid. |
+| `refresh_interval` | `"60"`   | If set, must be a positive integer number of seconds.                                                                                                                                              |
+| `mem_buf_limit`    | `"5M"`   | If set, must be a size in `M` with capital `M` and no suffix (for example, `"5M"`). Empty string is invalid.                                                                                      |
 
 #### `[global.v1.audit.storage]`
 
-| Field            | Default                      | Validation                                                                                                                   |
-| ---------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `storage_type`   | `"s3"`                      | If set, cannot be empty. After normalization must be `"s3"` or `"minio"`.                                                  |
-| `endpoint`       | —                            | Required for S3 when `bucket` is set, and always required for MinIO. For AWS S3, use the regional endpoint (for example, `https://s3.<AWS_REGION>.amazonaws.com`). For `us-east-1`, `https://s3.amazonaws.com` also works. |
-| `bucket`         | —                            | Required for S3 and MinIO to enable uploads. |
-| `storage_region` | —                            | Required for S3 when `bucket` is set. Not required for MinIO.                                                                |
-| `path_prefix`    | `"audit-logs"`             | Optional; if set, must be non-empty after trim.                                                                              |
-| `access_key`     | `""`                        | Required for MinIO. Not required for S3 (IAM role/instance profile may be used).                                             |
-| `secret_key`     | `""`                        | Required for MinIO. Not required for S3 (IAM role/instance profile may be used).                                             |
+| Field            | Default         | Validation                                                                                                                                                                                                                  |
+| ---------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `storage_type`   | `"s3"`          | If set, cannot be empty. Must resolve to `"s3"` or `"minio"`.                                                                                                                                                              |
+| `endpoint`       | —               | Required for S3 when `bucket` is set, and always required for MinIO. For AWS S3, use the regional endpoint (for example, `https://s3.<AWS_REGION>.amazonaws.com`). For `us-east-1`, `https://s3.amazonaws.com` also works. |
+| `bucket`         | —               | Required for S3 and MinIO to enable uploads.                                                                                                                                                                                |
+| `storage_region` | —               | Required for S3 when `bucket` is set. Not required for MinIO.                                                                                                                                                               |
+| `path_prefix`    | `"audit-logs/"` | Optional; if set, must be non-empty after trimming whitespace.                                                                                                                                                              |
+| `access_key`     | `""`            | Required for MinIO. Not required for S3 (IAM role/instance profile may be used).                                                                                                                                            |
+| `secret_key`     | `""`            | Required for MinIO. Not required for S3 (IAM role/instance profile may be used).                                                                                                                                            |
 
 #### `[global.v1.audit.storage.ssl]`
 
-| Field        | Default | Validation                                                       |
-| ------------ | ------- | ---------------------------------------------------------------- |
-| `enabled`    | `false` | If `true`, `root_cert` must be set and non-empty.                |
-| `verify_ssl` | `false` | Allowed only when `enabled = true` and `root_cert` is set.       |
+| Field        | Default | Validation                                                         |
+| ------------ | ------- | ------------------------------------------------------------------ |
+| `enabled`    | `false` | If `true`, `root_cert` must be set and non-empty.                  |
+| `verify_ssl` | `false` | Allowed only when `enabled = true` and `root_cert` is set.         |
 | `root_cert`  | `""`    | Required when `enabled = true`; must be PEM-encoded and non-empty. |
 
 #### `[global.v1.audit.output]`
 
-| Field               | Default | Min    | Max    | Validation                                                                                                               |
-| ------------------- | ------- | ------ | ------ | ------------------------------------------------------------------------------------------------------------------------ |
+| Field               | Default | Min    | Max     | Validation                                                                                                                                                                                                                              |
+| ------------------- | ------- | ------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `total_file_size`   | `"12M"` | `"1M"` | `"50G"` | If set, must be a positive size in `M` or `G` where `M`=MB and `G`=GB (for example, `"6M"` or `"6G"`). `K/KB/MB/GB` are not supported. Must be between `"1M"` and `"50G"`, and if both sizes are set, must be ≥ 2× `upload_chunk_size`. |
-| `upload_chunk_size` | `"6M"`  | `"6M"` | `"50M"` | If set, must be a size in `M` or `G` only (no `KB/MB/GB` suffixes). Must be between `"6M"` and `"50M"` (6 MB–50 MB). |
-| `upload_timeout`    | `"10m"` | —      | —      | If set, must match minutes-only lowercase `m` (for example, `"10m"`) and must be positive. Explicit empty string is invalid. |
+| `upload_chunk_size` | `"6M"`  | `"6M"` | `"50M"` | If set, must be a size in `M` or `G` only (no `KB/MB/GB` suffixes). Must be between `"6M"` and `"50M"` (6 MB–50 MB).                                                                                                                    |
+| `upload_timeout`    | `"10m"` | —      | —       | If set, must match minutes-only lowercase `m` (for example, `"10m"`) and must be positive. Empty string is invalid.                                                                                                                     |
+
+<!-- markdownlint-enable MD060 -->
 
 ## Audit log retrieval APIs
 
