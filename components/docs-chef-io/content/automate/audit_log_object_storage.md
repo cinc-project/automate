@@ -328,7 +328,8 @@ Audit validation is only enforced when `[global.v1.audit.logging].enabled = true
 
   [global.v1.audit.storage]
     storage_type = "s3"
-    # Note: endpoint and storage_region are not defined in DefaultGlobalConfig and may be supplied by templates/downstream defaults.
+    # Chef Automate does not fill in `endpoint` or `storage_region` automatically.
+    # When you enable S3 uploads (by setting `bucket`), set `endpoint` and `storage_region` too.
     path_prefix = "audit-logs/"
 
     [global.v1.audit.storage.ssl]
