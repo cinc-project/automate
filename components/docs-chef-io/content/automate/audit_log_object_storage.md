@@ -302,7 +302,7 @@ For a complete set of log storage settings, see the [reference examples](#audit-
 : `max_file_size`
   : The maximum size of the local audit log file before rotation occurs.
 
-    Default value: `"10MB"`
+    Default value: `"100MB"`
 
     If set, must be greater than or equal to 1 MB using the following units: `K`/`KB`, `M`/`MB`, or `G`/`GB`. For example, `"500K"`, `"10M"`, `"1G"`, `"10MB"`. An empty string is invalid.
 
