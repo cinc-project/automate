@@ -353,9 +353,9 @@ For a complete set of log storage settings, see the [reference examples](#audit-
     Required. Uploads don't run unless a bucket is configured.
 
 : `storage_region`
-  : Default value: `"us-east-1"`
+  : Default value: `""`
 
-    Required for AWS S3 when `bucket` is set. Not required for MinIO.
+    Required for AWS S3 when `bucket` is set. For MinIO, use `"us-east-1"`.
 
 : `path_prefix`
   : Default value: `""`
