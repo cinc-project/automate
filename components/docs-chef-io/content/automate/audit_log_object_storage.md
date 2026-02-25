@@ -439,7 +439,7 @@ For a complete set of log storage settings, see the [reference examples](#audit-
 : `upload_timeout`
   : Default value: `"10m"`
 
-    Units: `m`.
+    Units: minutes only (`m`).
 
 ### Audit log configuration file examples
 
