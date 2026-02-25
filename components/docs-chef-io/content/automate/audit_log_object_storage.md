@@ -171,7 +171,7 @@ To change the rotation size threshold, patch your Automate configuration.
 
     - Audit entries are written to `/hab/svc/automate-load-balancer/data/audit.log`.
     - When `audit.log` exceeds `max_file_size`, it is rotated to `audit.1.log`.
-    - Older rotated files are shifted up (`audit.1.log` → `audit.2.log`, etc.).
+    - Older rotated files are shifted up (`audit.1.log` -> `audit.2.log`, etc.).
     - Chef Automate keeps up to 10 rotated files (`audit.1.log` through `audit.10.log`).
 
 1. Patch the Chef Automate configuration:
