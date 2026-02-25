@@ -358,7 +358,7 @@ For a complete set of log storage settings, see the [reference examples](#audit-
     Required for AWS S3 when `bucket` is set. For MinIO, use `"us-east-1"`.
 
 : `path_prefix`
-  : Default value: `""`
+  : Default value: `"audit-logs"`
 
     Optional key prefix inside bucket
 
@@ -439,7 +439,7 @@ For a complete set of log storage settings, see the [reference examples](#audit-
 : `upload_timeout`
   : Default value: `"10m"`
 
-    Units: `s`, `m`, or `h`.
+    Units: `m`.
 
 ### Audit log configuration file examples
 
